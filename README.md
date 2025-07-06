@@ -16,6 +16,45 @@ Automatiza la preparación de tu entorno de usuario, aplicando una serie de conf
   - `macos`
   - `wsl2`
 
+## ¿Qué hace este proyecto?
+
+Este repositorio automatiza la configuración inicial de un entorno de usuario personalizado para sistemas Linux, macOS y WSL2. Está diseñado con un enfoque modular, multiplataforma e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
+
+### Fases de instalación (`install/*.sh`)
+
+#### `01-system.sh`
+
+Configura la base mínima del sistema:
+
+- Asegura que `~/bin` existe y está listo para recibir binarios personalizados.
+- Instala herramientas esenciales como `git`, `curl`, `wget`, `nano` y `zsh` mediante `apt` (Linux/WSL2) o `brew` (macOS).
+- Descarga e instala `oh-my-posh` en `~/bin`.
+- En sistemas Linux y WSL2, genera la locale `es_ES.UTF-8` si no existe.
+
+#### `02-packages.sh`
+
+Instala utilidades adicionales útiles para el trabajo diario:
+
+- Herramientas incluidas: `htop`, `tmux`, `fzf`, `bat`, `fd-find`, `ripgrep`, `tree`, `lsd`.
+- Usa el gestor de paquetes del sistema (`apt` o `brew`) y adapta los nombres según el sistema operativo.
+- Realiza verificación previa para evitar reinstalar si ya están presentes.
+
+#### `03-dotfiles.sh`
+
+Aplica dotfiles personalizados al entorno del usuario:
+
+- Copia `.zshrc` y `.luispa.omp.json` desde `dotfiles/` al `HOME`.
+- Si ya existen, los sobrescribe mostrando una advertencia.
+- En Linux y WSL2, cambia la shell por defecto a `zsh` si no lo es ya. En macOS no realiza el cambio, ya que `zsh` es por defecto desde Catalina.
+
+#### `04-localtools.sh`
+
+Instala herramientas locales y configuración adicional:
+
+- Copia utilidades personalizadas (`e`, `confcat`, `s`) desde `files/bin/` a `~/bin`.
+- Aplica configuración de `nano` desde `files/etc/nanorc` a `/etc/nanorc` (solo Linux y WSL2).
+- Crea directorios `.nano` en `$HOME` y `/root` si no existen (también limitado a Linux/WSL2).
+
 ## ⚡ Instalación remota rápida
 
 Puedes preparar tu equipo con una sola línea de comando:
