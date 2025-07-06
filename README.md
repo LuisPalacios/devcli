@@ -6,7 +6,7 @@ Este repositorio contiene los scripts necesarios para configurar desde cero un e
 
 Revisa este readme y los scripts para sentirte seguro de que lo que hacen no rompe nada de tu instalacion. Ten en cuenta que toca archivos MUY IMPORTANTES. Ejecútalo bajo tu responsabilidad y nunca lo hagas si no entiendes lo que hacen.
 
-Ejecución:
+Ejecución del bootstrap:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
@@ -58,7 +58,7 @@ Instala herramientas locales y configuración adicional:
 
 ## 🧠 Principios del diseño idempotente
 
-Los scripts están diseñados para ejecutarse varias veces sin provocar errores ni duplicar trabajo:
+Los scripts están diseñados para ejecutarse múltiples veces sin provocar errores ni duplicar trabajo. Muy útil para actualizarse a la última versión, simplemente ejecuta el bootstrap de nuevo. 
 
 - Solo se instalan los paquetes si no están presentes
 - Los dotfiles se sobreescriben con advertencia
