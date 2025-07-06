@@ -14,7 +14,7 @@ for file in "${FILES[@]}"; do
   dst="$TARGET_HOME/$file"
 
   if [[ -f "$dst" ]]; then
-    log "⚠️  $file ya existe en $TARGET_HOME y será sobrescrito"
+    log "🔄 $file ya existe en $TARGET_HOME y será sobrescrito"
   fi
 
   log "Copiando $file a $TARGET_HOME"
@@ -27,10 +27,11 @@ if command -v zsh &>/dev/null; then
   ZSH_PATH="$(command -v zsh)"
 
   if [[ "$CURRENT_SHELL" != "$ZSH_PATH" ]]; then
-  log "⚠️  Se pedirá tu contraseña para cambiar la shell por defecto a zsh"
+  log "Se pedirá tu contraseña para cambiar la shell por defecto a zsh"
     log "Cambiando shell por defecto a zsh para el usuario $USER"
     chsh -s "$ZSH_PATH"
-    log "⚠️  Cierra sesión y vuelve a entrar para que el cambio tenga efecto"
+    log "⚠️ Se ha cambiado la shell por defecto a zsh."
+    log "💡 Debes cerrar completamente la sesión gráfica (GUI) y volver a entrar para que tenga efecto."
   else
     log "La shell por defecto ya es zsh"
   fi
