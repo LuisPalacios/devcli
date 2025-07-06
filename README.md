@@ -2,6 +2,23 @@
 
 Este repositorio contiene los scripts necesarios para configurar desde cero un entorno personal de terminal en sistemas basados en Unix: **Linux**, **macOS** y **WSL2**, utilizando una única línea de instalación remota.
 
+## ⚡ Ejecución
+
+Recomiendo que revises el punto siguiente y los scripts para sentirte seguro de que lo que hace este script no rompe nada de tu instalacion. Ten en cuenta que toca archivos MUY IMPORTANTES. Ejecútalo bajo tu propio riesgo y nunco lo hagas si no entiendes qué está haciendo.
+
+Ejecuta lo siguiente para configurar tu equipo:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
+```
+
+Este comando:
+
+- Clona el repositorio en `~/.linux-setup`
+- Detecta el sistema operativo (Linux, macOS, WSL2)
+- Ejecuta automáticamente todos los scripts bajo `install/`
+- Aplica los dotfiles y herramientas locales
+
 ## 🚀 ¿Qué hace este proyecto?
 
 Este repositorio automatiza la configuración inicial de un entorno de usuario personalizado para sistemas Linux, macOS y WSL2. Está diseñado con un enfoque modular, multiplataforma e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
@@ -40,21 +57,6 @@ Instala herramientas locales y configuración adicional:
 - Copia utilidades personalizadas (`e`, `confcat`, `s`) desde `files/bin/` a `~/bin`.
 - Aplica configuración de `nano` desde `files/etc/nanorc` a `/etc/nanorc` (solo Linux y WSL2).
 - Crea directorios `.nano` en `$HOME` y `/root` si no existen (también limitado a Linux/WSL2).
-
-## ⚡ Instalación remota rápida
-
-Puedes preparar tu equipo con una sola línea de comando:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
-```
-
-Este comando:
-
-- Clona el repositorio en `~/.linux-setup`
-- Detecta el sistema operativo (Linux, macOS, WSL2)
-- Ejecuta automáticamente todos los scripts bajo `install/`
-- Aplica los dotfiles y herramientas locales
 
 ## 🧠 Principios del diseño idempotente
 
