@@ -27,6 +27,7 @@ if command -v zsh &>/dev/null; then
   ZSH_PATH="$(command -v zsh)"
 
   if [[ "$CURRENT_SHELL" != "$ZSH_PATH" ]]; then
+  log "⚠️  Se pedirá tu contraseña para cambiar la shell por defecto a zsh"
     log "Cambiando shell por defecto a zsh para el usuario $USER"
     chsh -s "$ZSH_PATH"
     log "⚠️  Cierra sesión y vuelve a entrar para que el cambio tenga efecto"
