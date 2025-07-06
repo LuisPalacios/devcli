@@ -7,7 +7,7 @@ log() {
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../dotfiles" && pwd)"
 TARGET_HOME="$HOME"
-FILES=(.zshrc .zshrc.async .luispa.omp.json)
+FILES=(.zshrc .luispa.omp.json)
 
 for file in "${FILES[@]}"; do
   src="$DOTFILES_DIR/$file"
