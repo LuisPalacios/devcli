@@ -26,3 +26,11 @@ wget -qO- https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootst
 ```
 
 Este comando clonará el repositorio en `~/.linux-setup`, ejecutará los scripts bajo `install/` y dejará todo listo.
+
+## 🧠 Principios del diseño idempotente
+
+- Los scripts pueden ejecutarse múltiples veces sin causar errores.
+- Las instalaciones se repiten solo si es necesario.
+- Los archivos de configuración (como .zshrc) se sobreescriben con advertencia.
+- Se informa claramente al usuario de cada acción, especialmente si se sobrescribe algo.
+- Todo debe funcionar correctamente desde un sistema Ubuntu recién instalado.
