@@ -20,7 +20,7 @@ for tool in e confcat s; do
   log "Instalando $tool en $dst"
   cp -f "$src" "$dst"
   chmod 755 "$dst"
-fi
+done
 
 # Configuración de nano (solo en Linux y WSL2)
 if [[ "$OS_TYPE" == "linux" || "$OS_TYPE" == "wsl2" ]]; then
