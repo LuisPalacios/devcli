@@ -3,19 +3,16 @@
 # Utilizado en MacOS (brew), Linux (Ubuntu), Windows WSL2
 #
 # Referencias:
-#
-# - Mis ficheros zsh - https://github.com/LuisPalacios/zsh-zshrc
+# - Proyecto padre - https://github.com/LuisPalacios/linux-setup
+# - Versión antigua - https://github.com/LuisPalacios/zsh-zshrc
 # - ¡Adiós Bash, hola Zsh! - https://www.luispa.com/administraci%C3%B3n/2024/04/23/zsh.html
 # - Terminales con tmux - https://www.luispa.com/administraci%C3%B3n/2024/04/25/tmux.html
 # - WSL2 en Windows - https://www.luispa.com/desarrollo/2024/08/25/win-desarrollo.html#wsl-2
 #
-# Creditos:
-# - He copiado ideas desde "My .zshrc" -> https://github.com/vincentbernat/zshrc
-#
 # Multiplataforma:
 # - linux, usuario normal y root: Funciona
 # - MacOS, usuario normal: Funciona
-#   MacOS, root: no lo uso. MacOS usa bash espcial que consume /root.lprofile
+#   MacOS, root: no lo uso. MacOS usa bash especial que consume /root.lprofile
 # - WSL2, usuario normal: Funciona
 #
 # Debug: En caso de necesitarlo, activar la línea siguiente
