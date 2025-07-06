@@ -9,6 +9,21 @@ log() {
   echo "[bootstrap] $*"
 }
 
+# Comprueba que git esté instalado
+if ! command -v git &>/dev/null; then
+  log "git no está instalado. Intentando instalar..."
+
+  if [[ -f /etc/debian_version ]]; then
+    sudo apt-get update -y
+    sudo apt-get install -y git
+  else
+    log "❌ No se pudo instalar git automáticamente. Instálalo manualmente e intenta de nuevo."
+    exit 1
+  fi
+else
+  log "git ya está instalado"
+fi
+
 # Clona o actualiza el repo
 if [[ -d "$SETUP_DIR" ]]; then
   log "Actualizando repo en $SETUP_DIR"
