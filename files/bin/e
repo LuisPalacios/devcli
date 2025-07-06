@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env sh
+
 #
 # Script "/usr/bin/e" que simplemente llama al editor nano
 # escribiendo menos caracteres :-)
