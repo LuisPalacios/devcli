@@ -42,3 +42,13 @@ if ! command -v "$BIN_DIR/oh-my-posh" &>/dev/null; then
 else
   log "oh-my-posh ya está instalado en $BIN_DIR"
 fi
+
+# Asegura que locale es_ES.UTF-8 esté generada
+if ! locale -a | grep -q 'es_ES.utf8'; then
+  log "Generando locale es_ES.UTF-8..."
+  sudo locale-gen es_ES.UTF-8
+  sudo update-locale LANG=es_ES.UTF-8 LC_ALL=es_ES.UTF-8
+else
+  log "Locale es_ES.UTF-8 ya disponible"
+fi
+
