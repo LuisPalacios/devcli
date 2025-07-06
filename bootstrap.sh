@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -euo pipefail
 
 REPO_URL="https://github.com/LuisPalacios/linux-setup.git"
