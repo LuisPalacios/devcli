@@ -1,5 +1,5 @@
 # Fichero .zshrc de LuisPa
-# Versión: 19 Mayo 2025
+# Versión: 6 de Julio de 2025
 # Utilizado en MacOS (brew), Linux (Ubuntu), Windows WSL2
 #
 # Referencias:
@@ -24,9 +24,10 @@ SOY="luis"  # cual es mi nombre de usuario en este sistema
 # Detecciones:
 # Estoy dentro de una sesión WSL2?
 export IS_WSL2=false
-if wslinfo --wsl-version > /dev/null 2>&1; then
+if [[ -n "$WSL_DISTRO_NAME" ]]; then
   export IS_WSL2=true
 fi
+
 # Estoy dentro de una sesión VSCode?
 export IS_VSCODE=false
 if [[ $(printenv | grep -c "VSCODE_") -gt 0 ]]; then
@@ -107,7 +108,7 @@ function parametriza_zsh_comun() {
   # falta una variable define qué caracteres especiales se consideran parte de
   # una palabra. Esta es mi versión modificada, en la que he eliminado '/' para
   # que sea más conveniente al eliminar componentes de directorio desde la CLI.
-  WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
+  WORDCHARS='*?_.[]~&;!#$%^(){}<>'
 
   # Elimino el mensaje "Last login" en las sesiones y nuevos tabs.
   [ ! -f ~/.hushlogin ] && touch ~/.hushlogin
@@ -139,7 +140,6 @@ function parametriza_zsh_comun() {
   zstyle ':completion:*' group-name ''
   zstyle ':completion:*' menu select=2
   zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-  zstyle ':completion:*' list-colors ''
   zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
   zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
   zstyle ':completion:*' menu select=long
@@ -166,17 +166,36 @@ function parametriza_zsh_comun() {
 # -----------------------------------------------------------------------------
 if [ "$IS_WSL2" = true ] ; then
 
-  # PATH WSL2------------------------------------------------------------------
-  #
-  export PATH=".:/mnt/c/Users/${SOY}/Nextcloud/priv/bin:/mnt/c/Users/${SOY}/Nextcloud/priv/bin/win"
-  export PATH=$PATH:"/home/${SOY}/bin:/mnt/c/Users/${SOY}/dev-tools/kombine.win"
-  export PATH=$PATH:"/mnt/c/Program Files/Docker/Docker/resources/bin"
-  export PATH=$PATH:"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib"
-  export PATH=$PATH:"/mnt/c/Windows/System32:/mnt/c/Windows:/mnt/c/Windows/System32/wbem"
-  export PATH=$PATH:"/mnt/c/Windows/System32/WindowsPowerShell/v1.0:/mnt/c/Program Files/PowerShell/7"
-  export PATH=$PATH:"/mnt/c/Users/${SOY}/AppData/Local/Programs/Microsoft VS Code/bin"
-  export PATH=$PATH:"/mnt/c/Program Files/Git/mingw64/bin"
-  export PATH=$PATH:"/usr/local/go/bin"
+  # Evitar duplicados en PATH
+  typeset -U path PATH
+
+  # Bloque limpio de construcción del PATH para WSL2
+  path=(
+    .                                    # Prioriza . en desarrollo
+    "/home/${SOY}/bin"
+    "/mnt/c/Users/${SOY}/Nextcloud/priv/bin"
+    "/mnt/c/Users/${SOY}/Nextcloud/priv/bin/win"
+    "/mnt/c/Users/${SOY}/dev-tools/kombine.win"
+    "/mnt/c/Program Files/Docker/Docker/resources/bin"
+    "/mnt/c/Users/${SOY}/AppData/Local/Programs/Microsoft VS Code/bin"
+    "/mnt/c/Program Files/Git/mingw64/bin"
+    "/mnt/c/Windows/System32"
+    "/mnt/c/Windows"
+    "/mnt/c/Windows/System32/wbem"
+    "/mnt/c/Windows/System32/WindowsPowerShell/v1.0"
+    "/mnt/c/Program Files/PowerShell/7"
+    "/usr/local/go/bin"
+    "/usr/local/sbin"
+    "/usr/local/bin"
+    "/usr/sbin"
+    "/usr/bin"
+    "/sbin"
+    "/bin"
+    "/usr/games"
+    "/usr/local/games"
+    "/usr/lib/wsl/lib"
+    $path                                # Añadir el PATH heredado al final
+  )
 
   # Comunes
   #
@@ -212,39 +231,51 @@ else
       ;;
 
     (darwin|freebsd)*)
-       # PATH MacOS---------------------------------------------------------------
-      export PATH=.:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$HOME/dev-tools/kombine.osx:$PATH
-      launchctl setenv PATH ".:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH"
-      # actualizar el PATH con homebrew
+       # PATH macOS y FreeBSD limpio con eliminación de duplicados
+      typeset -U path PATH
+      # Homebrew (instala en /opt/homebrew en Apple Silicon)
       eval "$(/opt/homebrew/bin/brew shellenv)"
-      #if [[ "$(uname)" == "Darwin" ]]; then whence -p brew &>/dev/null || eval "$(/opt/homebrew/bin/brew shellenv)"; fi
-      # Ruby y Gems
-      export PATH="/opt/homebrew/opt/ruby/bin:~/.gems/bin:$PATH"   # Versión para Mac ARM
-      #export PATH="/usr/local/opt/ruby/bin:~/.gems/bin:$PATH"     # Versión para Mac Intel
-      # Utilizo CLANG 17 y lo he instalado vía Homebrew
-      export PATH="/opt/homebrew/opt/llvm@17/bin:$PATH"
+
+      # PATH ordenado
+      path=(
+        .                                        # Prioriza . para scripts locales
+        "$HOME/Nextcloud/priv/bin"
+        "/usr/local/bin"
+        "/usr/local/sbin"
+        "/usr/local/go/bin"
+        "$HOME/dev-tools/kombine.osx"
+        "/opt/homebrew/opt/ruby/bin"
+        "$HOME/.gems/bin"
+        "/opt/homebrew/opt/llvm@17/bin"
+        $path                                   # Heredado del entorno
+      )
+
+      # También reflejar en entorno gráfico
+      launchctl setenv PATH "${(j/:/)path}"
+
+      # LLVM/Clang 17
       export CPLUS_INCLUDE_PATH="/opt/homebrew/opt/llvm@17/include"
       export LIBRARY_PATH="/opt/homebrew/opt/llvm@17/lib"
       export CC="/opt/homebrew/opt/llvm@17/bin/clang"
       export CXX="/opt/homebrew/opt/llvm@17/bin/clang++"
       export LDFLAGS="-L/opt/homebrew/opt/llvm@17/lib"
       export CPPFLAGS="-I/opt/homebrew/opt/llvm@17/include"
+
       # Path para shfmt
       export SHFMT_PATH="/opt/homebrew/bin/shfmt"
 
-      # Prepara la gestión de los colores para ls
+      # Colores para ls
       test-ls-args ls -G && alias ls='ls -G'
       zstyle -t ':omz:lib:theme-and-appearance' gnu-ls \
         && test-ls-args gls --color \
         && alias ls='gls --color=tty'
 
-      # Deshabilito FLOW CONTROL en mi terminal para que CTRL-S, CTRL-Q funcionen normales
+      # Terminal sin flow control (evita que Ctrl-S/Ctrl-Q congelen terminal)
       stty -ixon
 
-      # ALIAS
-      alias grep="/usr/bin/grep -d skip"
+      # Alias específicos macOS
+      alias grep="/usr/bin/grep" # "-d skip"
       alias e="/usr/local/bin/code"
-      #alias python="/opt/homebrew/bin/python3"
       alias pip="/opt/homebrew/bin/pip3"
 
       # Acelerar la navegación en recursos compartidos de red
@@ -254,42 +285,47 @@ else
       # De esta forma consigo el prompt inmediatamente.
       (ssh-add --apple-load-keychain >/dev/null 2>&1 &)
 
+      # GEMS de Ruby se instalan en ~/.gems, relacionado con PATH:
+      export GEM_HOME=~/.gems
+
       ;;
     *)
-      # PATH Linux---------------------------------------------------------------
-      #
+      # Linux
+      typeset -U path PATH
+
       if [[ $EUID -eq 0 ]]; then
-        # En el caso de ser root no hago nada
-        :
+        # PATH para root (mantengo PATH heredado, puedes añadir si lo deseas)
+        PROMPT='[%B%F{white}root%f%b]@%m:%~%# '
       else
-        # Para un usuario normal
-        export PATH=.:$HOME/Nextcloud/priv/bin:$HOME/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH
-        export SHFMT_PATH="/usr/bin/shfmt"
+        # PATH para usuario normal
+        path=(
+          .
+          "$HOME/Nextcloud/priv/bin"
+          "$HOME/bin"
+          "/usr/local/bin"
+          "/usr/local/sbin"
+          "/usr/local/go/bin"
+          $path
+        )
+
+        # Ejecutar agente SSH si no está en ejecución
+        if [[ -z "$SSH_AUTH_SOCK" ]] || ! pgrep -u "$UID" ssh-agent &>/dev/null; then
+          eval "$(ssh-agent -s)" &>/dev/null
+        fi
       fi
 
-      # Prepara la gestión de los colores para ls
+      # Herramienta shfmt (si está instalada desde el sistema)
+      export SHFMT_PATH="/usr/bin/shfmt"
+
+      # Configuración de alias para ls (soporte GNU o BSD)
       if test-ls-args ls --color; then
         alias ls='ls --color=tty'
       elif test-ls-args ls -G; then
         alias ls='ls -G'
       fi
-      #alias python="/usr/bin/python3"
-
-      # Mi PROMPT para root
-      if [[ $EUID -eq 0 ]]; then
-        # En el caso de ser root
-        PROMPT='[%B%F{white}root%f%b]@%m:%~%# '
-      else
-
-        # Me aseguro de que el agente SSH esté en ejecución
-        eval "$(ssh-agent)" &>/dev/null
-      fi
       ;;
   esac
 
-  # GEMS de Ruby se instalan en ~/.gems, relacionado con PATH:
-  export GEM_HOME=~/.gems
-  export PATH=~/.gems/bin:$PATH
 
   # Comunes
   #
@@ -420,7 +456,12 @@ else
     touch $LOCAL_FILE
   else
     # Verificar si se ha descargado en el último día
-    if [[ $(stat -c %Y $LOCAL_FILE 2>/dev/null || stat -f %m $LOCAL_FILE) -le $ONE_DAY_AGO ]]; then
+    if [[ "$OSTYPE" == darwin* ]]; then
+      MODTIME=$(stat -f %m "$LOCAL_FILE")
+    else
+      MODTIME=$(stat -c %Y "$LOCAL_FILE")
+    fi
+    if (( MODTIME <= ONE_DAY_AGO )); then
       # Descargar el archivo remoto temporalmente
       curl --connect-timeout 2 --max-time 3 -LJs -o $TEMP_REMOTE_FILE $REMOTE_FILE_URL
       # Comprobar si el archivo local es diferente del remoto
