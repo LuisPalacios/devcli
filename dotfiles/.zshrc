@@ -172,7 +172,7 @@ if [ "$IS_WSL2" = true ] ; then
   # Bloque limpio de construcción del PATH para WSL2
   path=(
     .                                    # Prioriza . en desarrollo
-    "/home/${SOY}/bin"
+    "${HOME}/bin"
     "/mnt/c/Users/${SOY}/Nextcloud/priv/bin"
     "/mnt/c/Users/${SOY}/Nextcloud/priv/bin/win"
     "/mnt/c/Users/${SOY}/dev-tools/kombine.win"
@@ -239,13 +239,14 @@ else
       # PATH ordenado
       path=(
         .                                        # Prioriza . para scripts locales
-        "$HOME/Nextcloud/priv/bin"
+        "${HOME}/bin"
+        "${HOME}/Nextcloud/priv/bin"
         "/usr/local/bin"
         "/usr/local/sbin"
         "/usr/local/go/bin"
-        "$HOME/dev-tools/kombine.osx"
+        "${HOME}/dev-tools/kombine.osx"
         "/opt/homebrew/opt/ruby/bin"
-        "$HOME/.gems/bin"
+        "${HOME}/.gems/bin"
         "/opt/homebrew/opt/llvm@17/bin"
         $path                                   # Heredado del entorno
       )
@@ -300,8 +301,8 @@ else
         # PATH para usuario normal
         path=(
           .
-          "$HOME/Nextcloud/priv/bin"
-          "$HOME/bin"
+          "${HOME}/bin"
+          "${HOME}/Nextcloud/priv/bin"
           "/usr/local/bin"
           "/usr/local/sbin"
           "/usr/local/go/bin"
