@@ -4,15 +4,13 @@ Este repositorio contiene los scripts necesarios para configurar desde cero un e
 
 ## ⚡ Ejecución
 
-Recomiendo que revises el punto siguiente y los scripts para sentirte seguro de que lo que hace este script no rompe nada de tu instalacion. Ten en cuenta que toca archivos MUY IMPORTANTES. Ejecútalo bajo tu propio riesgo y nunco lo hagas si no entiendes qué está haciendo.
+Revisa este readme y los scripts para sentirte seguro de que lo que hacen no rompe nada de tu instalacion. Ten en cuenta que toca archivos MUY IMPORTANTES. Ejecútalo bajo tu responsabilidad y nunca lo hagas si no entiendes lo que hacen.
 
-Ejecuta lo siguiente para configurar tu equipo:
+Ejecución:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
 ```
-
-Este comando:
 
 - Clona el repositorio en `~/.linux-setup`
 - Detecta el sistema operativo (Linux, macOS, WSL2)
@@ -86,6 +84,7 @@ Los scripts están diseñados para ejecutarse varias veces sin provocar errores 
 
 ## ✅ ToDo
 
+- Revisar deteccion OS y sacarlo a `.sh` externo, que usen todos los `.sh`
 - Crear un fichero de variables de entorno para configurar `locale`, `LANG`, etc., y así hacerlo completamente agnóstico al entorno.
 - Eliminar cualquier dependencia de usuario `luis` o rutas codificadas, para asegurar portabilidad entre usuarios.
 - Añadir integración opcional con gestores de dotfiles como [`chezmoi`](https://www.chezmoi.io/) o [`stow`](https://www.gnu.org/software/stow/).
