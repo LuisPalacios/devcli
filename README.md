@@ -13,7 +13,7 @@ Aquí iré documentando las acciones realizadas por los scripts de instalación:
 
 ## Instalación remota rápida
 
-Puedes preparar un equipo nuevo con:
+Puedes preparar un equipo nuevo con el comando siguiente (recomendado):
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
