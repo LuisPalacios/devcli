@@ -5,6 +5,12 @@ log() {
   echo "[01-system] $*"
 }
 
+# Asegura que sudo funcione sin contraseña
+if ! sudo -n true 2>/dev/null; then
+  echo "[ERROR] El usuario '$USER' no tiene acceso a sudo sin contraseña. Aborta."
+  exit 1
+fi
+
 # Asegura que ~/bin exista y esté en PATH
 BIN_DIR="$HOME/bin"
 if [[ ! -d "$BIN_DIR" ]]; then
@@ -16,7 +22,7 @@ fi
 
 # Paquetes base
 log "Actualizando lista de paquetes..."
-sudo apt-get update -y
+sudo apt-get update -y -qq
 
 PACKAGES=(git curl wget zsh)
 
@@ -25,7 +31,7 @@ for pkg in "${PACKAGES[@]}"; do
     log "$pkg ya está instalado"
   else
     log "Instalando $pkg..."
-    sudo apt-get install -y "$pkg"
+    sudo apt-get install -y -qq "$pkg"
   fi
 done
 
