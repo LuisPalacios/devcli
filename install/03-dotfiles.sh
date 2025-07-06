@@ -21,4 +21,20 @@ for file in "${FILES[@]}"; do
   cp -f "$src" "$dst"
 done
 
-log "✅ Dotfiles instalados"
+# Cambiar shell a zsh si está instalado y no es la shell actual
+if command -v zsh &>/dev/null; then
+  CURRENT_SHELL="$(getent passwd "$USER" | cut -d: -f7)"
+  ZSH_PATH="$(command -v zsh)"
+
+  if [[ "$CURRENT_SHELL" != "$ZSH_PATH" ]]; then
+    log "Cambiando shell por defecto a zsh para el usuario $USER"
+    chsh -s "$ZSH_PATH"
+    log "⚠️  Cierra sesión y vuelve a entrar para que el cambio tenga efecto"
+  else
+    log "La shell por defecto ya es zsh"
+  fi
+else
+  log "⚠️  zsh no está instalado, no se puede cambiar la shell"
+fi
+
+log "✅ Dotfiles instalados y shell configurada"
