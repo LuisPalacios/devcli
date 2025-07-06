@@ -1,6 +1,6 @@
 # Linux Setup
 
-Este repositorio contiene los scripts necesarios para configurar desde cero un entorno personal de terminal en sistemas basados en Unix: **Linux**, **macOS** y **WSL2**, utilizando una única línea de instalación remota.
+Contiene los scripts necesarios para configurar el entorno CLI en sistemas basados en Unix: **Linux**, **macOS** y **WSL2**, utilizando una única línea de instalación remota.
 
 ## ⚡ Ejecución
 
