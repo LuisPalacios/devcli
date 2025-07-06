@@ -4,20 +4,6 @@ Este repositorio contiene los scripts necesarios para configurar desde cero un e
 
 ## 🚀 ¿Qué hace este proyecto?
 
-Automatiza la preparación de tu entorno de usuario, aplicando una serie de configuraciones idempotentes que incluyen:
-
-- Instalación de **paquetes esenciales** y utilidades avanzadas
-- Configuración de entorno Zsh: `.zshrc`, `oh-my-posh`, `locale`, etc.
-- Aplicación de **dotfiles personalizados**
-- Instalación de herramientas locales (`e`, `s`, `confcat`) en `~/bin`
-- Configuración opcional de `nano` y locales (solo en Linux/WSL2)
-- Soporte multiplataforma con detección automática de sistema:
-  - `linux`
-  - `macos`
-  - `wsl2`
-
-## ¿Qué hace este proyecto?
-
 Este repositorio automatiza la configuración inicial de un entorno de usuario personalizado para sistemas Linux, macOS y WSL2. Está diseñado con un enfoque modular, multiplataforma e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
 
 ### Fases de instalación (`install/*.sh`)
