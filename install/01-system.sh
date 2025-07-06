@@ -21,20 +21,45 @@ else
   log "$BIN_DIR ya existe"
 fi
 
-# Paquetes base
-log "Actualizando lista de paquetes..."
-sudo apt-get update -y -qq
+# Paquetes base comunes
+COMMON_PACKAGES=(git curl wget nano zsh)
 
-PACKAGES=(git curl wget nano zsh)
+case "${OS_TYPE:-}" in
+  linux|wsl2)
+    log "Actualizando lista de paquetes (APT)..."
+    sudo apt-get update -y -qq
 
-for pkg in "${PACKAGES[@]}"; do
-  if dpkg -s "$pkg" &>/dev/null; then
-    log "$pkg ya está instalado"
-  else
-    log "Instalando $pkg..."
-    sudo apt-get install -y -qq "$pkg"
-  fi
-done
+    for pkg in "${COMMON_PACKAGES[@]}"; do
+      if dpkg -s "$pkg" &>/dev/null; then
+        log "$pkg ya está instalado"
+      else
+        log "Instalando $pkg..."
+        sudo apt-get install -y -qq "$pkg"
+      fi
+    done
+    ;;
+
+  macos)
+    if ! command -v brew &>/dev/null; then
+      echo "[01-system] ❌ Homebrew no está instalado. Aborta."
+      exit 1
+    fi
+
+    for pkg in "${COMMON_PACKAGES[@]}"; do
+      if brew list --formula "$pkg" &>/dev/null; then
+        log "$pkg ya está instalado"
+      else
+        log "Instalando $pkg..."
+        brew install "$pkg"
+      fi
+    done
+    ;;
+
+  *)
+    echo "[01-system] ❌ OS_TYPE desconocido o no soportado: $OS_TYPE"
+    exit 1
+    ;;
+esac
 
 # Instala oh-my-posh en ~/bin
 if ! command -v "$BIN_DIR/oh-my-posh" &>/dev/null; then
@@ -44,12 +69,13 @@ else
   log "oh-my-posh ya está instalado en $BIN_DIR"
 fi
 
-# Asegura que locale es_ES.UTF-8 esté generada
-if ! locale -a | grep -q 'es_ES.utf8'; then
-  log "Generando locale es_ES.UTF-8..."
-  sudo locale-gen es_ES.UTF-8
-  sudo update-locale LANG=es_ES.UTF-8 LC_ALL=es_ES.UTF-8
-else
-  log "Locale es_ES.UTF-8 ya disponible"
+# Locale solo en Linux (no aplica a macOS ni WSL2 sin systemd completo)
+if [[ "$OS_TYPE" == "linux" ]]; then
+  if ! locale -a | grep -q 'es_ES.utf8'; then
+    log "Generando locale es_ES.UTF-8..."
+    sudo locale-gen es_ES.UTF-8
+    sudo update-locale LANG=es_ES.UTF-8 LC_ALL=es_ES.UTF-8
+  else
+    log "Locale es_ES.UTF-8 ya disponible"
+  fi
 fi
-
