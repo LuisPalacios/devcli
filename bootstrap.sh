@@ -9,13 +9,19 @@ log() {
   echo "[bootstrap] $*"
 }
 
+# Asegura que sudo funcione sin contraseña
+if ! sudo -n true 2>/dev/null; then
+  echo "[ERROR] El usuario '$USER' no tiene acceso a sudo sin contraseña. Aborta."
+  exit 1
+fi
+
 # Comprueba que git esté instalado
 if ! command -v git &>/dev/null; then
   log "git no está instalado. Intentando instalar..."
 
   if [[ -f /etc/debian_version ]]; then
-    sudo apt-get update -y
-    sudo apt-get install -y git
+    sudo apt-get update -y -qq
+    sudo apt-get install -y -qq git
   else
     log "❌ No se pudo instalar git automáticamente. Instálalo manualmente e intenta de nuevo."
     exit 1
