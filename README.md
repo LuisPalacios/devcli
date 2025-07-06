@@ -84,7 +84,7 @@ Los scripts están diseñados para ejecutarse varias veces sin provocar errores 
 
 ## ✅ ToDo
 
-- Añadir sección Rquisitos con tema sudo
+- Añadir sección Requisitos con tema sudo
 - Revisar deteccion OS y sacarlo a `.sh` externo, que usen todos los `.sh`
 - Crear un fichero de variables de entorno para configurar `locale`, `LANG`, etc., y así hacerlo completamente agnóstico al entorno.
 - Eliminar cualquier dependencia de usuario `luis` o rutas codificadas, para asegurar portabilidad entre usuarios.
