@@ -37,6 +37,16 @@
       "alignment": "left",
       "segments": [
         {
+          "type": "env",
+          "style": "plain",
+          "properties": {
+            "variable": "ZSH_PROMPT_ENV"
+          },
+          "template": "<p:morado>[{{ .Value }}]</p:morado> ",
+          "foreground": "p:morado",
+          "background": "transparent"
+        },
+        {
           "type": "session",
           "style": "plain",
           "template": "<p:white><b>{{ if .SSHSession }}\ueba9 {{ end }}{{ .UserName }}</b><p:whitesoft>@{{ .HostName }}:"

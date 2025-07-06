@@ -475,6 +475,12 @@ else
     fi
   fi
 
+  # Variable que uso en .luispa.omp.json para mostrar entorno en el prompt
+  export ZSH_PROMPT_ENV="macOS"
+  [[ "$IS_WSL2" == true ]] && export ZSH_PROMPT_ENV="WSL2"
+  [[ "$OSTYPE" == linux* && "$IS_WSL2" == false ]] && export ZSH_PROMPT_ENV="Linux"
+  [[ "$OSTYPE" == darwin* ]] && export ZSH_PROMPT_ENV="macOS"
+
   # Arranco Oh My Posh
   eval "$(oh-my-posh init zsh --config ~/.luispa.omp.json)"
 fi
