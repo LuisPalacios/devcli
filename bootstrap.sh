@@ -29,4 +29,3 @@ for f in 0*.sh; do
 done
 
 log "✅ Instalación completada"
-
