@@ -33,6 +33,8 @@ fi
 # Clona o actualiza el repo
 if [[ -d "$SETUP_DIR" ]]; then
   log "Actualizando repo en $SETUP_DIR"
+  git -C "$SETUP_DIR" reset --hard HEAD
+  git -C "$SETUP_DIR" clean -fd
   git -C "$SETUP_DIR" pull
 else
   log "Clonando repo en $SETUP_DIR"
