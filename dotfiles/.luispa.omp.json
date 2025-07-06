@@ -37,14 +37,10 @@
       "alignment": "left",
       "segments": [
         {
-          "type": "env",
+          "type": "shell",
           "style": "plain",
-          "properties": {
-            "variable": "ZSH_PROMPT_ENV"
-          },
-          "template": "<p:morado>[{{ .Value }}]</p:morado> ",
-          "foreground": "p:morado",
-          "background": "transparent"
+          "foreground": "morado",
+          "template": "[{{ .Env.ZSH_PROMPT_ENV }}] "
         },
         {
           "type": "session",
