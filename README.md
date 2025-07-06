@@ -19,7 +19,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/mai
 
 ## 🚀 ¿Qué hace este proyecto?
 
-Este repositorio automatiza la configuración inicial de un entorno de usuario personalizado para sistemas Linux, macOS y WSL2. Está diseñado con un enfoque modular, multiplataforma e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
+Automatiza la configuración inicial de un entorno de usuario personalizado para sistemas Linux, macOS y WSL2. Está diseñado con un enfoque modular, multiplataforma e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
 
 ### Fases de instalación (`install/*.sh`)
 
