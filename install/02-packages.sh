@@ -18,7 +18,6 @@ COMMON_PACKAGES=(
   tmux
   fzf
   bat
-  fd-find
   ripgrep
   tree
   lsd
