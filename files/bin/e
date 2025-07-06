@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# Script "/usr/bin/e" que simplemente llama al editor nano
+# escribiendo menos caracteres :-)
+#
+/usr/bin/nano "${*}"

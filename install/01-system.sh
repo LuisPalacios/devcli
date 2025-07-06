@@ -24,7 +24,7 @@ fi
 log "Actualizando lista de paquetes..."
 sudo apt-get update -y -qq
 
-PACKAGES=(git curl wget zsh)
+PACKAGES=(git curl wget nano zsh)
 
 for pkg in "${PACKAGES[@]}"; do
   if dpkg -s "$pkg" &>/dev/null; then

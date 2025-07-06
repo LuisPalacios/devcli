@@ -1,0 +1,86 @@
+##
+## Fichero /etc/nanorc o ~/.nanorc de LuisPa
+## Crear los directorios /root/.nano y /home/<tu usuario>/.nano
+##
+## Referencias:
+##  https://www.nano-editor.org
+##
+
+## Salvar el fichero al salir, equivale a ^S (Salvar) + ^Q (salir)
+## Al pulsar ^Q salvará y saldrá !!
+## set saveonexit
+
+## Automáticamente indenta las líneas nuevas al mismo número de tab/espacios de la anterior
+set autoindent
+
+## Haz backup en backup dir de los ficheros. Nota, debe existir el directorio
+set backup
+set backupdir "~/.nano"
+
+## Recordar las strings de búsqueda/reemplazo para la siguiente sesión
+set historylog
+
+## Mostrar el número de línea a la izda.
+set linenumbers
+
+## Compatibilizar con el método de bloqueo de vim, por si se usa
+## vim en paralelo
+set locking
+
+## Ocultar la última línea con mini ayuda (para ayudar ^H)
+set nohelp
+
+## Recordar la posición del cursor
+set positionlog
+
+## Tamaño del tab y que siempre use espacios
+set tabsize 4
+set tabstospaces
+
+## Permite que la tecla de Backspace o DEL eliminen la región marcada.
+set zap
+
+## Mostrar número de línea, columna y carácter en la línea de estado
+set constantshow
+set boldtext
+
+## Habilitar el ratón
+set mouse
+
+## Cargar los ficheors de Syntax Highlighting
+include "/usr/share/nano/*.nanorc"         # Linux
+#include "/usr/local/share/nano/*.nanorc"  # MacOS (brew)
+
+## Asociación de teclado a función
+unbind ^K main
+unbind ^U main
+unbind ^W main
+
+bind ^Space mark main    # Marcar (equivalente a usar Shift-Teclas)
+bind ^C copy main        # Copiar
+bind ^X cut main         # Cortar
+bind ^V paste all        # Pegar
+
+bind ^Q exit all         # Salir (notar que tengo "saveonexit" activo)
+bind ^S savefile main    # Salvar
+bind ^F whereis all      # Buscar
+bind ^G findnext all     # Buscar Siguiente
+bind ^D findprevious all # Buscar Anterior
+bind ^R replace main     # Buscar y Reemplazar
+bind ^Z undo all         # Undo
+bind ^Y redo all         # Redo
+bind ^J gotoline main    # Ir a la línea,columna
+
+unbind M-H all
+bind M-H help all         # ESC H -> Entrar en la ayuda
+bind M-H exit help        # ESC H -> Salir de la ayuda
+
+# Colorines
+set titlecolor brightwhite,blue
+set statuscolor brightwhite,black
+set errorcolor brightwhite,red
+set selectedcolor brightwhite,magenta
+#set stripecolor ,yellow
+set numbercolor cyan
+set keycolor cyan
+set functioncolor green
