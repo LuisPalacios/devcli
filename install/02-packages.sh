@@ -17,6 +17,7 @@ log() {
 check_sudo_access
 
 # Define los paquetes comunes
+# Future: lsd, nerd fonts, etc.
 COMMON_PACKAGES=(
   htop
   tmux
@@ -24,7 +25,6 @@ COMMON_PACKAGES=(
   bat
   ripgrep
   tree
-  lsd
 )
 
 # Actualizar repositorios
