@@ -268,10 +268,11 @@ else
       export SHFMT_PATH="/opt/homebrew/bin/shfmt"
 
       # Colores para ls
-      test-ls-args ls -G && alias ls='ls -G'
-      zstyle -t ':omz:lib:theme-and-appearance' gnu-ls \
-        && test-ls-args gls --color \
-        && alias ls='gls --color=tty'
+      # test-ls-args ls -G && alias ls='ls -G'
+      # zstyle -t ':omz:lib:theme-and-appearance' gnu-ls \
+      #   && test-ls-args gls --color \
+      #   && alias ls='gls --color=tty'
+      alias ls='lsd'
 
       # Terminal sin flow control (evita que Ctrl-S/Ctrl-Q congelen terminal)
       stty -ixon
@@ -321,11 +322,12 @@ else
       export SHFMT_PATH="/usr/bin/shfmt"
 
       # Configuración de alias para ls (soporte GNU o BSD)
-      if test-ls-args ls --color; then
-        alias ls='ls --color=tty'
-      elif test-ls-args ls -G; then
-        alias ls='ls -G'
-      fi
+      # if test-ls-args ls --color; then
+      #   alias ls='ls --color=tty'
+      # elif test-ls-args ls -G; then
+      #   alias ls='ls -G'
+      # fi
+      alias ls='lsd'
       ;;
   esac
 
