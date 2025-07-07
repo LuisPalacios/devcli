@@ -31,7 +31,7 @@ for tool in e confcat s; do
   if [[ -f "$src" ]]; then
     cp -f "$src" "$dst" >/dev/null 2>&1
     chmod 755 "$dst" >/dev/null 2>&1
-    ((TOOLS_INSTALLED++))
+    TOOLS_INSTALLED=$((TOOLS_INSTALLED + 1))
   fi
 done
 
