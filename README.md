@@ -175,4 +175,3 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/mai
 - **Locale del sistema**: Configura `LANG`, `LC_ALL`, etc.
 - **Dotfiles**: Adapta la configuración según el idioma
 - **Herramientas**: Configura herramientas para el idioma especificado
-

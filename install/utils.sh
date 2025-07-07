@@ -62,7 +62,7 @@ package_installed_brew() {
 # Función para instalar paquete según OS (silenciosa)
 install_package() {
   local pkg="$1"
-  
+
   case "${OS_TYPE:-}" in
     linux|wsl2)
       if ! package_installed_apt "$pkg"; then
@@ -120,12 +120,12 @@ count_installed_packages() {
     case "${OS_TYPE:-}" in
       linux|wsl2)
         if package_installed_apt "$pkg"; then
-          ((count++))
+          count=$((count + 1))
         fi
         ;;
       macos)
         if package_installed_brew "$pkg"; then
-          ((count++))
+          count=$((count + 1))
         fi
         ;;
     esac
