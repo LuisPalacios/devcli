@@ -106,6 +106,51 @@ install_lsd() {
   log "lsd v${version} instalado correctamente"
 }
 
+# Función para instalar FiraCode Nerd Font
+install_nerd_fonts() {
+  local font_name="FiraCode"
+  local font_dir="$HOME/.local/share/fonts"
+  local temp_dir="/tmp/nerd-fonts-${font_name}"
+
+  # Crear directorio de fuentes si no existe
+  mkdir -p "$font_dir"
+
+  log "Instalando ${font_name} Nerd Font..."
+
+  # Descargar y extraer la fuente
+  if ! curl -fsSL -o "/tmp/${font_name}.zip" "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/${font_name}.zip" >/dev/null 2>&1; then
+    warning "No se pudo descargar ${font_name} Nerd Font"
+    return 1
+  fi
+
+  # Extraer fuentes
+  if ! unzip -q "/tmp/${font_name}.zip" -d "$temp_dir" >/dev/null 2>&1; then
+    warning "No se pudo extraer ${font_name} Nerd Font"
+    rm -f "/tmp/${font_name}.zip"
+    return 1
+  fi
+
+  # Copiar fuentes al directorio local
+  if ! cp -r "$temp_dir"/* "$font_dir/" >/dev/null 2>&1; then
+    warning "No se pudo copiar ${font_name} Nerd Font"
+    rm -rf "$temp_dir"
+    rm -f "/tmp/${font_name}.zip"
+    return 1
+  fi
+
+  # Limpiar archivos temporales
+  rm -rf "$temp_dir"
+  rm -f "/tmp/${font_name}.zip"
+
+  # Actualizar caché de fuentes
+  if command_exists fc-cache; then
+    fc-cache -f -v >/dev/null 2>&1
+  fi
+
+  log "${font_name} Nerd Font instalada correctamente"
+  log "Configura tu terminal para usar 'FiraCode Nerd Font'"
+}
+
 # Función para instalar paquete según OS (silenciosa)
 install_package() {
   local pkg="$1"
