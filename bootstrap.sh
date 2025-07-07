@@ -1,40 +1,21 @@
 #!/usr/bin/env bash
-
+#
 set -euo pipefail
 
-REPO_URL="https://github.com/LuisPalacios/linux-setup.git"
-SETUP_DIR="$HOME/.linux-setup"
-BRANCH="main"
+# Carga las variables de entorno
+source "$(dirname "${BASH_SOURCE[0]}")/install/env.sh"
 
+# Función de log
 log() {
   echo "[bootstrap] $*"
 }
 
-# Detección de sistema operativo compatible
-# Establece OS_TYPE: macos, wsl2, linux, other
-# Aborta si no es compatible
-
-detect_os_type() {
-  if [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
-    export OS_TYPE="wsl2"
-  elif [[ "$OSTYPE" == darwin* ]]; then
-    export OS_TYPE="macos"
-  elif [[ "$OSTYPE" == linux* ]]; then
-    export OS_TYPE="linux"
-  else
-    echo "[bootstrap] ❌ Sistema operativo no soportado: $OSTYPE"
-    export OS_TYPE="other"
-    exit 1
-  fi
-}
-
-# Invoca detección
-detect_os_type
+# Log de detección de sistema operativo
 log "Sistema detectado: $OS_TYPE"
 
 # Asegura que sudo funcione sin contraseña
 if ! sudo -n true 2>/dev/null; then
-  echo "[ERROR] El usuario '$USER' no tiene acceso a sudo sin contraseña. Aborta."
+  echo "[ERROR] El usuario '$CURRENT_USER' no tiene acceso a sudo sin contraseña. Aborta."
   exit 1
 fi
 
@@ -42,7 +23,7 @@ fi
 if ! command -v git &>/dev/null; then
   log "git no está instalado. Intentando instalar..."
 
-  case "$OS_TYPE" in
+  case "${OS_TYPE:-}" in
     linux|wsl2)
       sudo apt-get update -y -qq
       sudo apt-get install -y -qq git

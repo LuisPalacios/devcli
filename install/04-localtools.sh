@@ -1,40 +1,56 @@
 #!/usr/bin/env bash
-
+#
 set -euo pipefail
 
+# Carga las variables de entorno
+source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
+
+# Función de log
 log() {
-  echo "[04-localtools] $*"
+  echo "[04-locatools] $*"
 }
 
+# Directorio de archivos
 FILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../files" && pwd)"
-BIN_TARGET="$HOME/bin"
 
-# Asegura que el directorio de destino existe
-mkdir -p "$BIN_TARGET"
+# Me aseguro de que existe el directorio de los binarios del
+# usuario ($BIN_DIR definido en env.sh)
+if [[ ! -d "$BIN_DIR" ]]; then
+  log "Creando $BIN_DIR"
+  mkdir -p "$BIN_DIR"
+fi
 
-# Copiar herramientas a $HOME/bin
+# Copiar herramientas al directorio de los binarios
 for tool in e confcat s; do
   src="$FILES_DIR/bin/$tool"
-  dst="$BIN_TARGET/$tool"
+  dst="$BIN_DIR/$tool"
 
   log "Instalando $tool en $dst"
   cp -f "$src" "$dst"
   chmod 755 "$dst"
 done
 
-# Configuración de nano (solo en Linux y WSL2)
-if [[ "$OS_TYPE" == "linux" || "$OS_TYPE" == "wsl2" ]]; then
-  log "Instalando configuración personalizada de nano en /etc/nanorc"
-  sudo cp -f "$FILES_DIR/etc/nanorc" /etc/nanorc
-fi
+# Configuración y directorios dependientes del sistema operativo
+case "${OS_TYPE:-}" in
+  linux|wsl2)
+    log "Instalando configuración personalizada de nano en /etc/nanorc"
+    sudo cp -f "$FILES_DIR/etc/nanorc" /etc/nanorc
 
-# Crear directorios .nano
+    log "Creando /root/.nano"
+    sudo mkdir -p /root/.nano
+    ;;
+
+  macos)
+    log "macOS detectado: se omite configuración de /etc/nanorc y /root/.nano"
+    ;;
+
+  *)
+    log "Sistema no soportado: omitiendo configuración específica de nano"
+    ;;
+esac
+
+# Crear directorio local de nano (común a todos)
 log "Creando ~/.nano"
 mkdir -p "$HOME/.nano"
-
-if [[ "$OS_TYPE" == "linux" || "$OS_TYPE" == "wsl2" ]]; then
-  log "Creando /root/.nano"
-  sudo mkdir -p /root/.nano
-fi
 
 log "✅ Herramientas locales instaladas"

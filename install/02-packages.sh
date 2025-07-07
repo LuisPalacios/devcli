@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
-
+#
 set -euo pipefail
 
+# Carga las variables de entorno
+source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
+
+# Función de log
 log() {
   echo "[02-packages] $*"
 }
 
 # Asegura que sudo funcione sin contraseña
 if ! sudo -n true 2>/dev/null; then
-  echo "[ERROR] El usuario '$USER' no tiene acceso a sudo sin contraseña. Aborta."
+  echo "[ERROR] El usuario '$CURRENT_USER' no tiene acceso a sudo sin contraseña. Aborta."
   exit 1
 fi
 
@@ -24,7 +28,7 @@ COMMON_PACKAGES=(
 )
 
 # Instala paquetes según la plataforma
-case "$OS_TYPE" in
+case "${OS_TYPE:-}" in
   linux|wsl2)
     log "Actualizando índice de paquetes (APT)..."
     sudo apt-get update -y -qq
@@ -41,13 +45,13 @@ case "$OS_TYPE" in
     # batcat alias para bat en Debian/Ubuntu
     if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
       log "Creando alias simbólico bat → batcat en ~/bin"
-      ln -sf "$(command -v batcat)" "$HOME/bin/bat"
+      ln -sf "$(command -v batcat)" "$BIN_DIR/bat"
     fi
 
     # fdfind alias para fd
     if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
       log "Creando alias simbólico fd → fdfind en ~/bin"
-      ln -sf "$(command -v fdfind)" "$HOME/bin/fd"
+      ln -sf "$(command -v fdfind)" "$BIN_DIR/fd"
     fi
     ;;
 

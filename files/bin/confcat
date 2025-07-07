@@ -1,7 +1,6 @@
 #!/usr/bin/env sh
-
-# By LuisPa 1998
-# confcat: quita las lineas con comentarios, muy util como sustituto
+#
+# Quita las lineas con comentarios, muy util como sustituto
 # a "cat" para ver contenido sin los comentarios.
 #
 grep -vh '^[[:space:]]*#' "$@" | grep -v '^//' | grep -v '^;' | grep -v '^$' | grep -v '^!' | grep -v '^--'
