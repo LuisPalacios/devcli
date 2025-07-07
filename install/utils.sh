@@ -119,9 +119,17 @@ install_nerd_fonts() {
   local temp_dir="/tmp/nerd-fonts-${font_name}"
 
   # Verificar si las fuentes ya están instaladas
-  if fc-list | grep -q "FiraCode Nerd Font" 2>/dev/null; then
-    #log "FiraCode Nerd Font ya está instalada, omitiendo instalación"
-    return 0
+  if command_exists fc-list; then
+    if fc-list | grep -q "FiraCode Nerd Font" 2>/dev/null; then
+      #log "FiraCode Nerd Font ya está instalada, omitiendo instalación"
+      return 0
+    fi
+  else
+    # En macOS, verificar si las fuentes están en el directorio local
+    if [[ -d "$font_dir" ]] && find "$font_dir" -name "*FiraCode*" -type f | grep -q "FiraCode"; then
+      #log "FiraCode Nerd Font ya está instalada, omitiendo instalación"
+      return 0
+    fi
   fi
 
   # Crear directorio de fuentes si no existe
@@ -157,6 +165,12 @@ install_nerd_fonts() {
   # Actualizar caché de fuentes
   if command_exists fc-cache; then
     fc-cache -f -v >/dev/null 2>&1
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # En macOS, actualizar el caché de fuentes del sistema
+    if command_exists atsutil; then
+      atsutil server -shutdown >/dev/null 2>&1
+      atsutil server -ping >/dev/null 2>&1
+    fi
   fi
 
   log "${font_name} Nerd Font instalada correctamente"
