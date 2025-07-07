@@ -38,7 +38,7 @@ done
 # Instala oh-my-posh en $BIN_DIR (ver env.sh)
 if ! command -v "$BIN_DIR/oh-my-posh" &>/dev/null; then
   curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$BIN_DIR" >/dev/null 2>&1
-  
+
   # Validar que se instaló correctamente
   if ! command -v "$BIN_DIR/oh-my-posh" &>/dev/null; then
     error "oh-my-posh no se instaló correctamente"

@@ -73,17 +73,13 @@ fi
 # Ejecutar scripts de instalación
 cd "$SETUP_DIR/install"
 
-log "Ejecutando scripts de instalación:"
-log "  • 01-system.sh - Configuración base del sistema"
-log "  • 02-packages.sh - Herramientas de productividad"
-log "  • 03-dotfiles.sh - Configuración de shell y dotfiles"
-log "  • 04-localtools.sh - Herramientas locales"
-
 # Ejecuta la instalación por fases (silenciosa)
+log "Ejecutando scripts de instalación:"
 for f in [0-9][0-9]-*.sh; do
   if [[ -f "$f" ]]; then
     chmod +x "$f" >/dev/null 2>&1
-    "./$f" >/dev/null 2>&1
+    log "▶ Ejecutando $f"
+    "./$f"
   fi
 done
 
