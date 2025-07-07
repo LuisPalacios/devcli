@@ -25,6 +25,7 @@ COMMON_PACKAGES=(
   bat
   ripgrep
   tree
+  lsd
 )
 
 # Actualizar repositorios
