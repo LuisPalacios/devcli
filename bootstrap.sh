@@ -2,13 +2,33 @@
 #
 set -euo pipefail
 
-# Carga las variables de entorno
-source "$(dirname "${BASH_SOURCE[0]}")/install/env.sh"
+# Variables básicas para bootstrap (sin cargar env.sh)
+REPO_URL="https://github.com/LuisPalacios/linux-setup.git"
+BRANCH="main"
+CURRENT_USER="$(id -un)"
+SETUP_DIR="$HOME/.linux-setup"
 
 # Función de log
 log() {
   echo "[bootstrap] $*"
 }
+
+# Detección básica de sistema operativo (sin env.sh)
+detect_os_type() {
+  if [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
+    OS_TYPE="wsl2"
+  elif [[ "$OSTYPE" == darwin* ]]; then
+    OS_TYPE="macos"
+  elif [[ "$OSTYPE" == linux* ]]; then
+    OS_TYPE="linux"
+  else
+    echo "[bootstrap] ❌ Sistema operativo no soportado: $OSTYPE"
+    exit 1
+  fi
+}
+
+# Ejecutar detección
+detect_os_type
 
 # Log de detección de sistema operativo
 log "Sistema detectado: $OS_TYPE"
@@ -55,14 +75,17 @@ else
   git clone --branch "$BRANCH" "$REPO_URL" "$SETUP_DIR"
 fi
 
+# Ahora que el repo está clonado, ejecutar los scripts de instalación
 cd "$SETUP_DIR/install"
 
 # Ejecuta la instalación por fases
 log "Ejecutando scripts de instalación"
-for f in 0*.sh; do
-  chmod +x "$f"
-  log "▶ Ejecutando $f"
-  "./$f"
+for f in [0-9][0-9]-*.sh; do
+  if [[ -f "$f" ]]; then
+    chmod +x "$f"
+    log "▶ Ejecutando $f"
+    "./$f"
+  fi
 done
 
 log "✅ Instalación completada"

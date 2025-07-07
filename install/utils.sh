@@ -10,6 +10,13 @@ log() {
   echo "[$(date '+%H:%M:%S')] [$script_name] $*"
 }
 
+# Función de log simple (para compatibilidad)
+log_simple() {
+  local script_name="${BASH_SOURCE[1]##*/}"
+  script_name="${script_name%.sh}"
+  echo "[$script_name] $*"
+}
+
 # Función para verificar si un comando existe
 command_exists() {
   command -v "$1" &>/dev/null

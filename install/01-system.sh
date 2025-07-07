@@ -5,89 +5,38 @@ set -euo pipefail
 # Carga las variables de entorno
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 
-# Función de log
+# Carga las utilidades compartidas
+source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
+
+# Función de log (usando la de utils.sh)
 log() {
-  echo "[01-system] $*"
+  log_simple "$*"
 }
 
-# Asegura que sudo funcione sin contraseña
-if ! sudo -n true 2>/dev/null; then
-  echo "[ERROR] El usuario '$CURRENT_USER' no tiene acceso a sudo sin contraseña. Aborta."
-  exit 1
-fi
+# Verificar permisos sudo
+check_sudo_access
 
-# Me aseguro de que existe el directorio de los binarios del
-# usuario ($BIN_DIR definido en env.sh)
-if [[ ! -d "$BIN_DIR" ]]; then
-  log "Creando $BIN_DIR"
-  mkdir -p "$BIN_DIR"
-fi
+# Asegurar que existe el directorio de binarios
+ensure_directory "$BIN_DIR"
 
 # Paquetes base comunes
 COMMON_PACKAGES=(git curl wget nano zsh)
 
 # Comprueba que git esté instalado o lo instala
-if ! command -v git &>/dev/null; then
+if ! command_exists git; then
   log "git no está instalado. Intentando instalar..."
-
-  case "$OS_TYPE" in
-    linux|wsl2)
-      sudo apt-get update -y -qq
-      sudo apt-get install -y -qq git
-      ;;
-    macos)
-      if ! command -v brew &>/dev/null; then
-        echo "[bootstrap] ❌ Homebrew no está instalado. Instálalo primero desde https://brew.sh"
-        exit 1
-      fi
-      brew install git
-      ;;
-    *)
-      log "❌ No se pudo instalar git automáticamente. Instálalo manualmente e intenta de nuevo."
-      exit 1
-      ;;
-  esac
+  install_package git
 else
   log "git ya está instalado"
 fi
 
-# Instala paquetes según la plataforma
-case "${OS_TYPE:-}" in
-  linux|wsl2)
-    log "Actualizando lista de paquetes (APT)..."
-    sudo apt-get update -y -qq
+# Actualizar repositorios
+update_package_manager
 
-    for pkg in "${COMMON_PACKAGES[@]}"; do
-      if dpkg -s "$pkg" &>/dev/null; then
-        log "$pkg ya está instalado"
-      else
-        log "Instalando $pkg..."
-        sudo apt-get install -y -qq "$pkg"
-      fi
-    done
-    ;;
-
-  macos)
-    if ! command -v brew &>/dev/null; then
-      echo "[01-system] ❌ Homebrew no está instalado. Aborta."
-      exit 1
-    fi
-
-    for pkg in "${COMMON_PACKAGES[@]}"; do
-      if brew list --formula "$pkg" &>/dev/null; then
-        log "$pkg ya está instalado"
-      else
-        log "Instalando $pkg..."
-        brew install "$pkg"
-      fi
-    done
-    ;;
-
-  *)
-    echo "[01-system] ❌ OS_TYPE desconocido o no soportado: $OS_TYPE"
-    exit 1
-    ;;
-esac
+# Instalar paquetes comunes
+for pkg in "${COMMON_PACKAGES[@]}"; do
+  install_package "$pkg"
+done
 
 # Instala oh-my-posh en $BIN_DIR (ver env.sh)
 if ! command -v "$BIN_DIR/oh-my-posh" &>/dev/null; then
