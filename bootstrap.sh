@@ -13,6 +13,62 @@ log() {
   echo "[bootstrap] $*"
 }
 
+# Función de ayuda
+show_help() {
+  cat << EOF
+Linux Setup - Configuración automatizada de entorno CLI
+
+Uso: bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh) [OPCIONES]
+
+OPCIONES:
+  -l, --lang LOCALE     Configurar idioma (ej: en_US.UTF-8, es_ES.UTF-8)
+  -h, --help           Mostrar esta ayuda
+
+EJEMPLOS:
+  # Instalación con idioma por defecto (español)
+  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
+
+  # Instalación con idioma inglés
+  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh) -l en_US.UTF-8
+
+  # Instalación con idioma francés
+  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh) -l fr_FR.UTF-8
+
+IDIOMAS SOPORTADOS:
+  es_ES.UTF-8 (español, por defecto)
+  en_US.UTF-8 (inglés)
+  :
+EOF
+}
+
+# Procesar argumentos de línea de comandos
+SETUP_LANG="es_ES.UTF-8"  # Valor por defecto
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -l|--lang)
+      SETUP_LANG="$2"
+      shift 2
+      ;;
+    -h|--help)
+      show_help
+      exit 0
+      ;;
+    *)
+      echo "Error: Opción desconocida '$1'"
+      echo "Usa -h o --help para ver las opciones disponibles"
+      exit 1
+      ;;
+  esac
+done
+
+# Validar formato de locale
+if [[ ! "$SETUP_LANG" =~ ^[a-z]{2}_[A-Z]{2}\.UTF-8$ ]]; then
+  echo "Error: Formato de locale inválido. Usa formato: ll_CC.UTF-8"
+  echo "Ejemplo: es_ES.UTF-8, en_US.UTF-8"
+  exit 1
+fi
+
 # Detección básica de sistema operativo (sin env.sh)
 detect_os_type() {
   if [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
@@ -31,7 +87,7 @@ detect_os_type() {
 detect_os_type
 
 # Preparación del entorno
-log "Preparando entorno en $OS_TYPE..."
+log "Preparando entorno en $OS_TYPE (idioma: $SETUP_LANG)..."
 
 # Verificar permisos sudo
 if ! sudo -n true 2>/dev/null; then
@@ -75,6 +131,9 @@ chmod +x "$SETUP_DIR/install"/*.sh >/dev/null 2>&1
 
 # Ejecutar scripts de instalación
 cd "$SETUP_DIR/install"
+
+# Exportar SETUP_LANG para que los scripts lo usen
+export SETUP_LANG
 
 # Ejecuta la instalación por fases (silenciosa)
 log "Ejecutando scripts de instalación:"
