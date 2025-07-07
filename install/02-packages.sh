@@ -34,7 +34,9 @@ update_package_manager
 # Instalar paquetes comunes
 log "Instalando herramientas de productividad..."
 for pkg in "${COMMON_PACKAGES[@]}"; do
-  install_package "$pkg"
+  if ! install_package "$pkg"; then
+    warning "Falló la instalación de $pkg - continuando con el siguiente paquete"
+  fi
 done
 
 # Crear alias para herramientas con nombres diferentes en Debian/Ubuntu
