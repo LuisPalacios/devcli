@@ -10,7 +10,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
 
 # Función de log (usando la de utils.sh)
 log() {
-  log_quiet "$*"
+  log_simple "$*"
 }
 
 # Directorio de archivos
@@ -23,6 +23,7 @@ ensure_directory "$BIN_DIR"
 TOOLS_INSTALLED=0
 
 # Copiar herramientas al directorio de los binarios
+log "Instalando herramientas locales..."
 for tool in e confcat s; do
   src="$FILES_DIR/bin/$tool"
   dst="$BIN_DIR/$tool"
@@ -39,6 +40,7 @@ case "${OS_TYPE:-}" in
   linux|wsl2)
     # Instalar configuración de nano (silencioso)
     if [[ -f "$FILES_DIR/etc/nanorc" ]]; then
+      log "Configurando nano..."
       sudo cp -f "$FILES_DIR/etc/nanorc" /etc/nanorc >/dev/null 2>&1
     fi
 

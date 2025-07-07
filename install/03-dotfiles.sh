@@ -10,7 +10,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
 
 # Función de log (usando la de utils.sh)
 log() {
-  log_quiet "$*"
+  log_simple "$*"
 }
 
 # Directorio de dotfiles
@@ -27,6 +27,7 @@ fi
 INSTALLED_COUNT=0
 
 # Instala los dotfiles
+log "Instalando dotfiles..."
 for file in "${DOTFILES_LIST[@]}"; do
   src="$DOTFILES_DIR/$file"
   dst="$TARGET_HOME/$file"
@@ -55,6 +56,7 @@ if command -v zsh &>/dev/null; then
       CURRENT_SHELL="$(getent passwd "$CURRENT_USER" | cut -d: -f7)"
 
       if [[ "$CURRENT_SHELL" != "$ZSH_PATH" ]]; then
+        log "Cambiando shell por defecto a zsh..."
         chsh -s "$ZSH_PATH" >/dev/null 2>&1
         SHELL_CHANGED=true
       fi
