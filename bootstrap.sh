@@ -70,6 +70,9 @@ else
   git clone --branch "$BRANCH" "$REPO_URL" "$SETUP_DIR" >/dev/null 2>&1
 fi
 
+# Dar permisos de ejecución a todos los scripts de instalación
+chmod +x "$SETUP_DIR/install"/*.sh >/dev/null 2>&1
+
 # Ejecutar scripts de instalación
 cd "$SETUP_DIR/install"
 
@@ -77,7 +80,6 @@ cd "$SETUP_DIR/install"
 log "Ejecutando scripts de instalación:"
 for f in [0-9][0-9]-*.sh; do
   if [[ -f "$f" ]]; then
-    chmod +x "$f" >/dev/null 2>&1
     log "▶ Ejecutando $f"
     "./$f"
   fi
