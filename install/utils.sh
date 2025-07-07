@@ -62,6 +62,12 @@ package_installed_brew() {
 
 # Función para instalar lsd desde GitHub releases
 install_lsd() {
+  # Verificar si lsd ya está instalado
+  if command_exists lsd; then
+    log "lsd ya está instalado, omitiendo instalación"
+    return 0
+  fi
+
   local version="1.1.5"
   local arch
 
@@ -112,6 +118,12 @@ install_nerd_fonts() {
   local font_dir="$HOME/.local/share/fonts"
   local temp_dir="/tmp/nerd-fonts-${font_name}"
 
+  # Verificar si las fuentes ya están instaladas
+  if fc-list | grep -q "FiraCode Nerd Font" 2>/dev/null; then
+    log "FiraCode Nerd Font ya está instalada, omitiendo instalación"
+    return 0
+  fi
+
   # Crear directorio de fuentes si no existe
   mkdir -p "$font_dir"
 
@@ -157,25 +169,33 @@ install_package() {
 
   case "${OS_TYPE:-}" in
     linux|wsl2)
-      if ! package_installed_apt "$pkg"; then
-        # Caso especial para lsd (no disponible en repositorios estándar)
-        if [[ "$pkg" == "lsd" ]]; then
-          install_lsd
-        else
-          # Intentar instalar con manejo de errores usando apt (más moderno)
-          if ! sudo apt install -y -qq "$pkg" >/dev/null 2>&1; then
-            warning "No se pudo instalar $pkg - continuando..."
-            return 1
-          fi
+      # Verificar si ya está instalado
+      if package_installed_apt "$pkg"; then
+        log "$pkg ya está instalado, omitiendo instalación"
+        return 0
+      fi
+
+      # Caso especial para lsd (no disponible en repositorios estándar)
+      if [[ "$pkg" == "lsd" ]]; then
+        install_lsd
+      else
+        # Intentar instalar con manejo de errores usando apt (más moderno)
+        if ! sudo apt install -y -qq "$pkg" >/dev/null 2>&1; then
+          warning "No se pudo instalar $pkg - continuando..."
+          return 1
         fi
       fi
       ;;
     macos)
-      if ! package_installed_brew "$pkg"; then
-        if ! brew install "$pkg" >/dev/null 2>&1; then
-          warning "No se pudo instalar $pkg - continuando..."
-          return 1
-        fi
+      # Verificar si ya está instalado
+      if package_installed_brew "$pkg"; then
+        log "$pkg ya está instalado, omitiendo instalación"
+        return 0
+      fi
+
+      if ! brew install "$pkg" >/dev/null 2>&1; then
+        warning "No se pudo instalar $pkg - continuando..."
+        return 1
       fi
       ;;
     *)
