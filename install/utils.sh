@@ -59,6 +59,53 @@ package_installed_brew() {
   brew list --formula "$1" &>/dev/null
 }
 
+
+# Función para instalar lsd desde GitHub releases
+install_lsd() {
+  local version="1.1.5"
+  local arch
+
+  # Detectar arquitectura
+  case "$(uname -m)" in
+    x86_64) arch="amd64" ;;
+    aarch64|arm64) arch="arm64" ;;
+    *)
+      warning "Arquitectura no soportada para lsd: $(uname -m)"
+      return 1
+      ;;
+  esac
+
+  local deb_file="lsd_${version}_${arch}.deb"
+  local download_url="https://github.com/lsd-rs/lsd/releases/download/v${version}/${deb_file}"
+  local temp_file="/tmp/${deb_file}"
+
+  log "Descargando lsd v${version} para ${arch}..."
+
+  # Descargar el paquete .deb
+  if ! curl -fsSL -o "$temp_file" "$download_url" >/dev/null 2>&1; then
+    warning "No se pudo descargar lsd desde GitHub"
+    return 1
+  fi
+
+  # Instalar el paquete .deb
+  if ! sudo dpkg -i "$temp_file" >/dev/null 2>&1; then
+    warning "No se pudo instalar lsd desde .deb"
+    rm -f "$temp_file"
+    return 1
+  fi
+
+  # Limpiar archivo temporal
+  rm -f "$temp_file"
+
+  # Verificar que se instaló correctamente
+  if ! command_exists lsd; then
+    warning "lsd no se instaló correctamente"
+    return 1
+  fi
+
+  log "lsd v${version} instalado correctamente"
+}
+
 # Función para instalar paquete según OS (silenciosa)
 install_package() {
   local pkg="$1"
@@ -66,10 +113,15 @@ install_package() {
   case "${OS_TYPE:-}" in
     linux|wsl2)
       if ! package_installed_apt "$pkg"; then
-        # Intentar instalar con manejo de errores usando apt (más moderno)
-        if ! sudo apt install -y -qq "$pkg" >/dev/null 2>&1; then
-          warning "No se pudo instalar $pkg - continuando..."
-          return 1
+        # Caso especial para lsd (no disponible en repositorios estándar)
+        if [[ "$pkg" == "lsd" ]]; then
+          install_lsd
+        else
+          # Intentar instalar con manejo de errores usando apt (más moderno)
+          if ! sudo apt install -y -qq "$pkg" >/dev/null 2>&1; then
+            warning "No se pudo instalar $pkg - continuando..."
+            return 1
+          fi
         fi
       fi
       ;;
