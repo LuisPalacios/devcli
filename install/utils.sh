@@ -66,8 +66,8 @@ install_package() {
   case "${OS_TYPE:-}" in
     linux|wsl2)
       if ! package_installed_apt "$pkg"; then
-        # Intentar instalar con manejo de errores
-        if ! sudo apt-get install -y -qq "$pkg" >/dev/null 2>&1; then
+        # Intentar instalar con manejo de errores usando apt (más moderno)
+        if ! sudo apt install -y -qq "$pkg" >/dev/null 2>&1; then
           warning "No se pudo instalar $pkg - continuando..."
           return 1
         fi
@@ -108,7 +108,7 @@ check_sudo_access() {
 update_package_manager() {
   case "${OS_TYPE:-}" in
     linux|wsl2)
-      if ! sudo apt-get update -y -qq >/dev/null 2>&1; then
+      if ! sudo apt update -y -qq >/dev/null 2>&1; then
         warning "No se pudo actualizar repositorios - continuando..."
         return 1
       fi
