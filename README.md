@@ -213,6 +213,8 @@ configure-terminal wsl
 - **Alacritty**: Configuración YAML
 - **Kitty**: Configuración con tema
 - **VSCode**: Settings.json automático
+- **Terminal de macOS**: Instrucciones manuales
+- **iTerm2**: Instrucciones manuales
 - **WSL**: Instrucciones para Windows Terminal
 
 ### Verificación

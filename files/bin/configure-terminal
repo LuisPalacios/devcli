@@ -26,6 +26,8 @@ Terminales soportados:
   alacritty        Alacritty
   kitty            Kitty
   vscode           Visual Studio Code
+  macos-terminal   Terminal de macOS
+  iterm            iTerm2
   wsl              Windows Subsystem for Linux
   auto             Detectar automáticamente
 
@@ -39,6 +41,18 @@ EOF
 detect_terminal() {
     if [[ -n "$WSL_DISTRO_NAME" ]]; then
         echo "wsl"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        if [[ -n "$TERM_PROGRAM" ]]; then
+            case "$TERM_PROGRAM" in
+                "vscode") echo "vscode" ;;
+                "Apple_Terminal") echo "macos-terminal" ;;
+                "iTerm.app") echo "iterm" ;;
+                *) echo "macos-terminal" ;;
+            esac
+        else
+            echo "macos-terminal"
+        fi
     elif [[ -n "$TERM_PROGRAM" ]]; then
         case "$TERM_PROGRAM" in
             "vscode") echo "vscode" ;;
@@ -266,6 +280,40 @@ EOF
     echo -e "${YELLOW}Reinicia VSCode para ver los cambios${NC}"
 }
 
+# Función para configurar Terminal de macOS
+configure_macos_terminal() {
+    echo -e "${BLUE}Configurando Terminal de macOS...${NC}"
+
+    echo -e "${YELLOW}Para configurar Terminal de macOS:${NC}"
+    echo -e "${BLUE}1. Abre Terminal.app${NC}"
+    echo -e "2. Ve a Terminal > Preferencias > Perfiles"
+    echo -e "3. Selecciona un perfil y haz clic en 'Editar'"
+    echo -e "4. En la pestaña 'Texto', cambia la fuente a 'FiraCode Nerd Font'"
+    echo -e "5. Aplica los cambios"
+    echo -e ""
+    echo -e "${BLUE}O usa este comando para configurar automáticamente:${NC}"
+    echo -e "defaults write com.apple.Terminal 'NSWindow Frame TTWindow' 'FiraCode Nerd Font'"
+    echo -e ""
+    echo -e "${GREEN}✓ Instrucciones para Terminal de macOS mostradas${NC}"
+}
+
+# Función para configurar iTerm2
+configure_iterm() {
+    echo -e "${BLUE}Configurando iTerm2...${NC}"
+
+    echo -e "${YELLOW}Para configurar iTerm2:${NC}"
+    echo -e "${BLUE}1. Abre iTerm2${NC}"
+    echo -e "2. Ve a iTerm2 > Preferencias > Perfiles"
+    echo -e "3. Selecciona un perfil y ve a la pestaña 'Texto'"
+    echo -e "4. Cambia la fuente a 'FiraCode Nerd Font'"
+    echo -e "5. Aplica los cambios"
+    echo -e ""
+    echo -e "${BLUE}O usa este comando para configurar automáticamente:${NC}"
+    echo -e "defaults write com.googlecode.iterm2 'New Bookmarks' -array-add '{ \"Name\" = \"Default\"; \"Non Ascii Font\" = \"FiraCode Nerd Font 12\"; }'"
+    echo -e ""
+    echo -e "${GREEN}✓ Instrucciones para iTerm2 mostradas${NC}"
+}
+
 # Función para configurar WSL
 configure_wsl() {
     echo -e "${BLUE}Configurando WSL...${NC}"
@@ -284,10 +332,23 @@ configure_wsl() {
 
 # Función para verificar si las fuentes están instaladas
 check_fonts() {
-    if ! fc-list | grep -q "FiraCode Nerd Font"; then
-        echo -e "${RED}Error: FiraCode Nerd Font no está instalada${NC}"
-        echo -e "${YELLOW}Ejecuta el script de instalación primero${NC}"
-        exit 1
+    if command_exists fc-list; then
+        if ! fc-list | grep -q "FiraCode Nerd Font"; then
+            echo -e "${RED}Error: FiraCode Nerd Font no está instalada${NC}"
+            echo -e "${YELLOW}Ejecuta el script de instalación primero${NC}"
+            exit 1
+        fi
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        # En macOS, verificar si las fuentes están en el directorio local
+        local font_dir="$HOME/.local/share/fonts"
+        if ! [[ -d "$font_dir" ]] || ! find "$font_dir" -name "*FiraCode*" -type f | grep -q "FiraCode"; then
+            echo -e "${RED}Error: FiraCode Nerd Font no está instalada${NC}"
+            echo -e "${YELLOW}Ejecuta el script de instalación primero${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${YELLOW}No se puede verificar las fuentes en este sistema${NC}"
+        echo -e "${YELLOW}Continúa manualmente...${NC}"
     fi
 }
 
@@ -328,6 +389,12 @@ main() {
             ;;
         "vscode")
             configure_vscode
+            ;;
+        "macos-terminal")
+            configure_macos_terminal
+            ;;
+        "iterm")
+            configure_iterm
             ;;
         "wsl")
             configure_wsl
