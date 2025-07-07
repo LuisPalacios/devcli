@@ -10,7 +10,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
 
 # Función de log (usando la de utils.sh)
 log() {
-  log_quiet "$*"
+  log_simple "$*"
 }
 
 # Verificar permisos sudo
@@ -28,9 +28,11 @@ COMMON_PACKAGES=(
 )
 
 # Actualizar repositorios
+log "Actualizando repositorios..."
 update_package_manager
 
 # Instalar paquetes comunes
+log "Instalando herramientas de productividad..."
 for pkg in "${COMMON_PACKAGES[@]}"; do
   install_package "$pkg"
 done
