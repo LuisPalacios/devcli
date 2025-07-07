@@ -10,7 +10,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
 
 # Función de log (usando la de utils.sh)
 log() {
-  log_simple "$*"
+  log_quiet "$*"
 }
 
 # Directorio de archivos
@@ -19,24 +19,31 @@ FILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../files" && pwd)"
 # Asegurar que existe el directorio de binarios
 ensure_directory "$BIN_DIR"
 
+# Contador de herramientas instaladas
+TOOLS_INSTALLED=0
+
 # Copiar herramientas al directorio de los binarios
 for tool in e confcat s; do
   src="$FILES_DIR/bin/$tool"
   dst="$BIN_DIR/$tool"
 
-  log "Instalando $tool en $dst"
-  cp -f "$src" "$dst"
-  chmod 755 "$dst"
+  if [[ -f "$src" ]]; then
+    cp -f "$src" "$dst" >/dev/null 2>&1
+    chmod 755 "$dst" >/dev/null 2>&1
+    ((TOOLS_INSTALLED++))
+  fi
 done
 
 # Configuración y directorios dependientes del sistema operativo
 case "${OS_TYPE:-}" in
   linux|wsl2)
-    log "Instalando configuración personalizada de nano en /etc/nanorc"
-    sudo cp -f "$FILES_DIR/etc/nanorc" /etc/nanorc
+    # Instalar configuración de nano (silencioso)
+    if [[ -f "$FILES_DIR/etc/nanorc" ]]; then
+      sudo cp -f "$FILES_DIR/etc/nanorc" /etc/nanorc >/dev/null 2>&1
+    fi
 
-    log "Creando /root/.nano"
-    sudo mkdir -p /root/.nano
+    # Crear directorio /root/.nano (silencioso)
+    sudo mkdir -p /root/.nano >/dev/null 2>&1
     ;;
 
   macos)
@@ -49,7 +56,7 @@ case "${OS_TYPE:-}" in
 esac
 
 # Crear directorio local de nano (común a todos)
-log "Creando ~/.nano"
-mkdir -p "$HOME/.nano"
+mkdir -p "$HOME/.nano" >/dev/null 2>&1
 
-log "✅ Herramientas locales instaladas"
+# Mostrar resumen final
+success "Herramientas locales instaladas ($TOOLS_INSTALLED herramientas)"

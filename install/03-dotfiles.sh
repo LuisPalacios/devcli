@@ -10,11 +10,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
 
 # Función de log (usando la de utils.sh)
 log() {
-  log_simple "$*"
+  log_quiet "$*"
 }
-
-# Carga las variables de entorno
-source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 
 # Directorio de dotfiles
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../dotfiles" && pwd)"
@@ -22,9 +19,12 @@ TARGET_HOME="$HOME"
 
 # Validar que el directorio de dotfiles existe
 if [[ ! -d "$DOTFILES_DIR" ]]; then
-  log "❌ Directorio de dotfiles no encontrado: $DOTFILES_DIR"
+  error "Directorio de dotfiles no encontrado: $DOTFILES_DIR"
   exit 1
 fi
+
+# Contador de dotfiles instalados
+INSTALLED_COUNT=0
 
 # Instala los dotfiles
 for file in "${DOTFILES_LIST[@]}"; do
@@ -33,47 +33,38 @@ for file in "${DOTFILES_LIST[@]}"; do
 
   # Validar que el archivo fuente existe
   if [[ ! -f "$src" ]]; then
-    log "❌ Dotfile no encontrado: $src"
+    warning "Dotfile no encontrado: $src"
     continue
   fi
 
-  if [[ -f "$dst" ]]; then
-    log "🔄 $file ya existe en $TARGET_HOME y será sobrescrito"
-  fi
-
-  log "Copiando $file a $TARGET_HOME"
-  cp -f "$src" "$dst"
+  # Copiar archivo (silencioso)
+  cp -f "$src" "$dst" >/dev/null 2>&1
+  ((INSTALLED_COUNT++))
 done
 
 # Cambiar shell a zsh si está disponible y el sistema lo requiere
+SHELL_CHANGED=false
 if command -v zsh &>/dev/null; then
   ZSH_PATH="$(command -v zsh)"
 
   case "${OS_TYPE:-}" in
     macos)
-      log "macOS detectado: no es necesario cambiar la shell (zsh es la predeterminada)"
+      # macOS usa zsh por defecto desde Catalina
       ;;
-
     linux|wsl2)
       CURRENT_SHELL="$(getent passwd "$CURRENT_USER" | cut -d: -f7)"
 
       if [[ "$CURRENT_SHELL" != "$ZSH_PATH" ]]; then
-        log "Se pedirá tu contraseña para cambiar la shell por defecto a zsh"
-        log "Cambiando shell por defecto a zsh para el usuario $CURRENT_USER"
-        chsh -s "$ZSH_PATH"
-        log "⚠️ Se ha cambiado la shell por defecto a zsh."
-        log "💡 Debes cerrar completamente la sesión gráfica (GUI) y volver a entrar para que tenga efecto."
-      else
-        log "La shell por defecto ya es zsh"
+        chsh -s "$ZSH_PATH" >/dev/null 2>&1
+        SHELL_CHANGED=true
       fi
       ;;
-
-    *)
-      log "Sistema operativo no soportado para cambio de shell: $OS_TYPE"
-      ;;
   esac
-else
-  log "⚠️ zsh no está instalado, no se puede cambiar la shell"
 fi
 
-log "✅ Dotfiles instalados y shell configurada"
+# Mostrar resumen final
+if [[ "$SHELL_CHANGED" == "true" ]]; then
+  success "Dotfiles instalados ($INSTALLED_COUNT archivos) y shell cambiada a zsh"
+else
+  success "Dotfiles instalados ($INSTALLED_COUNT archivos)"
+fi

@@ -8,7 +8,7 @@ BRANCH="main"
 CURRENT_USER="$(id -un)"
 SETUP_DIR="$HOME/.linux-setup"
 
-# Función de log
+# Función de log minimalista
 log() {
   echo "[bootstrap] $*"
 }
@@ -30,62 +30,61 @@ detect_os_type() {
 # Ejecutar detección
 detect_os_type
 
-# Log de detección de sistema operativo
-log "Sistema detectado: $OS_TYPE"
+# Preparación del entorno
+log "Preparando entorno en $OS_TYPE..."
 
-# Asegura que sudo funcione sin contraseña
+# Verificar permisos sudo
 if ! sudo -n true 2>/dev/null; then
   echo "[ERROR] El usuario '$CURRENT_USER' no tiene acceso a sudo sin contraseña. Aborta."
   exit 1
 fi
 
-# Comprueba que git esté instalado o lo instala
+# Instalar git si es necesario (silencioso)
 if ! command -v git &>/dev/null; then
-  log "git no está instalado. Intentando instalar..."
-
+  log "Instalando git..."
   case "${OS_TYPE:-}" in
     linux|wsl2)
-      sudo apt-get update -y -qq
-      sudo apt-get install -y -qq git
+      sudo apt-get update -y -qq >/dev/null 2>&1
+      sudo apt-get install -y -qq git >/dev/null 2>&1
       ;;
     macos)
       if ! command -v brew &>/dev/null; then
         echo "[bootstrap] ❌ Homebrew no está instalado. Instálalo primero desde https://brew.sh"
         exit 1
       fi
-      brew install git
+      brew install git >/dev/null 2>&1
       ;;
     *)
-      log "❌ No se pudo instalar git automáticamente. Instálalo manualmente e intenta de nuevo."
+      log "❌ No se pudo instalar git automáticamente."
       exit 1
       ;;
   esac
-else
-  log "git ya está instalado"
 fi
 
-# Clona o actualiza el repo
+# Clona o actualiza el repo (completamente silencioso)
 if [[ -d "$SETUP_DIR" ]]; then
-  log "Actualizando repo en $SETUP_DIR"
-  git -C "$SETUP_DIR" reset --hard HEAD
-  git -C "$SETUP_DIR" clean -fd
-  git -C "$SETUP_DIR" pull
+  git -C "$SETUP_DIR" reset --hard HEAD >/dev/null 2>&1
+  git -C "$SETUP_DIR" clean -fd >/dev/null 2>&1
+  git -C "$SETUP_DIR" pull >/dev/null 2>&1
 else
-  log "Clonando repo en $SETUP_DIR"
-  git clone --branch "$BRANCH" "$REPO_URL" "$SETUP_DIR"
+  git clone --branch "$BRANCH" "$REPO_URL" "$SETUP_DIR" >/dev/null 2>&1
 fi
 
-# Ahora que el repo está clonado, ejecutar los scripts de instalación
+# Ejecutar scripts de instalación
 cd "$SETUP_DIR/install"
 
-# Ejecuta la instalación por fases
-log "Ejecutando scripts de instalación"
+log "Ejecutando scripts de instalación:"
+log "  • 01-system.sh - Configuración base del sistema"
+log "  • 02-packages.sh - Herramientas de productividad"
+log "  • 03-dotfiles.sh - Configuración de shell y dotfiles"
+log "  • 04-localtools.sh - Herramientas locales"
+
+# Ejecuta la instalación por fases (silenciosa)
 for f in [0-9][0-9]-*.sh; do
   if [[ -f "$f" ]]; then
-    chmod +x "$f"
-    log "▶ Ejecutando $f"
-    "./$f"
+    chmod +x "$f" >/dev/null 2>&1
+    "./$f" >/dev/null 2>&1
   fi
 done
 
-log "✅ Instalación completada"
+log "✅ Instalación completada exitosamente"

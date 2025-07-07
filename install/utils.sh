@@ -17,6 +17,33 @@ log_simple() {
   echo "[$script_name] $*"
 }
 
+# Función de log silencioso (solo errores y warnings)
+log_quiet() {
+  # Esta función no hace nada - para hacer scripts silenciosos
+  :
+}
+
+# Función para mostrar errores importantes
+error() {
+  local script_name="${BASH_SOURCE[1]##*/}"
+  script_name="${script_name%.sh}"
+  echo "[$script_name] ❌ $*" >&2
+}
+
+# Función para mostrar warnings importantes
+warning() {
+  local script_name="${BASH_SOURCE[1]##*/}"
+  script_name="${script_name%.sh}"
+  echo "[$script_name] ⚠️ $*" >&2
+}
+
+# Función para mostrar éxito final
+success() {
+  local script_name="${BASH_SOURCE[1]##*/}"
+  script_name="${script_name%.sh}"
+  echo "[$script_name] ✅ $*"
+}
+
 # Función para verificar si un comando existe
 command_exists() {
   command -v "$1" &>/dev/null
@@ -32,29 +59,23 @@ package_installed_brew() {
   brew list --formula "$1" &>/dev/null
 }
 
-# Función para instalar paquete según OS
+# Función para instalar paquete según OS (silenciosa)
 install_package() {
   local pkg="$1"
-
+  
   case "${OS_TYPE:-}" in
     linux|wsl2)
-      if package_installed_apt "$pkg"; then
-        log "$pkg ya está instalado"
-      else
-        log "Instalando $pkg..."
-        sudo apt-get install -y -qq "$pkg"
+      if ! package_installed_apt "$pkg"; then
+        sudo apt-get install -y -qq "$pkg" >/dev/null 2>&1
       fi
       ;;
     macos)
-      if package_installed_brew "$pkg"; then
-        log "$pkg ya está instalado"
-      else
-        log "Instalando $pkg..."
-        brew install "$pkg"
+      if ! package_installed_brew "$pkg"; then
+        brew install "$pkg" >/dev/null 2>&1
       fi
       ;;
     *)
-      log "❌ OS_TYPE no soportado para instalación: $OS_TYPE"
+      error "OS_TYPE no soportado para instalación: $OS_TYPE"
       return 1
       ;;
   esac
@@ -64,32 +85,50 @@ install_package() {
 ensure_directory() {
   local dir="$1"
   if [[ ! -d "$dir" ]]; then
-    log "Creando directorio: $dir"
-    mkdir -p "$dir"
+    mkdir -p "$dir" >/dev/null 2>&1
   fi
 }
 
 # Función para verificar permisos sudo
 check_sudo_access() {
   if ! sudo -n true 2>/dev/null; then
-    echo "[ERROR] El usuario '$CURRENT_USER' no tiene acceso a sudo sin contraseña. Aborta."
+    error "El usuario '$CURRENT_USER' no tiene acceso a sudo sin contraseña. Aborta."
     exit 1
   fi
 }
 
-# Función para actualizar repositorios según OS
+# Función para actualizar repositorios según OS (silenciosa)
 update_package_manager() {
   case "${OS_TYPE:-}" in
     linux|wsl2)
-      log "Actualizando lista de paquetes (APT)..."
-      sudo apt-get update -y -qq
+      sudo apt-get update -y -qq >/dev/null 2>&1
       ;;
     macos)
       # Homebrew se actualiza automáticamente
       ;;
     *)
-      log "❌ OS_TYPE no soportado para actualización: $OS_TYPE"
+      error "OS_TYPE no soportado para actualización: $OS_TYPE"
       return 1
       ;;
   esac
+}
+
+# Función para contar paquetes instalados
+count_installed_packages() {
+  local count=0
+  for pkg in "$@"; do
+    case "${OS_TYPE:-}" in
+      linux|wsl2)
+        if package_installed_apt "$pkg"; then
+          ((count++))
+        fi
+        ;;
+      macos)
+        if package_installed_brew "$pkg"; then
+          ((count++))
+        fi
+        ;;
+    esac
+  done
+  echo "$count"
 }
