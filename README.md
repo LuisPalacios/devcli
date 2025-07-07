@@ -2,6 +2,30 @@
 
 Contiene los scripts necesarios para configurar el entorno CLI en sistemas basados en Unix: **Linux**, **macOS** y **WSL2**, utilizando una única línea de instalación remota.
 
+## 📋 Requisitos Previos
+
+### Permisos Sudo
+
+El usuario debe tener acceso a `sudo` sin contraseña para que la instalación sea completamente automática. Para configurar esto:
+
+```bash
+# Añadir tu usuario al grupo sudo (si no está ya)
+sudo usermod -aG sudo $USER
+
+# Configurar sudo sin contraseña (editar /etc/sudoers)
+sudo visudo
+# Añadir línea: $USER ALL=(ALL) NOPASSWD:ALL
+```
+
+### macOS
+
+- **Homebrew**: Instalar desde [brew.sh](https://brew.sh) antes de ejecutar el setup
+
+### WSL2
+
+- WSL2 configurado y funcionando
+- Distribución Linux instalada (Ubuntu recomendado)
+
 ## ⚡ Ejecución
 
 Revisa este readme y los scripts para sentirte seguro de que lo que hacen no rompe nada de tu instalacion. Ten en cuenta que toca archivos MUY IMPORTANTES. Ejecútalo bajo tu responsabilidad y nunca lo hagas si no entiendes lo que hacen.
@@ -58,14 +82,14 @@ Instala herramientas locales y configuración adicional:
 
 ## 🧠 Principios del diseño idempotente
 
-Los scripts están diseñados para ejecutarse múltiples veces sin provocar errores ni duplicar trabajo. Muy útil para actualizarse a la última versión, simplemente ejecuta el bootstrap de nuevo. 
+Los scripts están diseñados para ejecutarse múltiples veces sin provocar errores ni duplicar trabajo. Muy útil para actualizarse a la última versión, simplemente ejecuta el bootstrap de nuevo.
 
 - Solo se instalan los paquetes si no están presentes
 - Los dotfiles se sobreescriben con advertencia
 - Se informa claramente cada paso con logs semánticos
 - Soporta configuraciones seguras sin intervención adicional
 
-🗂 Estructura del repositorio
+## 🗂 Estructura del repositorio
 
 ```sh
 .
@@ -75,6 +99,8 @@ Los scripts están diseñados para ejecutarse múltiples veces sin provocar erro
 │   ├── bin/               # Ejecutables locales: e, s, confcat
 │   └── etc/               # Configuración de /etc/nanorc
 ├── install/               # Scripts de instalación por fases
+│   ├── env.sh             # Variables de entorno compartidas
+│   ├── utils.sh           # Utilidades compartidas
 │   ├── 01-system.sh
 │   ├── 02-packages.sh
 │   ├── 03-dotfiles.sh
@@ -82,12 +108,40 @@ Los scripts están diseñados para ejecutarse múltiples veces sin provocar erro
 └── README.md
 ```
 
+## 🔧 Herramientas Instaladas
+
+### Herramientas del Sistema
+
+- `git` - Control de versiones
+- `curl`, `wget` - Descarga de archivos
+- `nano` - Editor de texto
+- `zsh` - Shell avanzado
+
+### Herramientas de Productividad
+
+- `htop` - Monitor de procesos
+- `tmux` - Multiplexor de terminal
+- `fzf` - Búsqueda fuzzy
+- `bat` - Cat con syntax highlighting
+- `ripgrep` - Búsqueda rápida en archivos
+- `tree` - Visualización de directorios
+- `lsd` - ls moderno
+
+### Herramientas Locales
+
+- `e` - Alias para nano
+- `confcat` - Cat sin comentarios
+- `s` - Acceso rápido a sudo
+
 ## ✅ ToDo
 
-- Añadir sección Requisitos con tema sudo
-- Revisar deteccion OS y sacarlo a `.sh` externo, que usen todos los `.sh`
-- Crear un fichero de variables de entorno para configurar `locale`, `LANG`, etc., y así hacerlo completamente agnóstico al entorno.
-- Eliminar cualquier dependencia de usuario `luis` o rutas codificadas, para asegurar portabilidad entre usuarios.
-- Añadir integración opcional con gestores de dotfiles como [`chezmoi`](https://www.chezmoi.io/) o [`stow`](https://www.gnu.org/software/stow/).
-- Incluir más herramientas útiles para desarrollo y productividad: configuración avanzada de `vim`, `git`, `tmux`, etc.
-- Detectar si el entorno es remoto (por ejemplo, una sesión SSH o entorno virtualizado) para adaptar la configuración automáticamente.
+- [x] Añadir sección Requisitos con tema sudo
+- [x] Revisar deteccion OS y sacarlo a `.sh` externo, que usen todos los `.sh`
+- [x] Crear un fichero de variables de entorno para configurar `locale`, `LANG`, etc., y así hacerlo completamente agnóstico al entorno.
+- [x] Eliminar cualquier dependencia de usuario `luis` o rutas codificadas, para asegurar portabilidad entre usuarios.
+- [ ] Añadir integración opcional con gestores de dotfiles como [`chezmoi`](https://www.chezmoi.io/) o [`stow`](https://www.gnu.org/software/stow/).
+- [ ] Incluir más herramientas útiles para desarrollo y productividad: configuración avanzada de `vim`, `git`, `tmux`, etc.
+- [ ] Detectar si el entorno es remoto (por ejemplo, una sesión SSH o entorno virtualizado) para adaptar la configuración automáticamente.
+- [ ] Añadir opciones de configuración personalizables
+- [ ] Implementar rollback en caso de error
+- [ ] Añadir tests automatizados

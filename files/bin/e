@@ -1,7 +1,6 @@
 #!/usr/bin/env sh
-
 #
-# Script "/usr/bin/e" que simplemente llama al editor nano
+# Script que simplemente llama al editor nano
 # escribiendo menos caracteres :-)
 #
 /usr/bin/nano "${*}"

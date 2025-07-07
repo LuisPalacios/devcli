@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #
-# Script /usr/bin/s para cambiar al usuario root de forma rápida
+# Script para cambiar al usuario root de forma rápida
 # escribiendo menos caracteres :-)
 #
 /usr/bin/sudo -i
