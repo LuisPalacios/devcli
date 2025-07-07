@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 set -euo pipefail
-set -x
+
 # Carga las variables de entorno
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 
