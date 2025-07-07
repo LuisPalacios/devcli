@@ -110,10 +110,25 @@ Instala herramientas locales y configuración adicional:
 
 Los scripts están diseñados para ejecutarse múltiples veces sin provocar errores ni duplicar trabajo. Muy útil para actualizarse a la última versión, simplemente ejecuta el bootstrap de nuevo.
 
-- Solo se instalan los paquetes si no están presentes
-- Los dotfiles se sobreescriben con advertencia
-- Se informa claramente cada paso con logs semánticos
-- Soporta configuraciones seguras sin intervención adicional
+- **Paquetes del sistema**: Solo se instalan si no están presentes
+- **lsd**: Verifica si ya está instalado antes de descargar desde GitHub
+- **Nerd Fonts**: Verifica si las fuentes ya están instaladas antes de descargar
+- **Dotfiles**: Se sobreescriben con advertencia y backup automático
+- **Logging mejorado**: Informa claramente cada paso con logs semánticos
+- **Configuración segura**: Soporta ejecuciones múltiples sin intervención
+
+### Verificaciones de Idempotencia
+
+```bash
+# Verificar herramientas instaladas
+command -v lsd && echo "lsd está instalado" || echo "lsd no está instalado"
+
+# Verificar fuentes instaladas
+fc-list | grep "FiraCode Nerd Font" && echo "Fuentes instaladas" || echo "Fuentes no instaladas"
+
+# Verificar paquetes del sistema
+dpkg -s git >/dev/null 2>&1 && echo "git instalado" || echo "git no instalado"
+```
 
 ## 🗂 Estructura del repositorio
 
