@@ -73,7 +73,8 @@ function parametriza_zsh_comun() {
   export LSCOLORS='GxExDxDxCxDxDxFxFxexEx'
 
   # Bajo WSL2 se soporta ls --color
-  alias ls='ls --color=tty'
+  #alias ls='ls --color=tty'
+  alias ls='lsd'
 
   # Locales
   export LC_CTYPE=${LANG}
