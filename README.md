@@ -173,7 +173,7 @@ dpkg -s git >/dev/null 2>&1 && echo "git instalado" || echo "git no instalado"
 - `e` - Alias para nano
 - `confcat` - Cat sin comentarios
 - `s` - Acceso rápido a sudo
-- `configure-terminal` - Configuración automática de terminal con Nerd Fonts
+- `linux-setup-terminal.sh` - Configuración automática de terminal con Nerd Fonts
 
 ## 🎨 Nerd Fonts y lsd
 
@@ -191,17 +191,19 @@ Después de la instalación, configura tu terminal para usar la fuente:
 
 ```bash
 # Configuración automática (detecta tu terminal)
-configure-terminal auto
+linux-setup-terminal.sh auto
 
 # Configuración manual
-configure-terminal gnome-terminal
-configure-terminal konsole
-configure-terminal xfce4-terminal
-configure-terminal terminator
-configure-terminal alacritty
-configure-terminal kitty
-configure-terminal vscode
-configure-terminal wsl
+linux-setup-terminal.sh gnome-terminal
+
+# Otros terminales
+linux-setup-terminal.sh konsole
+linux-setup-terminal.sh xfce4-terminal
+linux-setup-terminal.sh terminator
+linux-setup-terminal.sh alacritty
+linux-setup-terminal.sh kitty
+linux-setup-terminal.sh vscode
+linux-setup-terminal.sh wsl
 ```
 
 ### Terminales Soportados

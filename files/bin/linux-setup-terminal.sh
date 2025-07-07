@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script para configurar terminal con Nerd Fonts
-# Uso: configure-terminal [terminal]
+# Uso: linux-setup-terminal.sh [terminal]
 
 set -e
 
@@ -19,7 +19,7 @@ command_exists() {
 # Función para mostrar ayuda
 show_help() {
     cat << EOF
-Uso: configure-terminal [TERMINAL]
+Uso: linux-setup-terminal.sh [TERMINAL]
 
 Configura tu terminal para usar FiraCode Nerd Font.
 
@@ -37,8 +37,8 @@ Terminales soportados:
   auto             Detectar automáticamente
 
 Ejemplos:
-  configure-terminal gnome-terminal
-  configure-terminal auto
+  linux-setup-terminal.sh gnome-terminal
+  linux-setup-terminal.sh auto
 EOF
 }
 
