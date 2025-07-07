@@ -64,7 +64,7 @@ package_installed_brew() {
 install_lsd() {
   # Verificar si lsd ya está instalado
   if command_exists lsd; then
-    log "lsd ya está instalado, omitiendo instalación"
+    #log "lsd ya está instalado, omitiendo instalación"
     return 0
   fi
 
@@ -120,7 +120,7 @@ install_nerd_fonts() {
 
   # Verificar si las fuentes ya están instaladas
   if fc-list | grep -q "FiraCode Nerd Font" 2>/dev/null; then
-    log "FiraCode Nerd Font ya está instalada, omitiendo instalación"
+    #log "FiraCode Nerd Font ya está instalada, omitiendo instalación"
     return 0
   fi
 
@@ -171,7 +171,7 @@ install_package() {
     linux|wsl2)
       # Verificar si ya está instalado
       if package_installed_apt "$pkg"; then
-        log "$pkg ya está instalado, omitiendo instalación"
+        #log "$pkg ya está instalado, omitiendo instalación"
         return 0
       fi
 
@@ -189,7 +189,7 @@ install_package() {
     macos)
       # Verificar si ya está instalado
       if package_installed_brew "$pkg"; then
-        log "$pkg ya está instalado, omitiendo instalación"
+        #log "$pkg ya está instalado, omitiendo instalación"
         return 0
       fi
 
