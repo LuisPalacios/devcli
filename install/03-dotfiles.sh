@@ -38,9 +38,12 @@ for file in "${DOTFILES_LIST[@]}"; do
     continue
   fi
 
-  # Copiar archivo (silencioso)
-  cp -f "$src" "$dst" >/dev/null 2>&1
-  ((INSTALLED_COUNT++))
+  # Copiar archivo (silencioso pero capturando errores)
+  if cp -f "$src" "$dst" >/dev/null 2>&1; then
+    ((INSTALLED_COUNT++))
+  else
+    warning "No se pudo copiar $file"
+  fi
 done
 
 # Cambiar shell a zsh si está disponible y el sistema lo requiere
@@ -57,8 +60,11 @@ if command -v zsh &>/dev/null; then
 
       if [[ "$CURRENT_SHELL" != "$ZSH_PATH" ]]; then
         log "Cambiando shell por defecto a zsh..."
-        chsh -s "$ZSH_PATH" >/dev/null 2>&1
-        SHELL_CHANGED=true
+        if chsh -s "$ZSH_PATH" >/dev/null 2>&1; then
+          SHELL_CHANGED=true
+        else
+          warning "No se pudo cambiar la shell por defecto (puede requerir contraseña)"
+        fi
       fi
       ;;
   esac
