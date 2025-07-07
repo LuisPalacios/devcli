@@ -1,4 +1,4 @@
-# Fichero .zshrc de LuisPa
+# Fichero .zshrc de Linux Setup
 # Versión: 6 de Julio de 2025
 # Utilizado en MacOS (brew), Linux (Ubuntu), Windows WSL2
 #
@@ -19,8 +19,10 @@
 #set -x
 
 # Parametrización
-SOY="luis"  # cual es mi nombre de usuario en este sistema
+SOY="$(id -un)"
+export LANG="es_ES.UTF-8"
 
+# -----------------------------------------------------------------------------
 # Detecciones:
 # Estoy dentro de una sesión WSL2?
 export IS_WSL2=false
@@ -74,20 +76,19 @@ function parametriza_zsh_comun() {
   alias ls='ls --color=tty'
 
   # Locales
-  export LANG=es_ES.UTF-8
-  export LC_CTYPE="es_ES.UTF-8"
-  export LC_NUMERIC="es_ES.UTF-8"
-  export LC_TIME="es_ES.UTF-8"
-  export LC_COLLATE="es_ES.UTF-8"
-  export LC_MONETARY="es_ES.UTF-8"
-  export LC_MESSAGES="es_ES.UTF-8"
-  export LC_PAPER="es_ES.UTF-8"
-  export LC_NAME="es_ES.UTF-8"
-  export LC_ADDRESS="es_ES.UTF-8"
-  export LC_TELEPHONE="es_ES.UTF-8"
-  export LC_MEASUREMENT="es_ES.UTF-8"
-  export LC_IDENTIFICATION="es_ES.UTF-8"
-  export LC_ALL="es_ES.UTF-8"
+  export LC_CTYPE=${LANG}
+  export LC_NUMERIC=${LANG}
+  export LC_TIME=${LANG}
+  export LC_COLLATE=${LANG}
+  export LC_MONETARY=${LANG}
+  export LC_MESSAGES=${LANG}
+  export LC_PAPER=${LANG}
+  export LC_NAME=${LANG}
+  export LC_ADDRESS=${LANG}
+  export LC_TELEPHONE=${LANG}
+  export LC_MEASUREMENT=${LANG}
+  export LC_IDENTIFICATION=${LANG}
+  export LC_ALL=${LANG}
 
   # Detecto e inicializo el valor de la variable SHELL
   #
@@ -436,7 +437,7 @@ else
 
   # Compruebo si tengo mi tema
   LOCAL_FILE=~/.luispa.omp.json
-  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.luispa.omp.json"
+  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/dotfiles/.luispa.omp.json"
   TEMP_REMOTE_FILE="/tmp/.luispa.omp_remote.json"
 
   # Detectar el sistema operativo para usar el comando 'date' correcto
@@ -491,4 +492,4 @@ else
   eval "$(oh-my-posh init zsh --config ~/.luispa.omp.json)"
 fi
 
-# LuisPa: -------------------------------------------------------------- END
+# Linux Setup: -------------------------------------------------------------- END
