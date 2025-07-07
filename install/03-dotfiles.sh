@@ -41,7 +41,7 @@ for file in "${DOTFILES_LIST[@]}"; do
 
   # Copiar archivo (silencioso pero capturando errores)
   if cp -f "$src" "$dst" >/dev/null 2>&1; then
-    ((INSTALLED_COUNT++))
+    INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
   else
     warning "No se pudo copiar $file"
   fi
