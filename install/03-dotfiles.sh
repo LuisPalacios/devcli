@@ -46,29 +46,41 @@ for file in "${DOTFILES_LIST[@]}"; do
   fi
 done
 
+log "Dotfiles copiados, verificando shell..."
+
 # Cambiar shell a zsh si está disponible y el sistema lo requiere
 SHELL_CHANGED=false
 if command -v zsh &>/dev/null; then
+  log "zsh encontrado, verificando shell actual..."
   ZSH_PATH="$(command -v zsh)"
 
   case "${OS_TYPE:-}" in
     macos)
       # macOS usa zsh por defecto desde Catalina
+      log "macOS detectado, saltando cambio de shell"
       ;;
     linux|wsl2)
       CURRENT_SHELL="$(getent passwd "$CURRENT_USER" | cut -d: -f7)"
+      log "Shell actual: $CURRENT_SHELL, zsh en: $ZSH_PATH"
 
       if [[ "$CURRENT_SHELL" != "$ZSH_PATH" ]]; then
         log "Cambiando shell por defecto a zsh..."
         if chsh -s "$ZSH_PATH" >/dev/null 2>&1; then
           SHELL_CHANGED=true
+          log "Shell cambiada exitosamente"
         else
           warning "No se pudo cambiar la shell por defecto (puede requerir contraseña)"
         fi
+      else
+        log "Shell ya es zsh, no es necesario cambiar"
       fi
       ;;
   esac
+else
+  log "zsh no encontrado, saltando cambio de shell"
 fi
+
+log "Preparando resumen final..."
 
 # Mostrar resumen final
 if [[ "$SHELL_CHANGED" == "true" ]]; then
@@ -76,3 +88,5 @@ if [[ "$SHELL_CHANGED" == "true" ]]; then
 else
   success "Dotfiles instalados ($INSTALLED_COUNT archivos)"
 fi
+
+log "Script 03-dotfiles.sh completado"
