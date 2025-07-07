@@ -2,6 +2,7 @@
 # -------------------------------------------------------------------
 # utils.sh - Utilidades compartidas para scripts de instalación
 # -------------------------------------------------------------------
+set -x
 
 # Función de log con timestamp
 log() {
