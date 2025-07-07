@@ -5,9 +5,12 @@ set -euo pipefail
 # Carga las variables de entorno
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 
-# Función de log
+# Carga las utilidades compartidas
+source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
+
+# Función de log (usando la de utils.sh)
 log() {
-  echo "[03-dotfiles] $*"
+  log_simple "$*"
 }
 
 # Carga las variables de entorno

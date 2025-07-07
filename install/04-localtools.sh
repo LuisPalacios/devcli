@@ -5,20 +5,19 @@ set -euo pipefail
 # Carga las variables de entorno
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 
-# Función de log
+# Carga las utilidades compartidas
+source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
+
+# Función de log (usando la de utils.sh)
 log() {
-  echo "[04-locatools] $*"
+  log_simple "$*"
 }
 
 # Directorio de archivos
 FILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../files" && pwd)"
 
-# Me aseguro de que existe el directorio de los binarios del
-# usuario ($BIN_DIR definido en env.sh)
-if [[ ! -d "$BIN_DIR" ]]; then
-  log "Creando $BIN_DIR"
-  mkdir -p "$BIN_DIR"
-fi
+# Asegurar que existe el directorio de binarios
+ensure_directory "$BIN_DIR"
 
 # Copiar herramientas al directorio de los binarios
 for tool in e confcat s; do
