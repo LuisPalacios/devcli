@@ -158,6 +158,57 @@ Los scripts están diseñados para ejecutarse múltiples veces sin provocar erro
 - `e` - Alias para nano
 - `confcat` - Cat sin comentarios
 - `s` - Acceso rápido a sudo
+- `configure-terminal` - Configuración automática de terminal con Nerd Fonts
+
+## 🎨 Nerd Fonts y lsd
+
+### Instalación Automática
+
+El proyecto instala automáticamente **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`:
+
+- **Fuente**: FiraCode Nerd Font v3.1.1
+- **Ubicación**: `~/.local/share/fonts/`
+- **Configuración**: Automática durante la instalación
+
+### Configuración de Terminal
+
+Después de la instalación, configura tu terminal para usar la fuente:
+
+```bash
+# Configuración automática (detecta tu terminal)
+configure-terminal auto
+
+# Configuración manual
+configure-terminal gnome-terminal
+configure-terminal konsole
+configure-terminal xfce4-terminal
+configure-terminal terminator
+configure-terminal alacritty
+configure-terminal kitty
+configure-terminal vscode
+configure-terminal wsl
+```
+
+### Terminales Soportados
+
+- **GNOME Terminal**: Configuración automática via gsettings
+- **Konsole**: Archivo de perfil personalizado
+- **XFCE4 Terminal**: Configuración via xfconf
+- **Terminator**: Archivo de configuración completo
+- **Alacritty**: Configuración YAML
+- **Kitty**: Configuración con tema
+- **VSCode**: Settings.json automático
+- **WSL**: Instrucciones para Windows Terminal
+
+### Verificación
+
+```bash
+# Verificar que las fuentes están instaladas
+fc-list | grep "FiraCode Nerd Font"
+
+# Verificar que lsd funciona con iconos
+lsd --version
+```
 
 ## 🌍 Personalización de Idioma
 

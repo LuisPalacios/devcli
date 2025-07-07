@@ -40,6 +40,12 @@ for pkg in "${COMMON_PACKAGES[@]}"; do
   fi
 done
 
+# Instalar Nerd Fonts si lsd está en la lista
+if [[ " ${COMMON_PACKAGES[*]} " =~ " lsd " ]]; then
+  log "Instalando fuentes para lsd..."
+  install_nerd_fonts
+fi
+
 # Crear alias para herramientas con nombres diferentes en Debian/Ubuntu
 case "${OS_TYPE:-}" in
   linux|wsl2)
