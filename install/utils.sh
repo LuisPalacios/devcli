@@ -67,12 +67,19 @@ install_package() {
   case "${OS_TYPE:-}" in
     linux|wsl2)
       if ! package_installed_apt "$pkg"; then
-        sudo apt-get install -y -qq "$pkg" >/dev/null 2>&1
+        # Intentar instalar con manejo de errores
+        if ! sudo apt-get install -y -qq "$pkg" >/dev/null 2>&1; then
+          warning "No se pudo instalar $pkg - continuando..."
+          return 1
+        fi
       fi
       ;;
     macos)
       if ! package_installed_brew "$pkg"; then
-        brew install "$pkg" >/dev/null 2>&1
+        if ! brew install "$pkg" >/dev/null 2>&1; then
+          warning "No se pudo instalar $pkg - continuando..."
+          return 1
+        fi
       fi
       ;;
     *)
@@ -102,7 +109,10 @@ check_sudo_access() {
 update_package_manager() {
   case "${OS_TYPE:-}" in
     linux|wsl2)
-      sudo apt-get update -y -qq >/dev/null 2>&1
+      if ! sudo apt-get update -y -qq >/dev/null 2>&1; then
+        warning "No se pudo actualizar repositorios - continuando..."
+        return 1
+      fi
       ;;
     macos)
       # Homebrew se actualiza automáticamente
