@@ -22,6 +22,24 @@ ensure_directory "$BIN_DIR"
 # Contador de herramientas instaladas
 TOOLS_INSTALLED=0
 
+# Función para actualizar variables de Nerd Fonts en scripts
+update_nerd_font_variables() {
+  local script_file="$1"
+  if [[ -f "$script_file" ]]; then
+    # Crear archivo temporal
+    local temp_file=$(mktemp)
+    
+    # Reemplazar NERD_FONT_NAME
+    sed "s/export NERD_FONT_NAME=\"[^\"]*\"/export NERD_FONT_NAME=\"${NERD_FONT_NAME}\"/g" "$script_file" > "$temp_file"
+    
+    # Reemplazar NERD_FONT_FULL_NAME
+    sed "s/export NERD_FONT_FULL_NAME=\"[^\"]*\"/export NERD_FONT_FULL_NAME=\"${NERD_FONT_FULL_NAME}\"/g" "$temp_file" > "$script_file"
+    
+    # Limpiar archivo temporal
+    rm -f "$temp_file" 2>/dev/null || true
+  fi
+}
+
 # Copiar herramientas al directorio de los binarios
 log "Instalando herramientas locales..."
 for tool in e confcat s nerd-setup.sh nerd-verify.sh; do
@@ -31,6 +49,13 @@ for tool in e confcat s nerd-setup.sh nerd-verify.sh; do
   if [[ -f "$src" ]]; then
     cp -f "$src" "$dst" >/dev/null 2>&1
     chmod 755 "$dst" >/dev/null 2>&1
+    
+    # Actualizar variables de Nerd Fonts en scripts específicos
+    if [[ "$tool" == "nerd-setup.sh" ]] || [[ "$tool" == "nerd-verify.sh" ]]; then
+      update_nerd_font_variables "$dst"
+      log "Variables de Nerd Fonts actualizadas en $tool"
+    fi
+    
     TOOLS_INSTALLED=$((TOOLS_INSTALLED + 1))
   fi
 done
