@@ -192,6 +192,9 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
     log "  2. O instala las fuentes primero: cd ~/.linux-setup/install && ./02-packages.sh"
   fi
 
+  # Mensaje especial
+  msg_shown=false
+  
   # Mensaje especial para WSL
   if [[ "${OS_TYPE:-}" == "wsl2" ]]; then
     echo
@@ -205,10 +208,11 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
     echo "5. Cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
     echo "==========================================="
     echo
+    msg_shown=true
   fi
 
   # Mensajes especiales para macOS
-  if [[ "${OS_TYPE:-}" == "macos" ]]; then
+  if [[ "${OS_TYPE:-}" == "macos" ]] && [[ "$msg_shown" == "false" ]]; then
     # Detectar terminal específico de macOS
     macos_terminal=$(detect_terminal)
 
@@ -219,13 +223,14 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
         echo "IMPORTANTE PARA macOS TERMINAL:"
         echo "==========================================="
         echo "1. Abre Terminal.app"
-        echo "2. Ve a Terminal > Preferences (⌘,)"
+        echo "2. Ve a Terminal > Ajustes (⌘,)"
         echo "3. Selecciona tu perfil actual"
         echo "4. Ve a la pestaña 'Text'"
         echo "5. Cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
         echo "6. Ajusta el tamaño de fuente si es necesario"
         echo "==========================================="
         echo
+        msg_shown=true
         ;;
       "iterm")
         echo
@@ -233,7 +238,7 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
         echo "IMPORTANTE PARA iTerm2:"
         echo "==========================================="
         echo "1. Abre iTerm2"
-        echo "2. Ve a iTerm2 > Preferences (⌘,)"
+        echo "2. Ve a iTerm2 > Settings (⌘,)"
         echo "3. Selecciona tu perfil actual"
         echo "4. Ve a la pestaña 'Text'"
         echo "5. Cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
@@ -241,6 +246,7 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
         echo "7. Opcional: Activa 'Use ligatures' para mejor apariencia"
         echo "==========================================="
         echo
+        msg_shown=true
         ;;
       "vscode")
         echo
@@ -254,6 +260,7 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
         echo "5. Opcional: Añade 'terminal.integrated.fontLigatures': true"
         echo "==========================================="
         echo
+        msg_shown=true
         ;;
       *)
         echo
@@ -267,6 +274,33 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
         echo "4. Reinicia tu terminal"
         echo "==========================================="
         echo
+        msg_shown=true
         ;;
     esac
+  fi
+
+  # Mensaje general para cualquier sistema (solo si no se ha mostrado ningún mensaje específico)
+  if [[ "$msg_shown" == "false" ]]; then
+    echo
+    echo "==========================================="
+    echo "CONFIGURACIÓN MANUAL DE NERD FONTS:"
+    echo "==========================================="
+    echo "Si tu terminal no se configuró automáticamente,"
+    echo "puedes configurar manualmente '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}' en cualquier terminal:"
+    echo ""
+    echo "1. Abre tu aplicación de terminal"
+    echo "2. Busca la configuración de fuentes/tipografía"
+    echo "3. Cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
+    echo "4. Ajusta el tamaño de fuente si es necesario"
+    echo "5. Reinicia tu terminal"
+    echo ""
+    echo "Beneficios de usar Nerd Fonts:"
+    echo "  - Iconos y símbolos especiales en la terminal"
+    echo "  - Mejor visualización de archivos y directorios"
+    echo "  - Compatibilidad con herramientas como lsd, exa, etc."
+    echo ""
+    echo "Para verificar la instalación, ejecuta:"
+    echo "  nerd-verify.sh"
+    echo "==========================================="
+    echo
   fi
