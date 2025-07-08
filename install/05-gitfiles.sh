@@ -160,6 +160,8 @@ process_repository() {
     local filename=$(basename "$clean_path")
     local dst_file="$BIN_DIR/$filename"
 
+    log "Intentando copiar: $src_file -> $dst_file"
+
     if copy_file_with_permissions "$src_file" "$dst_file"; then
       repo_files_copied=$((repo_files_copied + 1))
       FILES_COPIED=$((FILES_COPIED + 1))
