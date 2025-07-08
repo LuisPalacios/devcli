@@ -1,13 +1,49 @@
 {
   "packages": [
-    "htop",
-    "tmux", 
-    "fzf",
-    "bat",
-    "fd-find",
-    "ripgrep",
-    "tree",
-    "jq",
-    "lsd"
+    {
+      "name": "htop",
+      "linux": "htop",
+      "macos": "htop"
+    },
+    {
+      "name": "tmux",
+      "linux": "tmux",
+      "macos": "tmux"
+    },
+    {
+      "name": "fzf",
+      "linux": "fzf",
+      "macos": "fzf"
+    },
+    {
+      "name": "bat",
+      "linux": "bat",
+      "macos": "bat"
+    },
+    {
+      "name": "fd-find",
+      "linux": "fd-find",
+      "macos": "fd"
+    },
+    {
+      "name": "ripgrep",
+      "linux": "ripgrep",
+      "macos": "ripgrep"
+    },
+    {
+      "name": "tree",
+      "linux": "tree",
+      "macos": "tree"
+    },
+    {
+      "name": "jq",
+      "linux": "jq",
+      "macos": "jq"
+    },
+    {
+      "name": "lsd",
+      "linux": "lsd",
+      "macos": "lsd"
+    }
   ]
-} 
+}

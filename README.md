@@ -58,7 +58,8 @@ Instala utilidades adicionales útiles para el trabajo diario:
 
 - Lee configuración desde `install/02-packages.json`.
 - Herramientas incluidas: `htop`, `tmux`, `fzf`, `bat`, `fd-find`, `ripgrep`, `tree`, `jq`, `lsd`.
-- Usa el gestor de paquetes del sistema (`apt` o `brew`) y adapta los nombres según el sistema operativo.
+- Usa el gestor de paquetes del sistema (`apt` o `brew`) con nombres específicos por OS.
+- Maneja automáticamente diferencias como `fd-find` (Linux) vs `fd` (macOS).
 - Realiza verificación previa para evitar reinstalar si ya están presentes.
 
 #### `03-dotfiles.sh`
