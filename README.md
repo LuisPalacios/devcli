@@ -1,12 +1,10 @@
 # Linux Setup
 
-Contiene los scripts necesarios para configurar el entorno CLI en sistemas basados en Unix: **Linux**, **macOS** y **WSL2**, utilizando una única línea de instalación remota.
+Configura el entorno CLI en sistemas basados en Unix: **Linux**, **macOS** y **WSL2**, utilizando una única línea de instalación. Estaba ya cansado de que cada vez que instalo uno de estos sitemas me lleva un par de horas parametrizándolo, instalar tools, fuentes, scripts de ayuda. He creado este repo para automatizarlo con un solo comando.
 
-## 📋 Requisitos Previos
+## 📋 Requisitos
 
-### Permisos Sudo
-
-El usuario debe tener acceso a `sudo` sin contraseña para que la instalación sea completamente automática. Para configurar esto:
+Tu usuario debe tener acceso a `sudo` sin contraseña para que la instalación sea completamente automática. Para configurar esto:
 
 ```bash
 # Añadir tu usuario al grupo sudo (si no está ya)
@@ -17,36 +15,20 @@ sudo visudo
 # Añadir línea: $USER ALL=(ALL) NOPASSWD:ALL
 ```
 
-### macOS
+En macOS utilizo **Homebrew**: Instalar desde [brew.sh](https://brew.sh) antes de ejecutar el setup
 
-- **Homebrew**: Instalar desde [brew.sh](https://brew.sh) antes de ejecutar el setup
-
-### WSL2
-
-- WSL2 configurado y funcionando
-- Distribución Linux instalada (Ubuntu recomendado)
+En WSL2, necesitas tenerlo configurado y funcionando. Yo siempre uso Ubuntu como distribución Linux.
 
 ## ⚡ Ejecución
 
-Revisa este readme y los scripts para sentirte seguro de que lo que hacen no rompe nada de tu instalación. Ten en cuenta que toca archivos MUY IMPORTANTES. Ejecútalo bajo tu responsabilidad y nunca lo hagas si no entiendes lo que hacen.
+> Revisa este documento y los scripts para sentirte seguro de que lo que hacen **no rompe nada de tu instalación**. Ten en cuenta que toca archivos MUY IMPORTANTES. Ejecútalo bajo tu responsabilidad y nunca lo hagas si no entiendes lo que hacen.
 
 ### Instalación Básica
 
+Ejecuta este comando. Para cambiar el idioma mira Personalización de Idioma, más adelante.
+
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
-```
-
-### Instalación con Idioma Personalizado
-
-```bash
-# Instalación con idioma inglés
-bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh) -l en_US.UTF-8
-
-# Instalación con idioma francés
-bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh) -l fr_FR.UTF-8
-
-# Ver todas las opciones disponibles
-bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh) -h
 ```
 
 - Clona el repositorio en `~/.linux-setup`
@@ -57,7 +39,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/mai
 
 ## 🚀 ¿Qué hace este proyecto?
 
-Automatiza la configuración inicial de un entorno de usuario personalizado para sistemas Linux, macOS y WSL2. Está diseñado con un enfoque modular, multiplataforma e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
+Automatiza la configuración inicial de un entorno personalizado para sistemas Linux, macOS y WSL2. Está diseñado con un enfoque modular, multiplataforma e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
 
 ### Fases de instalación (`install/*.sh`)
 
@@ -105,7 +87,7 @@ Los scripts están diseñados para ejecutarse múltiples veces sin provocar erro
 - **Logging mejorado**: Informa claramente cada paso con logs semánticos
 - **Configuración segura**: Soporta ejecuciones múltiples sin intervención
 
-### Verificaciones de Idempotencia
+Una vez que termina de ejecutarse, algunas verificaciones que puedes hacer
 
 ```bash
 # Verificar herramientas instaladas
