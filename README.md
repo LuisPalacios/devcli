@@ -173,7 +173,8 @@ dpkg -s git >/dev/null 2>&1 && echo "git instalado" || echo "git no instalado"
 - `e` - Alias para nano
 - `confcat` - Cat sin comentarios
 - `s` - Acceso rápido a sudo
-- `linux-setup-terminal.sh` - Configuración automática de terminal con Nerd Fonts
+- `nerd-setup.sh` - Configuración automática de terminal con Nerd Fonts
+- `nerd-verif.sh` - Verificación completa de Nerd Fonts
 
 ## 🎨 Nerd Fonts y lsd
 
@@ -191,19 +192,19 @@ Después de la instalación, configura tu terminal para usar la fuente:
 
 ```bash
 # Configuración automática (detecta tu terminal)
-linux-setup-terminal.sh auto
+nerd-setup.sh auto
 
 # Configuración manual
-linux-setup-terminal.sh gnome-terminal
+nerd-setup.sh gnome-terminal
 
 # Otros terminales
-linux-setup-terminal.sh konsole
-linux-setup-terminal.sh xfce4-terminal
-linux-setup-terminal.sh terminator
-linux-setup-terminal.sh alacritty
-linux-setup-terminal.sh kitty
-linux-setup-terminal.sh vscode
-linux-setup-terminal.sh wsl
+nerd-setup.sh konsole
+nerd-setup.sh xfce4-terminal
+nerd-setup.sh terminator
+nerd-setup.sh alacritty
+nerd-setup.sh kitty
+nerd-setup.sh vscode
+nerd-setup.sh wsl
 ```
 
 ### Terminales Soportados
@@ -222,6 +223,9 @@ linux-setup-terminal.sh wsl
 ### Verificación
 
 ```bash
+# Verificación completa de Nerd Fonts
+nerd-verif.sh
+
 # Verificar que las fuentes están instaladas
 fc-list | grep "FiraCode Nerd Font"
 
