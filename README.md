@@ -28,7 +28,7 @@ sudo visudo
 
 ## ⚡ Ejecución
 
-Revisa este readme y los scripts para sentirte seguro de que lo que hacen no rompe nada de tu instalacion. Ten en cuenta que toca archivos MUY IMPORTANTES. Ejecútalo bajo tu responsabilidad y nunca lo hagas si no entiendes lo que hacen.
+Revisa este readme y los scripts para sentirte seguro de que lo que hacen no rompe nada de tu instalación. Ten en cuenta que toca archivos MUY IMPORTANTES. Ejecútalo bajo tu responsabilidad y nunca lo hagas si no entiendes lo que hacen.
 
 ### Instalación Básica
 
@@ -48,18 +48,6 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/mai
 # Ver todas las opciones disponibles
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh) -h
 ```
-
-### Idiomas Soportados
-
-- `es_ES.UTF-8` - Español (por defecto)
-- `en_US.UTF-8` - Inglés
-- `fr_FR.UTF-8` - Francés
-- `de_DE.UTF-8` - Alemán
-- `it_IT.UTF-8` - Italiano
-- `pt_PT.UTF-8` - Portugués
-- `ca_ES.UTF-8` - Catalán
-- `eu_ES.UTF-8` - Euskera
-- `gl_ES.UTF-8` - Gallego
 
 - Clona el repositorio en `~/.linux-setup`
 - Detecta el sistema operativo (Linux, macOS, WSL2)
@@ -192,33 +180,8 @@ Después de la instalación, configura tu terminal para usar la fuente:
 
 ```bash
 # Configuración automática (detecta tu terminal)
-nerd-setup.sh auto
-
-# Configuración manual
-nerd-setup.sh gnome-terminal
-
-# Otros terminales
-nerd-setup.sh konsole
-nerd-setup.sh xfce4-terminal
-nerd-setup.sh terminator
-nerd-setup.sh alacritty
-nerd-setup.sh kitty
-nerd-setup.sh vscode
-nerd-setup.sh wsl
+nerd-setup.sh auto | <nombre del terminal>
 ```
-
-### Terminales Soportados
-
-- **GNOME Terminal**: Configuración automática via gsettings
-- **Konsole**: Archivo de perfil personalizado
-- **XFCE4 Terminal**: Configuración via xfconf
-- **Terminator**: Archivo de configuración completo
-- **Alacritty**: Configuración YAML
-- **Kitty**: Configuración con tema
-- **VSCode**: Settings.json automático
-- **Terminal de macOS**: Instrucciones manuales
-- **iTerm2**: Instrucciones manuales
-- **WSL**: Instrucciones para Windows Terminal
 
 ### Verificación
 
@@ -249,3 +212,14 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/mai
 - **Locale del sistema**: Configura `LANG`, `LC_ALL`, etc.
 - **Dotfiles**: Adapta la configuración según el idioma
 - **Herramientas**: Configura herramientas para el idioma especificado
+
+## ✅ Resultados de Pruebas
+
+### Tabla de Compatibilidad
+
+| Sistema | Detección | Fuentes | Configuración |
+|---------|-----------|---------|---------------|
+| **macOS (iTerm2)** | ✅ Correcta | ✅ Instaladas | ✅ Automática |
+| **Linux Headless** | ✅ SSH detectado | ✅ Instaladas | ⚠️ Manual requerida |
+| **Linux Normal** | ✅ GNOME detectado | ✅ Instaladas | ✅ Automática |
+| **WSL2** | ✅ WSL detectado | ✅ Instaladas | ✅ Automática |
