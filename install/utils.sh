@@ -311,25 +311,25 @@ count_installed_packages() {
 read_json_array() {
   local json_file="$1"
   local array_key="$2"
-  
+
   # Verificar que jq está disponible
   if ! command_exists jq; then
     error "jq no está disponible"
     return 1
   fi
-  
+
   # Verificar que el archivo existe
   if [[ ! -f "$json_file" ]]; then
     error "Archivo JSON no encontrado: $json_file"
     return 1
   fi
-  
+
   # Verificar que el JSON es válido
   if ! jq empty "$json_file" 2>/dev/null; then
     error "Archivo JSON inválido: $json_file"
     return 1
   fi
-  
+
   # Leer y retornar el array
   jq -r ".$array_key[]" "$json_file" 2>/dev/null
 }
@@ -338,25 +338,25 @@ read_json_array() {
 read_packages_with_os_names() {
   local json_file="$1"
   local array_key="$2"
-  
+
   # Verificar que jq está disponible
   if ! command_exists jq; then
     error "jq no está disponible"
     return 1
   fi
-  
+
   # Verificar que el archivo existe
   if [[ ! -f "$json_file" ]]; then
     error "Archivo JSON no encontrado: $json_file"
     return 1
   fi
-  
+
   # Verificar que el JSON es válido
   if ! jq empty "$json_file" 2>/dev/null; then
     error "Archivo JSON inválido: $json_file"
     return 1
   fi
-  
+
   # Leer paquetes con nombres específicos por OS
   case "${OS_TYPE:-}" in
     linux|wsl2)
@@ -366,8 +366,8 @@ read_packages_with_os_names() {
       jq -r ".$array_key[] | .macos" "$json_file" 2>/dev/null
       ;;
     *)
-      # Fallback: usar el nombre genérico si existe
-      jq -r ".$array_key[] | .name // .linux // .macos" "$json_file" 2>/dev/null
+      # Fallback: usar linux o macos
+      jq -r ".$array_key[] | .linux // .macos" "$json_file" 2>/dev/null
       ;;
   esac
 }
