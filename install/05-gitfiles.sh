@@ -124,13 +124,13 @@ copy_file_with_permissions() {
   if [[ "$filename" != *.ps1 ]]; then
     # Aplicar permisos 755 para archivos ejecutables
     chmod 755 "$dst_file" >/dev/null 2>&1
-    log "Copiado con permisos 755: $filename"
-  else
-    # Mantener permisos originales para archivos .ps1
-    log "Copiado con permisos originales: $filename"
+#     log "Copiado: $filename (755)"
+#   else
+#     # Mantener permisos originales para archivos .ps1
+#     log "Copiado: $filename (original)"
   fi
-
   return 0
+
 }
 
 # Función para procesar un repositorio
@@ -149,29 +149,16 @@ process_repository() {
     return 1
   fi
 
-  log "Repositorio clonado en: $temp_dir"
-  log "Contenido del directorio clonado:"
-  ls -la "$temp_dir" | while read line; do
-    log "  $line"
-  done
-
   # Contador de archivos copiados en este repositorio
   local repo_files_copied=0
 
   # Procesar cada archivo
-  log "Archivos a procesar: $files_array"
   while IFS= read -r file_path; do
     # Limpiar path (remover ./ si existe)
     local clean_path="${file_path#./}"
     local src_file="$temp_dir/$clean_path"
     local filename=$(basename "$clean_path")
     local dst_file="$BIN_DIR/$filename"
-
-    log "Procesando archivo: $file_path"
-    log "Path limpio: $clean_path"
-    log "Archivo fuente: $src_file"
-    log "Archivo destino: $dst_file"
-    log "¿Existe archivo fuente? $(test -f "$src_file" && echo "SÍ" || echo "NO")"
 
     if copy_file_with_permissions "$src_file" "$dst_file"; then
       repo_files_copied=$((repo_files_copied + 1))
