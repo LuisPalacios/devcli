@@ -21,6 +21,10 @@ export BIN_DIR="$HOME/bin"
 # Idioma y locale
 export SETUP_LANG="es_ES.UTF-8"
 
+# Configuración de Nerd Fonts
+export NERD_FONT_NAME="FiraCode"
+export NERD_FONT_FULL_NAME="FiraCode Nerd Font"
+
 # Dotfiles a instalar (relativos al repo)
 export DOTFILES_LIST=(.zshrc .luispa.omp.json)
 

@@ -112,48 +112,48 @@ install_lsd() {
   log "lsd v${version} instalado correctamente"
 }
 
-# Función para instalar FiraCode Nerd Font
+# Función para instalar Nerd Fonts
 install_nerd_fonts() {
-  local font_name="FiraCode"
+  local font_name="${NERD_FONT_NAME:-FiraCode}"
   local font_dir="$HOME/.local/share/fonts"
   local fonts_dir="$HOME/.fonts"
   local temp_dir="/tmp/nerd-fonts-${font_name}"
 
   # Verificar si las fuentes ya están instaladas (método robusto)
   local fonts_installed=false
-  
+
   # Método 1: Verificar con fc-list (Linux/WSL2)
   if command_exists fc-list; then
-    if fc-list | grep -q "FiraCode Nerd Font" 2>/dev/null; then
+    if fc-list | grep -q "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" 2>/dev/null; then
       fonts_installed=true
     fi
   fi
-  
+
   # Método 2: Verificar directorio estándar
   if [[ "$fonts_installed" == "false" ]] && [[ -d "$font_dir" ]]; then
-    if find "$font_dir" -name "*FiraCode*" -type f | grep -q "FiraCode" 2>/dev/null; then
+    if find "$font_dir" -name "*${NERD_FONT_NAME:-FiraCode}*" -type f | grep -q "${NERD_FONT_NAME:-FiraCode}" 2>/dev/null; then
       fonts_installed=true
     fi
   fi
-  
+
   # Método 3: Verificar directorio alternativo
   if [[ "$fonts_installed" == "false" ]] && [[ -d "$fonts_dir" ]]; then
-    if find "$fonts_dir" -name "*FiraCode*" -type f | grep -q "FiraCode" 2>/dev/null; then
+    if find "$fonts_dir" -name "*${NERD_FONT_NAME:-FiraCode}*" -type f | grep -q "${NERD_FONT_NAME:-FiraCode}" 2>/dev/null; then
       fonts_installed=true
     fi
   fi
-  
+
   # Método 4: Verificar fuentes del sistema (macOS)
   if [[ "$fonts_installed" == "false" ]] && [[ "$OSTYPE" == "darwin"* ]]; then
     if command_exists system_profiler; then
-      if system_profiler SPFontsDataType | grep -q "FiraCode" 2>/dev/null; then
+      if system_profiler SPFontsDataType | grep -q "${NERD_FONT_NAME:-FiraCode}" 2>/dev/null; then
         fonts_installed=true
       fi
     fi
   fi
-  
+
   if [[ "$fonts_installed" == "true" ]]; then
-    log "FiraCode Nerd Font ya está instalada, omitiendo instalación"
+    log "'${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}' ya está instalada, omitiendo instalación"
     return 0
   fi
 
@@ -200,14 +200,14 @@ install_nerd_fonts() {
 
   # Verificar que la instalación fue exitosa
   if command_exists fc-list; then
-    if ! fc-list | grep -q "FiraCode Nerd Font" 2>/dev/null; then
-      warning "FiraCode Nerd Font no se detecta después de la instalación"
+    if ! fc-list | grep -q "'${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'" 2>/dev/null; then
+      warning "'${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}' no se detecta después de la instalación"
       return 1
     fi
   fi
 
   log "${font_name} Nerd Font instalada correctamente"
-  log "Configura tu terminal para usar 'FiraCode Nerd Font'"
+  log "Configura tu terminal para usar '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
 }
 
 # Función para instalar paquete según OS (silenciosa)

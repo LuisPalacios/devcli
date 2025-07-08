@@ -72,7 +72,7 @@ check_nerd_fonts_installed() {
 
   # Método 1: fc-list (Linux/WSL2)
   if command -v fc-list &>/dev/null; then
-    if fc-list | grep -q "FiraCode Nerd Font" 2>/dev/null; then
+    if fc-list | grep -q "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" 2>/dev/null; then
       fonts_installed=true
     fi
   fi
@@ -80,7 +80,7 @@ check_nerd_fonts_installed() {
   # Método 2: Directorio estándar
   if [[ "$fonts_installed" == "false" ]]; then
     local font_dir="$HOME/.local/share/fonts"
-    if [[ -d "$font_dir" ]] && find "$font_dir" -name "*FiraCode*" -type f | grep -q "FiraCode" 2>/dev/null; then
+    if [[ -d "$font_dir" ]] && find "$font_dir" -name "*${NERD_FONT_NAME:-FiraCode}*" -type f | grep -q "${NERD_FONT_NAME:-FiraCode}" 2>/dev/null; then
       fonts_installed=true
     fi
   fi
@@ -88,7 +88,7 @@ check_nerd_fonts_installed() {
   # Método 3: Directorio alternativo
   if [[ "$fonts_installed" == "false" ]]; then
     local fonts_dir="$HOME/.fonts"
-    if [[ -d "$fonts_dir" ]] && find "$fonts_dir" -name "*FiraCode*" -type f | grep -q "FiraCode" 2>/dev/null; then
+    if [[ -d "$fonts_dir" ]] && find "$fonts_dir" -name "*${NERD_FONT_NAME:-FiraCode}*" -type f | grep -q "${NERD_FONT_NAME:-FiraCode}" 2>/dev/null; then
       fonts_installed=true
     fi
   fi
@@ -129,7 +129,7 @@ detect_terminal() {
 
 # Verificar si las fuentes están instaladas
 if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
-  log "FiraCode Nerd Font detectada, configurando terminal automáticamente..."
+  log "'${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}' detectada, configurando terminal automáticamente..."
 
   # Detectar terminal
   terminal=$(detect_terminal)
@@ -137,7 +137,7 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
   # Intentar configuración automática
   if [[ -f "$BIN_DIR/nerd-setup.sh" ]]; then
     if "$BIN_DIR/nerd-setup.sh" "$terminal" >/dev/null 2>&1; then
-      success "Terminal configurado automáticamente para usar FiraCode Nerd Font"
+      success "Terminal configurado automáticamente para usar '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
     else
       if [[ "$terminal" == "unknown" ]]; then
         log "Sistema headless detectado (SSH/consola)"
@@ -161,7 +161,7 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
     log "  nerd-setup.sh $terminal"
   fi
   else
-    log "FiraCode Nerd Font no detectada"
+    log "'${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}' no detectada"
     log "Para instalar las fuentes y configurar tu terminal:"
     log "  1. Ejecuta: nerd-setup.sh auto"
     log "  2. O instala las fuentes primero: cd ~/.linux-setup/install && ./02-packages.sh"
@@ -170,14 +170,14 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
   # Mensaje especial para WSL
   if [[ "${OS_TYPE:-}" == "wsl2" ]]; then
     echo
-    echo "==============================="
+    echo "==========================================="
     echo "IMPORTANTE PARA WSL:"
-    echo "==============================="
+    echo "==========================================="
     echo "1. Abre Windows Terminal"
     echo "2. Ve a Configuración (Ctrl+,)"
     echo "3. Busca tu perfil de WSL/Ubuntu"
     echo "4. Ve a Appearance"
-    echo "5. Cambia la fuente a 'FiraCode Nerd Font'"
-    echo "==============================="
+    echo "5. Cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
+    echo "==========================================="
     echo
   fi
