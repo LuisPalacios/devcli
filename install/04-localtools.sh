@@ -98,7 +98,7 @@ check_nerd_fonts_installed() {
 
 # Función para detectar terminal automáticamente
 detect_terminal() {
-  if [[ -n "$WSL_DISTRO_NAME" ]]; then
+  if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
     echo "wsl"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     if [[ -n "$TERM_PROGRAM" ]]; then
@@ -132,7 +132,7 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
   log "FiraCode Nerd Font detectada, configurando terminal automáticamente..."
 
   # Detectar terminal
-  local terminal=$(detect_terminal)
+  terminal=$(detect_terminal)
 
   # Intentar configuración automática
   if [[ -f "$BIN_DIR/nerd-setup.sh" ]]; then
