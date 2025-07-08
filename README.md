@@ -1,6 +1,6 @@
 # Linux Setup
 
-Configura el entorno CLI en sistemas basados en Unix, **Linux**, **macOS** y **WSL2**. Estaba ya cansado de perder un par de horas parametrizar, instalar herramientas, fuentes, scripts de ayuda. Lo he automatizado con un solo comando.
+Configura el entorno CLI en sistemas basados en Unix, **Linux**, **macOS** y **WSL2**. Estaba ya cansado de perder un par de horas en parametrizar, instalar herramientas, fuentes, scripts de ayuda. Lo he automatizado con un solo comando.
 
 ## 📋 Requisitos
 
