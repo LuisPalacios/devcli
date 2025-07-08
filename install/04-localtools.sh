@@ -206,3 +206,67 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
     echo "==========================================="
     echo
   fi
+
+  # Mensajes especiales para macOS
+  if [[ "${OS_TYPE:-}" == "macos" ]]; then
+    # Detectar terminal específico de macOS
+    local macos_terminal=$(detect_terminal)
+    
+    case "$macos_terminal" in
+      "macos-terminal")
+        echo
+        echo "==========================================="
+        echo "IMPORTANTE PARA macOS TERMINAL:"
+        echo "==========================================="
+        echo "1. Abre Terminal.app"
+        echo "2. Ve a Terminal > Preferences (⌘,)"
+        echo "3. Selecciona tu perfil actual"
+        echo "4. Ve a la pestaña 'Text'"
+        echo "5. Cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
+        echo "6. Ajusta el tamaño de fuente si es necesario"
+        echo "==========================================="
+        echo
+        ;;
+      "iterm")
+        echo
+        echo "==========================================="
+        echo "IMPORTANTE PARA iTerm2:"
+        echo "==========================================="
+        echo "1. Abre iTerm2"
+        echo "2. Ve a iTerm2 > Preferences (⌘,)"
+        echo "3. Selecciona tu perfil actual"
+        echo "4. Ve a la pestaña 'Text'"
+        echo "5. Cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
+        echo "6. Ajusta el tamaño de fuente si es necesario"
+        echo "7. Opcional: Activa 'Use ligatures' para mejor apariencia"
+        echo "==========================================="
+        echo
+        ;;
+      "vscode")
+        echo
+        echo "==========================================="
+        echo "IMPORTANTE PARA VSCode EN macOS:"
+        echo "==========================================="
+        echo "1. Abre VSCode"
+        echo "2. Ve a Code > Preferences > Settings (⌘,)"
+        echo "3. Busca 'terminal.integrated.fontFamily'"
+        echo "4. Cambia el valor a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
+        echo "5. Opcional: Añade 'terminal.integrated.fontLigatures': true"
+        echo "==========================================="
+        echo
+        ;;
+      *)
+        echo
+        echo "==========================================="
+        echo "IMPORTANTE PARA macOS:"
+        echo "==========================================="
+        echo "Para usar '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}' en tu terminal:"
+        echo "1. Abre tu aplicación de terminal"
+        echo "2. Busca la configuración de fuentes"
+        echo "3. Cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
+        echo "4. Reinicia tu terminal"
+        echo "==========================================="
+        echo
+        ;;
+    esac
+  fi
