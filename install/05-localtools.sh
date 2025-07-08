@@ -19,6 +19,9 @@ FILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../files" && pwd)"
 # Asegurar que existe el directorio de binarios
 ensure_directory "$BIN_DIR"
 
+# Archivo de configuración
+LOCAL_TOOLS_CONFIG="$(dirname "${BASH_SOURCE[0]}")/05-localtools.json"
+
 # Contador de herramientas instaladas
 TOOLS_INSTALLED=0
 
@@ -42,23 +45,25 @@ update_nerd_font_variables() {
 
 # Copiar herramientas al directorio de los binarios
 log "Instalando herramientas locales..."
-for tool in e confcat s nerd-setup.sh nerd-verify.sh; do
-  src="$FILES_DIR/bin/$tool"
-  dst="$BIN_DIR/$tool"
+while IFS= read -r tool; do
+  if [[ -n "$tool" ]]; then
+    src="$FILES_DIR/bin/$tool"
+    dst="$BIN_DIR/$tool"
 
-  if [[ -f "$src" ]]; then
-    cp -f "$src" "$dst" >/dev/null 2>&1
-    chmod 755 "$dst" >/dev/null 2>&1
-    
-    # Actualizar variables de Nerd Fonts en scripts específicos
-    if [[ "$tool" == "nerd-setup.sh" ]] || [[ "$tool" == "nerd-verify.sh" ]]; then
-      update_nerd_font_variables "$dst"
-      log "Variables de Nerd Fonts actualizadas en $tool"
+    if [[ -f "$src" ]]; then
+      cp -f "$src" "$dst" >/dev/null 2>&1
+      chmod 755 "$dst" >/dev/null 2>&1
+
+      # Actualizar variables de Nerd Fonts en scripts específicos
+      if [[ "$tool" == "nerd-setup.sh" ]] || [[ "$tool" == "nerd-verify.sh" ]]; then
+        update_nerd_font_variables "$dst"
+        log "Variables de Nerd Fonts actualizadas en $tool"
+      fi
+
+      TOOLS_INSTALLED=$((TOOLS_INSTALLED + 1))
     fi
-    
-    TOOLS_INSTALLED=$((TOOLS_INSTALLED + 1))
   fi
-done
+done < <(read_json_array "$LOCAL_TOOLS_CONFIG" "tools")
 
 # Configuración y directorios dependientes del sistema operativo
 case "${OS_TYPE:-}" in
@@ -194,7 +199,7 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
 
   # Mensaje especial
   msg_shown=false
-  
+
   # Mensaje especial para WSL
   if [[ "${OS_TYPE:-}" == "wsl2" ]]; then
     echo
