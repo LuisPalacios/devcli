@@ -68,7 +68,17 @@ Aplica dotfiles personalizados al entorno del usuario:
 - Si ya existen, los sobrescribe mostrando una advertencia.
 - En Linux y WSL2, cambia la shell por defecto a `zsh` si no lo es ya. En macOS no realiza el cambio, ya que `zsh` es por defecto desde Catalina.
 
-#### `04-localtools.sh`
+#### `04-gitfiles.sh`
+
+Clona repositorios Git temporales y copia archivos específicos:
+
+- Lee configuración desde `install/04-gitfiles.json`.
+- Clona temporalmente repositorios especificados en el JSON.
+- Copia archivos específicos desde los repositorios a `~/bin`.
+- Aplica permisos 755 automáticamente (excepto archivos `.ps1`).
+- Limpia automáticamente los directorios temporales después de la copia.
+
+#### `05-localtools.sh`
 
 Instala herramientas locales y configuración adicional:
 
@@ -115,11 +125,38 @@ dpkg -s git >/dev/null 2>&1 && echo "git instalado" || echo "git no instalado"
 │   ├── 01-system.sh
 │   ├── 02-packages.sh
 │   ├── 03-dotfiles.sh
-│   └── 04-localtools.sh
+│   ├── 04-gitfiles.sh
+│   └── 05-localtools.sh
 └── README.md
 ```
 
 ## 🔧 Herramientas Instaladas
+
+### Configuración de Gitfiles
+
+El proyecto incluye un sistema modular para clonar repositorios Git temporales y copiar archivos específicos. La configuración se define en `install/04-gitfiles.json`. Este es un ejemplo:
+
+```json
+{
+  "repositories": [
+    {
+      "url": "https://github.com/LuisPalacios/git-config-repos",
+      "files": [
+        "./git-config-repos.sh",
+        "./git-status-pull.ps1",
+        "./git-status-pull.sh"
+      ]
+    }
+  ]
+}
+```
+
+**Características:**
+
+- **Clonación temporal**: Los repositorios se clonan en `/tmp` y se limpian automáticamente
+- **Permisos automáticos**: Archivos `.sh` y otros ejecutables reciben permisos 755, `.ps1` mantiene permisos originales
+- **Idempotente**: Se puede ejecutar múltiples veces
+- **Manejo de errores**: Continúa con otros repositorios si uno falla
 
 ### Herramientas del Sistema
 

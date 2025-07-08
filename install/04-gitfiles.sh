@@ -17,7 +17,7 @@ log() {
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Archivo de configuración
-GITFILES_CONFIG="$REPO_DIR/gitfiles.json"
+GITFILES_CONFIG="$REPO_DIR/install/04-gitfiles.json"
 
 # Asegurar que existe el directorio de binarios
 ensure_directory "$BIN_DIR"
