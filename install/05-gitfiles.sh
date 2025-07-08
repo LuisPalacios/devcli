@@ -153,6 +153,7 @@ process_repository() {
   local repo_files_copied=0
 
   # Procesar cada archivo
+  log "Archivos a procesar: $files_array"
   while IFS= read -r file_path; do
     # Limpiar path (remover ./ si existe)
     local clean_path="${file_path#./}"
@@ -160,7 +161,11 @@ process_repository() {
     local filename=$(basename "$clean_path")
     local dst_file="$BIN_DIR/$filename"
 
-    log "Intentando copiar: $src_file -> $dst_file"
+    log "Procesando archivo: $file_path"
+    log "Path limpio: $clean_path"
+    log "Archivo fuente: $src_file"
+    log "Archivo destino: $dst_file"
+    log "¿Existe archivo fuente? $(test -f "$src_file" && echo "SÍ" || echo "NO")"
 
     if copy_file_with_permissions "$src_file" "$dst_file"; then
       repo_files_copied=$((repo_files_copied + 1))
