@@ -31,6 +31,7 @@ Ejecuta este comando. Para cambiar el idioma mira Personalización de Idioma, m�
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
 ```
 
+- Puedes especificar el locale, por ejemplo: `bash <(curl -fsSL .../bootstrap.sh) -l en_US.UTF-8`
 - Clona el repositorio en `~/.linux-setup`
 - Detecta el sistema operativo (Linux, macOS, WSL2)
 - Ejecuta automáticamente todos los scripts bajo `install/`
@@ -85,64 +86,11 @@ Instala herramientas locales y configuración adicional:
 - Aplica configuración de `nano` desde `files/etc/nanorc` a `/etc/nanorc` (solo Linux y WSL2).
 - Crea directorios `.nano` en `$HOME` y `/root` si no existen (también limitado a Linux/WSL2).
 
-## 🧠 Principios del diseño idempotente
-
-Los scripts están diseñados para ejecutarse múltiples veces sin provocar errores ni duplicar trabajo. Muy útil para actualizarse a la última versión, simplemente ejecuta el bootstrap de nuevo.
-
-- **Paquetes del sistema**: Solo se instalan si no están presentes
-- **lsd**: Verifica si ya está instalado antes de descargar desde GitHub
-- **Nerd Fonts**: Verifica si las fuentes ya están instaladas antes de descargar
-- **Dotfiles**: Se sobreescriben con advertencia y backup automático
-- **Logging mejorado**: Informa claramente cada paso con logs semánticos
-- **Configuración segura**: Soporta ejecuciones múltiples sin intervención
-
-Una vez que termina de ejecutarse, algunas verificaciones que puedes hacer
-
-```bash
-# Verificar herramientas instaladas
-command -v lsd && echo "lsd está instalado" || echo "lsd no está instalado"
-
-# Verificar fuentes instaladas
-fc-list | grep "FiraCode Nerd Font" && echo "Fuentes instaladas" || echo "Fuentes no instaladas"
-
-# Verificar paquetes del sistema
-dpkg -s git >/dev/null 2>&1 && echo "git instalado" || echo "git no instalado"
-```
-
-## 🗂 Estructura del repositorio
-
-```sh
-.
-├── bootstrap.sh           # Script principal de instalación remota
-├── dotfiles/              # Dotfiles como .zshrc y configuración de oh-my-posh
-├── files/                 # Herramientas personalizadas y config de nano
-│   ├── bin/               # Ejecutables locales: e, s, confcat
-│   └── etc/               # Configuración de /etc/nanorc
-├── install/               # Scripts de instalación por fases
-│   ├── env.sh             # Variables de entorno compartidas
-│   ├── utils.sh           # Utilidades compartidas
-│   ├── 01-system.sh
-│   ├── 02-packages.sh
-│   ├── 02-packages.json   # Configuración de paquetes
-│   ├── 03-dotfiles.sh
-│   ├── 04-gitfiles.sh
-│   ├── 04-gitfiles.json   # Configuración de repositorios Git
-│   ├── 05-localtools.sh
-│   └── 05-localtools.json # Configuración de herramientas locales
-└── README.md
-```
-
 ## 🎨 Nerd Fonts y lsd
 
 ### Instalación Automática
 
-El proyecto instala automáticamente **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`:
-
-- **Fuente**: FiraCode Nerd Font v3.1.1
-- **Ubicación**: `~/.local/share/fonts/`
-- **Configuración**: Automática durante la instalación
-
-Después de la instalación, puede que necesites configurar tu terminal para usar la fuente:
+El proyecto instala automáticamente **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`. Después de la instalación, puede que necesites configurar tu terminal para usar la fuente:
 
 ```bash
 # Configuración automática (detecta tu terminal)
@@ -158,15 +106,6 @@ fc-list | grep "FiraCode Nerd Font"
 
 # Verificar que lsd funciona con iconos
 lsd --version
-```
-
-## 🌍 Personalización de Idioma
-
-El proyecto soporta múltiples idiomas mediante el argumento `-l` o `--lang`:
-
-```bash
-# Ejemplos de uso
-bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh) -l en_US.UTF-8
 ```
 
 ## ✅ Resultados de pruebas
