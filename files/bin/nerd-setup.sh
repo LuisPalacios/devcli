@@ -1,8 +1,12 @@
 #!/bin/bash
 # Script para configurar terminal con Nerd Fonts
-# Uso: linux-setup-terminal.sh [terminal]
+# Uso: nerd-setup.sh [terminal]
 
 set -e
+
+# Configuración de Nerd Fonts
+export NERD_FONT_NAME="FiraCode"
+export NERD_FONT_FULL_NAME="FiraCode Nerd Font"
 
 # Colores
 RED='\033[0;31m'
@@ -21,7 +25,7 @@ show_help() {
     cat << EOF
 Uso: linux-setup-terminal.sh [TERMINAL]
 
-Configura tu terminal para usar FiraCode Nerd Font.
+Configura tu terminal para usar ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}.
 
 Terminales soportados:
   gnome-terminal    Terminal de GNOME
@@ -83,7 +87,7 @@ configure_gnome_terminal() {
     profile=${profile:1:-1}  # Remover comillas
 
     # Configurar fuente
-    gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:${profile}/ font 'FiraCode Nerd Font 12'
+    gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:${profile}/ font '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} 12'
 
     echo -e "${GREEN}✓ GNOME Terminal configurado${NC}"
     echo -e "${YELLOW}Reinicia tu terminal para ver los cambios${NC}"
@@ -100,7 +104,7 @@ configure_konsole() {
     cat > "$config_dir/Profile1.profile" << EOF
 [Appearance]
 ColorScheme=Breeze
-Font=FiraCode Nerd Font,12,-1,5,50,0,0,0,0,0
+Font=${NERD_FONT_FULL_NAME:-FiraCode Nerd Font},12,-1,5,50,0,0,0,0,0
 
 [General]
 Name=Profile 1
@@ -116,7 +120,7 @@ configure_xfce4_terminal() {
     echo -e "${BLUE}Configurando XFCE4 Terminal...${NC}"
 
     # Configurar fuente
-    xfconf-query -c xfce4-terminal -p /profiles/Default/font -s "FiraCode Nerd Font 12" 2>/dev/null || true
+    xfconf-query -c xfce4-terminal -p /profiles/Default/font -s "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} 12" 2>/dev/null || true
 
     echo -e "${GREEN}✓ XFCE4 Terminal configurado${NC}"
     echo -e "${YELLOW}Reinicia tu terminal para ver los cambios${NC}"
@@ -144,7 +148,7 @@ configure_terminator() {
     background_type = solid
     cursor_color = "#aaaaaa"
     cursor_shape = block
-    font = FiraCode Nerd Font 12
+    font = ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} 12
     foreground_color = "#ffffff"
     palette = "#2e2e2e:#ff0000:#00ff00:#ffff00:#0000ff:#ff00ff:#00ffff:#ffffff:#2e2e2e:#ff0000:#00ff00:#ffff00:#0000ff:#ff00ff:#00ffff:#ffffff"
     use_system_font = False
@@ -185,13 +189,13 @@ configure_alacritty() {
     cat > "$config_dir/alacritty.yml" << EOF
 font:
   normal:
-    family: FiraCode Nerd Font
+    family: ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}
     style: Regular
   bold:
-    family: FiraCode Nerd Font
+    family: ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}
     style: Bold
   italic:
-    family: FiraCode Nerd Font
+    family: ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}
     style: Italic
   size: 12.0
 
@@ -232,7 +236,7 @@ configure_kitty() {
     mkdir -p "$config_dir"
 
     cat > "$config_dir/kitty.conf" << EOF
-font_family FiraCode Nerd Font
+font_family ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}
 font_size 12.0
 
 background #2e2e2e
@@ -271,12 +275,12 @@ configure_vscode() {
     # Crear o actualizar settings.json
     if [[ -f "$settings_dir/settings.json" ]]; then
         # Actualizar configuración existente
-        jq '.terminal.integrated.fontFamily = "FiraCode Nerd Font"' "$settings_dir/settings.json" > "$settings_dir/settings.json.tmp" && mv "$settings_dir/settings.json.tmp" "$settings_dir/settings.json"
+        jq '.terminal.integrated.fontFamily = "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}"' "$settings_dir/settings.json" > "$settings_dir/settings.json.tmp" && mv "$settings_dir/settings.json.tmp" "$settings_dir/settings.json"
     else
         # Crear nuevo archivo
         cat > "$settings_dir/settings.json" << EOF
 {
-    "terminal.integrated.fontFamily": "FiraCode Nerd Font"
+    "terminal.integrated.fontFamily": "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}"
 }
 EOF
     fi
@@ -293,7 +297,7 @@ configure_macos_terminal() {
     echo -e "${BLUE}1. Abre Terminal.app${NC}"
     echo -e "2. Ve a Terminal > Preferencias > Perfiles"
     echo -e "3. Selecciona un perfil y haz clic en 'Editar'"
-    echo -e "4. En la pestaña 'Texto', cambia la fuente a 'FiraCode Nerd Font'"
+    echo -e "4. En la pestaña 'Texto', cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
     echo -e "5. Aplica los cambios"
     echo -e ""
     echo -e "${BLUE}O usa este comando para configurar automáticamente:${NC}"
@@ -310,7 +314,7 @@ configure_iterm() {
     echo -e "${BLUE}1. Abre iTerm2${NC}"
     echo -e "2. Ve a iTerm2 > Preferencias > Perfiles"
     echo -e "3. Selecciona un perfil y ve a la pestaña 'Texto'"
-    echo -e "4. Cambia la fuente a 'FiraCode Nerd Font'"
+    echo -e "4. Cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
     echo -e "5. Aplica los cambios"
     echo -e ""
     echo -e "${BLUE}O usa este comando para configurar automáticamente:${NC}"
@@ -326,7 +330,7 @@ configure_wsl() {
     # Intentar configurar Windows Terminal automáticamente
     if command_exists powershell.exe; then
         echo -e "${BLUE}Intentando configurar Windows Terminal automáticamente...${NC}"
-        
+
         # Crear script PowerShell para configurar Windows Terminal
         local ps_script="/tmp/configure-wt.ps1"
         cat > "$ps_script" << 'EOF'
@@ -335,7 +339,7 @@ $settingsPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8b
 
 if (Test-Path $settingsPath) {
     $settings = Get-Content $settingsPath | ConvertFrom-Json
-    
+
     # Buscar el perfil de WSL/Ubuntu
     foreach ($profile in $settings.profiles.list) {
         if ($profile.source -eq "Windows.Terminal.Wsl" -or $profile.name -like "*Ubuntu*" -or $profile.name -like "*WSL*") {
@@ -346,7 +350,7 @@ if (Test-Path $settingsPath) {
             Write-Host "Configurando perfil: $($profile.name)"
         }
     }
-    
+
     # Guardar configuración
     $settings | ConvertTo-Json -Depth 10 | Set-Content $settingsPath
     Write-Host "Windows Terminal configurado exitosamente"
@@ -362,7 +366,7 @@ EOF
         else
             echo -e "${YELLOW}⚠ Configuración automática falló, usando método manual${NC}"
         fi
-        
+
         # Limpiar script temporal
         rm -f "$ps_script"
     fi
@@ -372,7 +376,7 @@ EOF
     echo -e "   - Abre Windows Terminal"
     echo -e "   - Ve a Configuración (Ctrl+,)"
     echo -e "   - Busca tu perfil de WSL/Ubuntu"
-    echo -e "   - En Apariencia, cambia la fuente a 'FiraCode Nerd Font'"
+    echo -e "   - En Apariencia, cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
     echo -e ""
     echo -e "${BLUE}2. Alternativas:${NC}"
     echo -e "   - Usa VSCode con terminal integrado"
@@ -384,14 +388,14 @@ EOF
 # Función para verificar si las fuentes están instaladas
 check_fonts() {
     local fonts_installed=false
-    
+
     # Método 1: Verificar con fc-list (Linux/WSL2)
     if command_exists fc-list; then
         if fc-list | grep -q "FiraCode Nerd Font" 2>/dev/null; then
             fonts_installed=true
         fi
     fi
-    
+
     # Método 2: Verificar directorio estándar
     if [[ "$fonts_installed" == "false" ]]; then
         local font_dir="$HOME/.local/share/fonts"
@@ -399,7 +403,7 @@ check_fonts() {
             fonts_installed=true
         fi
     fi
-    
+
     # Método 3: Verificar directorio alternativo
     if [[ "$fonts_installed" == "false" ]]; then
         local fonts_dir="$HOME/.fonts"
@@ -407,7 +411,7 @@ check_fonts() {
             fonts_installed=true
         fi
     fi
-    
+
     # Método 4: Verificar fuentes del sistema (macOS)
     if [[ "$fonts_installed" == "false" ]] && [[ "$OSTYPE" == "darwin"* ]]; then
         if command_exists system_profiler; then
@@ -416,13 +420,13 @@ check_fonts() {
             fi
         fi
     fi
-    
+
     if [[ "$fonts_installed" == "false" ]]; then
-        echo -e "${RED}Error: FiraCode Nerd Font no está instalada${NC}"
+        echo -e "${RED}Error: ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} no está instalada${NC}"
         echo -e "${YELLOW}Ejecuta el script de instalación primero${NC}"
         exit 1
     fi
-    
+
     echo -e "${GREEN}✓ FiraCode Nerd Font detectada${NC}"
 }
 

@@ -1,8 +1,12 @@
 #!/bin/bash
 # Script completo de verificación de Nerd Fonts
-# Uso: ./verify_nerd_fonts.sh
+# Uso: ./nerd-verify.sh
 
 set -e
+
+# Configuración de Nerd Fonts
+export NERD_FONT_NAME="FiraCode"
+export NERD_FONT_FULL_NAME="FiraCode Nerd Font"
 
 # Colores
 RED='\033[0;31m'
@@ -73,12 +77,12 @@ check_fonts_comprehensive() {
   # Método 1: fc-list (Linux/WSL2)
   if command_exists fc-list; then
     echo -e "${BLUE}Verificando con fc-list...${NC}"
-    if fc-list | grep -q "FiraCode Nerd Font" 2>/dev/null; then
-      echo -e "${GREEN}✓ FiraCode Nerd Font detectada con fc-list${NC}"
+    if fc-list | grep -q "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" 2>/dev/null; then
+      echo -e "${GREEN}✓ ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} detectada con fc-list${NC}"
       fonts_installed=true
       detection_methods+=("fc-list")
     else
-      echo -e "${RED}✗ FiraCode Nerd Font NO detectada con fc-list${NC}"
+      echo -e "${RED}✗ ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} NO detectada con fc-list${NC}"
     fi
   else
     echo -e "${YELLOW}⚠ fc-list no disponible${NC}"
@@ -88,12 +92,12 @@ check_fonts_comprehensive() {
   local font_dir="$HOME/.local/share/fonts"
   echo -e "${BLUE}Verificando directorio estándar: $font_dir${NC}"
   if [[ -d "$font_dir" ]]; then
-    if find "$font_dir" -name "*FiraCode*" -type f | grep -q "FiraCode" 2>/dev/null; then
-      echo -e "${GREEN}✓ FiraCode Nerd Font detectada en directorio estándar${NC}"
+    if find "$font_dir" -name "*${NERD_FONT_NAME:-FiraCode}*" -type f | grep -q "${NERD_FONT_NAME:-FiraCode}" 2>/dev/null; then
+      echo -e "${GREEN}✓ ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} detectada en directorio estándar${NC}"
       fonts_installed=true
       detection_methods+=("directorio estándar")
     else
-      echo -e "${RED}✗ FiraCode Nerd Font NO detectada en directorio estándar${NC}"
+      echo -e "${RED}✗ ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} NO detectada en directorio estándar${NC}"
     fi
   else
     echo -e "${YELLOW}⚠ Directorio estándar no existe: $font_dir${NC}"
@@ -103,12 +107,12 @@ check_fonts_comprehensive() {
   local fonts_dir="$HOME/.fonts"
   echo -e "${BLUE}Verificando directorio alternativo: $fonts_dir${NC}"
   if [[ -d "$fonts_dir" ]]; then
-    if find "$fonts_dir" -name "*FiraCode*" -type f | grep -q "FiraCode" 2>/dev/null; then
-      echo -e "${GREEN}✓ FiraCode Nerd Font detectada en directorio alternativo${NC}"
+    if find "$fonts_dir" -name "*${NERD_FONT_NAME:-FiraCode}*" -type f | grep -q "${NERD_FONT_NAME:-FiraCode}" 2>/dev/null; then
+      echo -e "${GREEN}✓ ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} detectada en directorio alternativo${NC}"
       fonts_installed=true
       detection_methods+=("directorio alternativo")
     else
-      echo -e "${RED}✗ FiraCode Nerd Font NO detectada en directorio alternativo${NC}"
+      echo -e "${RED}✗ ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} NO detectada en directorio alternativo${NC}"
     fi
   else
     echo -e "${YELLOW}⚠ Directorio alternativo no existe: $fonts_dir${NC}"
@@ -118,12 +122,12 @@ check_fonts_comprehensive() {
   if [[ "$OSTYPE" == "darwin"* ]]; then
     echo -e "${BLUE}Verificando fuentes del sistema en macOS...${NC}"
     if command_exists system_profiler; then
-      if system_profiler SPFontsDataType | grep -q "FiraCode" 2>/dev/null; then
-        echo -e "${GREEN}✓ FiraCode Nerd Font detectada en sistema macOS${NC}"
+      if system_profiler SPFontsDataType | grep -q "${NERD_FONT_NAME:-FiraCode}" 2>/dev/null; then
+        echo -e "${GREEN}✓ ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} detectada en sistema macOS${NC}"
         fonts_installed=true
         detection_methods+=("sistema macOS")
       else
-        echo -e "${RED}✗ FiraCode Nerd Font NO detectada en sistema macOS${NC}"
+        echo -e "${RED}✗ ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font} NO detectada en sistema macOS${NC}"
       fi
     else
       echo -e "${YELLOW}⚠ system_profiler no disponible${NC}"
@@ -157,11 +161,11 @@ check_terminal_configuration() {
         if [[ -n "$profile" ]]; then
           profile=${profile:1:-1}
           local font=$(gsettings get org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:${profile}/ font 2>/dev/null)
-          if [[ "$font" == *"FiraCode"* ]]; then
-            echo -e "${GREEN}✓ GNOME Terminal configurado con FiraCode${NC}"
+          if [[ "$font" == *"${NERD_FONT_NAME:-FiraCode}"* ]]; then
+            echo -e "${GREEN}✓ GNOME Terminal configurado con ${NERD_FONT_NAME:-FiraCode}${NC}"
             terminal_configured=true
           else
-            echo -e "${YELLOW}⚠ GNOME Terminal NO configurado con FiraCode (actual: $font)${NC}"
+            echo -e "${YELLOW}⚠ GNOME Terminal NO configurado con ${NERD_FONT_NAME:-FiraCode} (actual: $font)${NC}"
           fi
         fi
       fi
@@ -169,11 +173,11 @@ check_terminal_configuration() {
     "vscode")
       local settings_file="$HOME/.config/Code/User/settings.json"
       if [[ -f "$settings_file" ]]; then
-        if grep -q "FiraCode Nerd Font" "$settings_file" 2>/dev/null; then
-          echo -e "${GREEN}✓ VSCode configurado con FiraCode${NC}"
+        if grep -q "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" "$settings_file" 2>/dev/null; then
+          echo -e "${GREEN}✓ VSCode configurado con ${NERD_FONT_NAME:-FiraCode}${NC}"
           terminal_configured=true
         else
-          echo -e "${YELLOW}⚠ VSCode NO configurado con FiraCode${NC}"
+          echo -e "${YELLOW}⚠ VSCode NO configurado con ${NERD_FONT_NAME:-FiraCode}${NC}"
         fi
       else
         echo -e "${YELLOW}⚠ Archivo de configuración de VSCode no encontrado${NC}"
@@ -182,11 +186,11 @@ check_terminal_configuration() {
     "alacritty")
       local config_file="$HOME/.config/alacritty/alacritty.yml"
       if [[ -f "$config_file" ]]; then
-        if grep -q "FiraCode Nerd Font" "$config_file" 2>/dev/null; then
-          echo -e "${GREEN}✓ Alacritty configurado con FiraCode${NC}"
+        if grep -q "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" "$config_file" 2>/dev/null; then
+          echo -e "${GREEN}✓ Alacritty configurado con ${NERD_FONT_NAME:-FiraCode}${NC}"
           terminal_configured=true
         else
-          echo -e "${YELLOW}⚠ Alacritty NO configurado con FiraCode${NC}"
+          echo -e "${YELLOW}⚠ Alacritty NO configurado con ${NERD_FONT_NAME:-FiraCode}${NC}"
         fi
       else
         echo -e "${YELLOW}⚠ Archivo de configuración de Alacritty no encontrado${NC}"
@@ -195,11 +199,11 @@ check_terminal_configuration() {
     "kitty")
       local config_file="$HOME/.config/kitty/kitty.conf"
       if [[ -f "$config_file" ]]; then
-        if grep -q "FiraCode Nerd Font" "$config_file" 2>/dev/null; then
-          echo -e "${GREEN}✓ Kitty configurado con FiraCode${NC}"
+        if grep -q "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" "$config_file" 2>/dev/null; then
+          echo -e "${GREEN}✓ Kitty configurado con ${NERD_FONT_NAME:-FiraCode}${NC}"
           terminal_configured=true
         else
-          echo -e "${YELLOW}⚠ Kitty NO configurado con FiraCode${NC}"
+          echo -e "${YELLOW}⚠ Kitty NO configurado con ${NERD_FONT_NAME:-FiraCode}${NC}"
         fi
       else
         echo -e "${YELLOW}⚠ Archivo de configuración de Kitty no encontrado${NC}"
@@ -211,7 +215,7 @@ check_terminal_configuration() {
       echo -e "1. Abre Windows Terminal"
       echo -e "2. Ve a Configuración (Ctrl+,)"
       echo -e "3. Busca tu perfil de WSL/Ubuntu"
-      echo -e "4. Cambia la fuente a 'FiraCode Nerd Font'"
+      echo -e "4. Cambia la fuente a '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
       ;;
     "unknown")
       echo -e "${YELLOW}⚠ Sistema headless detectado (SSH/consola)${NC}"
@@ -249,8 +253,8 @@ show_available_fonts() {
   echo -e "${BLUE}=== Fuentes Disponibles ===${NC}"
 
   if command_exists fc-list; then
-    echo "Fuentes con 'FiraCode' en el nombre:"
-    fc-list | grep -i "firacode" | head -5
+    echo "Fuentes con '${NERD_FONT_NAME:-FiraCode}' en el nombre:"
+    fc-list | grep -i "${NERD_FONT_NAME:-FiraCode}" | head -5
     echo
 
     echo "Fuentes con 'Nerd' en el nombre:"
@@ -276,7 +280,7 @@ show_font_directories() {
   for dir in "${dirs[@]}"; do
     if [[ -d "$dir" ]]; then
       echo "✓ $dir"
-      local firacode_files=$(find "$dir" -name "*FiraCode*" -type f 2>/dev/null | head -3)
+      local firacode_files=$(find "$dir" -name "*${NERD_FONT_NAME:-FiraCode}*" -type f 2>/dev/null | head -3)
       if [[ -n "$firacode_files" ]]; then
         echo "$firacode_files" | while read -r file; do
           echo "  └─ $(basename "$file")"
