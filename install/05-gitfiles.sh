@@ -85,8 +85,6 @@ clone_repo_temp() {
   local repo_url="$1"
   local temp_dir="$2"
 
-  log "Clonando repositorio: $repo_url"
-
   # Clonar repositorio directamente en el directorio temporal
   if ! git clone --depth 1 --quiet "$repo_url" "$temp_dir" >/dev/null 2>&1; then
     error "No se pudo clonar repositorio: $repo_url"
@@ -202,8 +200,6 @@ main() {
     return 0
   fi
 
-  log "Procesando $repo_count repositorio(s)..."
-
   # Procesar cada repositorio
   local repo_index=0
   while [[ $repo_index -lt $repo_count ]]; do
@@ -213,9 +209,7 @@ main() {
     repo_url=$(jq -r ".repositories[$repo_index].url" "$GITFILES_CONFIG")
     files_array=$(jq -c ".repositories[$repo_index].files" "$GITFILES_CONFIG")
 
-    if process_repository "$repo_url" "$files_array"; then
-      log "Repositorio procesado exitosamente: $repo_url"
-    else
+    if ! process_repository "$repo_url" "$files_array"; then
       warning "Error procesando repositorio: $repo_url"
     fi
 
