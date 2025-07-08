@@ -23,7 +23,7 @@ command_exists() {
 # Función para mostrar ayuda
 show_help() {
     cat << EOF
-Uso: linux-setup-terminal.sh [TERMINAL]
+Uso: nerd-setup.sh [TERMINAL]
 
 Configura tu terminal para usar ${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}.
 
@@ -41,8 +41,8 @@ Terminales soportados:
   auto             Detectar automáticamente
 
 Ejemplos:
-  linux-setup-terminal.sh gnome-terminal
-  linux-setup-terminal.sh auto
+  nerd-setup.sh gnome-terminal
+  nerd-setup.sh auto
 EOF
 }
 
