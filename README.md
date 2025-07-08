@@ -174,7 +174,7 @@ dpkg -s git >/dev/null 2>&1 && echo "git instalado" || echo "git no instalado"
 - `confcat` - Cat sin comentarios
 - `s` - Acceso rápido a sudo
 - `nerd-setup.sh` - Configuración automática de terminal con Nerd Fonts
-- `nerd-verif.sh` - Verificación completa de Nerd Fonts
+- `nerd-verify.sh` - Verificación completa de Nerd Fonts
 
 ## 🎨 Nerd Fonts y lsd
 
@@ -224,7 +224,7 @@ nerd-setup.sh wsl
 
 ```bash
 # Verificación completa de Nerd Fonts
-nerd-verif.sh
+nerd-verify.sh
 
 # Verificar que las fuentes están instaladas
 fc-list | grep "FiraCode Nerd Font"

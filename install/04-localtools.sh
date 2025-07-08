@@ -24,7 +24,7 @@ TOOLS_INSTALLED=0
 
 # Copiar herramientas al directorio de los binarios
 log "Instalando herramientas locales..."
-for tool in e confcat s nerd-setup.sh nerd-verif.sh; do
+for tool in e confcat s nerd-setup.sh nerd-verify.sh; do
   src="$FILES_DIR/bin/$tool"
   dst="$BIN_DIR/$tool"
 
