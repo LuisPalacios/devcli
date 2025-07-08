@@ -1,0 +1,13 @@
+{
+  "packages": [
+    "htop",
+    "tmux", 
+    "fzf",
+    "bat",
+    "fd-find",
+    "ripgrep",
+    "tree",
+    "jq",
+    "lsd"
+  ]
+} 

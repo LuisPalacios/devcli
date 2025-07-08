@@ -56,7 +56,8 @@ Configura la base mínima del sistema:
 
 Instala utilidades adicionales útiles para el trabajo diario:
 
-- Herramientas incluidas: `htop`, `tmux`, `fzf`, `bat`, `fd-find`, `ripgrep`, `tree`, `lsd`.
+- Lee configuración desde `install/02-packages.json`.
+- Herramientas incluidas: `htop`, `tmux`, `fzf`, `bat`, `fd-find`, `ripgrep`, `tree`, `jq`, `lsd`.
 - Usa el gestor de paquetes del sistema (`apt` o `brew`) y adapta los nombres según el sistema operativo.
 - Realiza verificación previa para evitar reinstalar si ya están presentes.
 
@@ -82,7 +83,8 @@ Clona repositorios Git temporales y copia archivos específicos:
 
 Instala herramientas locales y configuración adicional:
 
-- Copia utilidades personalizadas (`e`, `confcat`, `s`) desde `files/bin/` a `~/bin`.
+- Lee configuración desde `install/05-localtools.json`.
+- Copia utilidades personalizadas (`e`, `confcat`, `s`, `nerd-setup.sh`, `nerd-verify.sh`) desde `files/bin/` a `~/bin`.
 - Aplica configuración de `nano` desde `files/etc/nanorc` a `/etc/nanorc` (solo Linux y WSL2).
 - Crea directorios `.nano` en `$HOME` y `/root` si no existen (también limitado a Linux/WSL2).
 
@@ -124,9 +126,12 @@ dpkg -s git >/dev/null 2>&1 && echo "git instalado" || echo "git no instalado"
 │   ├── utils.sh           # Utilidades compartidas
 │   ├── 01-system.sh
 │   ├── 02-packages.sh
+│   ├── 02-packages.json   # Configuración de paquetes
 │   ├── 03-dotfiles.sh
 │   ├── 04-gitfiles.sh
-│   └── 05-localtools.sh
+│   ├── 04-gitfiles.json   # Configuración de repositorios Git
+│   ├── 05-localtools.sh
+│   └── 05-localtools.json # Configuración de herramientas locales
 └── README.md
 ```
 
@@ -236,7 +241,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/mai
 
 ### Tabla de Compatibilidad
 
-| Sistema | Detección | Fuentes | Configuración |
+| Sistema | Detección | Fuentes | Configuración<br>fuentes |
 |---------|-----------|---------|---------------|
 | **macOS (iTerm2)** | ✅ Correcta | ✅ Instaladas | ✅ Automática |
 | **Linux Headless** | ✅ SSH detectado | ✅ Instaladas | ⚠️ Manual requerida |

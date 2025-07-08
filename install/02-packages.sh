@@ -16,33 +16,31 @@ log() {
 # Verificar permisos sudo
 check_sudo_access
 
-# Define los paquetes comunes
-# Future: lsd, nerd fonts, etc.
-COMMON_PACKAGES=(
-  htop
-  tmux
-  fzf
-  bat
-  ripgrep
-  tree
-  jq
-  lsd
-)
+# Archivo de configuración
+PACKAGES_CONFIG="$(dirname "${BASH_SOURCE[0]}")/02-packages.json"
 
 # Actualizar repositorios
 log "Actualizando repositorios..."
 update_package_manager
 
-# Instalar paquetes comunes
+# Instalar paquetes desde JSON
 log "Instalando herramientas de productividad..."
-for pkg in "${COMMON_PACKAGES[@]}"; do
-  if ! install_package "$pkg"; then
-    warning "Falló la instalación de $pkg - continuando con el siguiente paquete"
+PACKAGES_INSTALLED=0
+PACKAGES_FAILED=0
+
+while IFS= read -r pkg; do
+  if [[ -n "$pkg" ]]; then
+    if install_package "$pkg"; then
+      PACKAGES_INSTALLED=$((PACKAGES_INSTALLED + 1))
+    else
+      warning "Falló la instalación de $pkg - continuando con el siguiente paquete"
+      PACKAGES_FAILED=$((PACKAGES_FAILED + 1))
+    fi
   fi
-done
+done < <(read_json_array "$PACKAGES_CONFIG" "packages")
 
 # Instalar Nerd Fonts si lsd está en la lista
-if [[ " ${COMMON_PACKAGES[*]} " =~ " lsd " ]]; then
+if read_json_array "$PACKAGES_CONFIG" "packages" | grep -q "lsd"; then
   install_nerd_fonts
 fi
 
@@ -62,5 +60,11 @@ case "${OS_TYPE:-}" in
 esac
 
 # Mostrar resumen final
-PACKAGES_COUNT=$(count_installed_packages "${COMMON_PACKAGES[@]}")
-success "Herramientas de productividad instaladas ($PACKAGES_COUNT paquetes verificados)"
+if [[ $PACKAGES_INSTALLED -gt 0 ]]; then
+  success "Herramientas de productividad instaladas ($PACKAGES_INSTALLED paquetes)"
+  if [[ $PACKAGES_FAILED -gt 0 ]]; then
+    warning "$PACKAGES_FAILED paquetes fallaron en la instalación"
+  fi
+else
+  log "No se instalaron nuevos paquetes"
+fi

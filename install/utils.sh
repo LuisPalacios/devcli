@@ -306,3 +306,30 @@ count_installed_packages() {
   done
   echo "$count"
 }
+
+# Función para leer array desde archivo JSON
+read_json_array() {
+  local json_file="$1"
+  local array_key="$2"
+  
+  # Verificar que jq está disponible
+  if ! command_exists jq; then
+    error "jq no está disponible"
+    return 1
+  fi
+  
+  # Verificar que el archivo existe
+  if [[ ! -f "$json_file" ]]; then
+    error "Archivo JSON no encontrado: $json_file"
+    return 1
+  fi
+  
+  # Verificar que el JSON es válido
+  if ! jq empty "$json_file" 2>/dev/null; then
+    error "Archivo JSON inválido: $json_file"
+    return 1
+  fi
+  
+  # Leer y retornar el array
+  jq -r ".$array_key[]" "$json_file" 2>/dev/null
+}

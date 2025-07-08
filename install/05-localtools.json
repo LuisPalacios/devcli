@@ -1,0 +1,9 @@
+{
+  "tools": [
+    "e",
+    "confcat", 
+    "s",
+    "nerd-setup.sh",
+    "nerd-verify.sh"
+  ]
+} 
