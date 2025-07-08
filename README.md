@@ -21,22 +21,16 @@ En WSL2, necesitas tenerlo configurado y funcionando. Yo siempre uso Ubuntu como
 
 ## ⚡ Ejecución
 
-> Revisa este documento y los scripts para sentirte seguro de que lo que hacen **no rompe nada de tu instalación**. Ten en cuenta que toca archivos MUY IMPORTANTES. Ejecútalo bajo tu responsabilidad y nunca lo hagas si no entiendes lo que hacen.
-
-### Instalación Básica
-
-Ejecuta este comando. Para cambiar el idioma mira Personalización de Idioma, más adelante.
+> IMPORTANTE: Lee este readme, se modifican archivos muy importantes, asegúrate de que **no rompe nada de tu instalación**. Ejecútalo bajo tu responsabilidad y nunca lo hagas si no entiendes lo que hace.
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
 ```
 
-- Puedes especificar el locale, por ejemplo: `bash <(curl -fsSL .../bootstrap.sh) -l en_US.UTF-8`
-- Clona el repositorio en `~/.linux-setup`
-- Detecta el sistema operativo (Linux, macOS, WSL2)
+- Por defecto usa locale Español (es_ES.UTF-8), pero lo puedes cambiar: `bash <(curl -fsSL .../bootstrap.sh) -l en_US.UTF-8`
+- Clona el repositorio en `~/.linux-setup`, detecta el sistema operativo (Linux, macOS, WSL2)
 - Ejecuta automáticamente todos los scripts bajo `install/`
 - Aplica los dotfiles y herramientas locales
-- Configura el idioma especificado (por defecto: español)
 
 ## 🚀 ¿Qué hace este proyecto?
 
