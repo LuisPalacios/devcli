@@ -42,7 +42,6 @@ done
 
 # Instalar Nerd Fonts si lsd está en la lista
 if [[ " ${COMMON_PACKAGES[*]} " =~ " lsd " ]]; then
-  log "Instalando fuentes para lsd..."
   install_nerd_fonts
 fi
 
