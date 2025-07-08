@@ -160,9 +160,24 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
     log "Para configurar tu terminal, ejecuta:"
     log "  nerd-setup.sh $terminal"
   fi
-else
-  log "FiraCode Nerd Font no detectada"
-  log "Para instalar las fuentes y configurar tu terminal:"
-  log "  1. Ejecuta: nerd-setup.sh auto"
-  log "  2. O instala las fuentes primero: cd ~/.linux-setup/install && ./02-packages.sh"
-fi
+  else
+    log "FiraCode Nerd Font no detectada"
+    log "Para instalar las fuentes y configurar tu terminal:"
+    log "  1. Ejecuta: nerd-setup.sh auto"
+    log "  2. O instala las fuentes primero: cd ~/.linux-setup/install && ./02-packages.sh"
+  fi
+
+  # Mensaje especial para WSL
+  if [[ "${OS_TYPE:-}" == "wsl2" ]]; then
+    echo
+    echo "==============================="
+    echo "IMPORTANTE PARA WSL:"
+    echo "==============================="
+    echo "1. Abre Windows Terminal"
+    echo "2. Ve a Configuración (Ctrl+,)"
+    echo "3. Busca tu perfil de WSL/Ubuntu"
+    echo "4. Ve a Appearance"
+    echo "5. Cambia la fuente a 'FiraCode Nerd Font'"
+    echo "==============================="
+    echo
+  fi
