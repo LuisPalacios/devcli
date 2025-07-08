@@ -1,10 +1,10 @@
 # Linux Setup
 
-Configura el entorno CLI en sistemas basados en Unix, **Linux**, **macOS** y **WSL2**. Estaba ya cansado de perder un par de horas en parametrizar, instalar herramientas, fuentes, scripts de ayuda. Lo he automatizado con un solo comando.
+Configura el entorno CLI en sistemas basados en Unix, **Linux**, **macOS** y **WSL2**. Estaba ya cansado de perder un par de horas consistemas nuevos, parametrizar, herramientas, fuentes, scripts de ayuda. Lo automatizo todo con un solo comando.
 
 ## 📋 Requisitos
 
-Tu usuario debe tener acceso a `sudo` sin contraseña para que la instalación sea completamente automática. Para configurar esto:
+Tu usuario debe tener acceso a `sudo` sin contraseña para que la instalación sea completamente automática.
 
 ```bash
 # Añadir tu usuario al grupo sudo (si no está ya)
