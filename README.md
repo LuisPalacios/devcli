@@ -60,7 +60,7 @@ Aplica dotfiles personalizados al entorno del usuario:
 
 - Copia `.zshrc` y `.luispa.omp.json` desde `dotfiles/` al `HOME`.
 - Si ya existen, los sobrescribe.
-- En Linux y WSL2, cambia la shell por defecto a `zsh` si no lo es ya. En macOS no realiza el cambio, ya que `zsh` es por defecto desde Catalina.
+- En Linux y WSL2, cambia la shell por defecto a `zsh`. En macOS no realiza el cambio, ya que `zsh` viene por defecto desde Catalina.
 
 #### `04-gitfiles.sh`
 
