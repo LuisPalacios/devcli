@@ -139,9 +139,21 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
     if "$BIN_DIR/nerd-setup.sh" "$terminal" >/dev/null 2>&1; then
       success "Terminal configurado automáticamente para usar FiraCode Nerd Font"
     else
-      warning "Configuración automática falló, pero las fuentes están instaladas"
-      log "Para configurar manualmente tu terminal, ejecuta:"
-      log "  nerd-setup.sh $terminal"
+      if [[ "$terminal" == "unknown" ]]; then
+        log "Sistema headless detectado (SSH/consola)"
+        log "Las fuentes están instaladas y disponibles para:"
+        log "  - Clientes SSH con soporte de fuentes"
+        log "  - Editores remotos (VSCode Remote, etc.)"
+        log "  - Terminales locales que se conecten a este servidor"
+        log ""
+        log "Para configurar un cliente SSH, ejecuta:"
+        log "  nerd-setup.sh vscode    # Para VSCode Remote"
+        log "  nerd-setup.sh auto      # Para detección automática"
+      else
+        warning "Configuración automática falló, pero las fuentes están instaladas"
+        log "Para configurar manualmente tu terminal, ejecuta:"
+        log "  nerd-setup.sh $terminal"
+      fi
     fi
   else
     warning "Script nerd-setup.sh no encontrado"

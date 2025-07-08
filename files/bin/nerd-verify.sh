@@ -66,10 +66,10 @@ detect_terminal() {
 # Función para verificar fuentes con múltiples métodos
 check_fonts_comprehensive() {
   echo -e "${BLUE}=== Verificación de Fuentes ===${NC}"
-  
+
   local fonts_installed=false
   local detection_methods=()
-  
+
   # Método 1: fc-list (Linux/WSL2)
   if command_exists fc-list; then
     echo -e "${BLUE}Verificando con fc-list...${NC}"
@@ -83,7 +83,7 @@ check_fonts_comprehensive() {
   else
     echo -e "${YELLOW}⚠ fc-list no disponible${NC}"
   fi
-  
+
   # Método 2: Directorio estándar
   local font_dir="$HOME/.local/share/fonts"
   echo -e "${BLUE}Verificando directorio estándar: $font_dir${NC}"
@@ -98,7 +98,7 @@ check_fonts_comprehensive() {
   else
     echo -e "${YELLOW}⚠ Directorio estándar no existe: $font_dir${NC}"
   fi
-  
+
   # Método 3: Directorio alternativo
   local fonts_dir="$HOME/.fonts"
   echo -e "${BLUE}Verificando directorio alternativo: $fonts_dir${NC}"
@@ -113,7 +113,7 @@ check_fonts_comprehensive() {
   else
     echo -e "${YELLOW}⚠ Directorio alternativo no existe: $fonts_dir${NC}"
   fi
-  
+
   # Método 4: Fuentes del sistema (macOS)
   if [[ "$OSTYPE" == "darwin"* ]]; then
     echo -e "${BLUE}Verificando fuentes del sistema en macOS...${NC}"
@@ -129,7 +129,7 @@ check_fonts_comprehensive() {
       echo -e "${YELLOW}⚠ system_profiler no disponible${NC}"
     fi
   fi
-  
+
   # Resumen de detección
   echo
   if [[ "$fonts_installed" == "true" ]]; then
@@ -147,9 +147,9 @@ check_terminal_configuration() {
   local terminal="$1"
   echo -e "${BLUE}=== Verificación de Configuración de Terminal ===${NC}"
   echo -e "${BLUE}Terminal detectado: $terminal${NC}"
-  
+
   local terminal_configured=false
-  
+
   case "$terminal" in
     "gnome-terminal")
       if command_exists gsettings; then
@@ -213,11 +213,22 @@ check_terminal_configuration() {
       echo -e "3. Busca tu perfil de WSL/Ubuntu"
       echo -e "4. Cambia la fuente a 'FiraCode Nerd Font'"
       ;;
+    "unknown")
+      echo -e "${YELLOW}⚠ Sistema headless detectado (SSH/consola)${NC}"
+      echo -e "${BLUE}Las fuentes están instaladas y disponibles para:${NC}"
+      echo -e "  - Clientes SSH con soporte de fuentes"
+      echo -e "  - Editores remotos (VSCode Remote, etc.)"
+      echo -e "  - Terminales locales que se conecten a este servidor"
+      echo -e ""
+      echo -e "${BLUE}Para configurar un cliente SSH:${NC}"
+      echo -e "  nerd-setup.sh vscode    # Para VSCode Remote"
+      echo -e "  nerd-setup.sh auto      # Para detección automática"
+      ;;
     *)
       echo -e "${YELLOW}⚠ Verificación de configuración no implementada para $terminal${NC}"
       ;;
   esac
-  
+
   return $([[ "$terminal_configured" == "true" ]] && echo 0 || echo 1)
 }
 
@@ -236,12 +247,12 @@ show_system_info() {
 # Función para mostrar fuentes disponibles
 show_available_fonts() {
   echo -e "${BLUE}=== Fuentes Disponibles ===${NC}"
-  
+
   if command_exists fc-list; then
     echo "Fuentes con 'FiraCode' en el nombre:"
     fc-list | grep -i "firacode" | head -5
     echo
-    
+
     echo "Fuentes con 'Nerd' en el nombre:"
     fc-list | grep -i "nerd" | head -5
     echo
@@ -251,7 +262,7 @@ show_available_fonts() {
 # Función para mostrar directorios de fuentes
 show_font_directories() {
   echo -e "${BLUE}=== Directorios de Fuentes ===${NC}"
-  
+
   local dirs=(
     "$HOME/.local/share/fonts"
     "$HOME/.fonts"
@@ -261,7 +272,7 @@ show_font_directories() {
     "/Library/Fonts"
     "$HOME/Library/Fonts"
   )
-  
+
   for dir in "${dirs[@]}"; do
     if [[ -d "$dir" ]]; then
       echo "✓ $dir"
@@ -281,10 +292,10 @@ show_font_directories() {
 # Función para mostrar recomendaciones
 show_recommendations() {
   echo -e "${BLUE}=== Recomendaciones ===${NC}"
-  
+
   local os=$(detect_os)
   local terminal=$(detect_terminal)
-  
+
   if [[ "$1" -eq 0 ]] && [[ "$2" -eq 0 ]]; then
     echo -e "${GREEN}✓ Todo está configurado correctamente${NC}"
     echo -e "${BLUE}Prueba lsd para ver los iconos:${NC}"
@@ -297,7 +308,7 @@ show_recommendations() {
       echo "cd ~/.linux-setup/install && ./02-packages.sh"
       echo
     fi
-    
+
     if [[ "$2" -ne 0 ]]; then
       echo -e "${RED}✗ Terminal no configurado${NC}"
       echo -e "${YELLOW}Para configurar el terminal:${NC}"
@@ -310,29 +321,29 @@ show_recommendations() {
 # Función principal
 main() {
   show_system_info
-  
+
   local os=$(detect_os)
   local terminal=$(detect_terminal)
-  
+
   # Verificar fuentes
   check_fonts_comprehensive
   fonts_status=$?
-  
+
   echo
-  
+
   # Verificar configuración de terminal
   check_terminal_configuration "$terminal"
   terminal_status=$?
-  
+
   echo
-  
+
   # Mostrar información adicional
   show_available_fonts
   show_font_directories
-  
+
   # Mostrar recomendaciones
   show_recommendations $fonts_status $terminal_status
-  
+
   # Resumen final
   echo -e "${BLUE}=== Resumen Final ===${NC}"
   if [[ "$fonts_status" -eq 0 ]]; then
@@ -340,14 +351,14 @@ main() {
   else
     echo -e "${RED}✗ Fuentes NO instaladas${NC}"
   fi
-  
+
   if [[ "$terminal_status" -eq 0 ]]; then
     echo -e "${GREEN}✓ Terminal configurado${NC}"
   else
     echo -e "${RED}✗ Terminal NO configurado${NC}"
   fi
-  
+
   echo
 }
 
-main "$@" 
+main "$@"
