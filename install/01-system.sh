@@ -19,7 +19,7 @@ check_sudo_access
 # Asegurar que existe el directorio de binarios
 ensure_directory "$BIN_DIR"
 
-# Paquetes base comunes
+# Paquetes esenciales obligatorios
 COMMON_PACKAGES=(git curl wget nano zsh)
 
 # Comprueba que git esté instalado o lo instala
@@ -42,7 +42,7 @@ done
 if ! command -v "$BIN_DIR/oh-my-posh" &>/dev/null; then
   log "Instalando oh-my-posh..."
   curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$BIN_DIR" >/dev/null 2>&1
-  
+
   # Validar que se instaló correctamente
   if ! command -v "$BIN_DIR/oh-my-posh" &>/dev/null; then
     error "oh-my-posh no se instaló correctamente"
