@@ -27,7 +27,7 @@ En WSL2, necesitas tenerlo configurado y funcionando. Yo siempre uso Ubuntu como
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
 ```
 
-- Por defecto usa locale Español (es_ES.UTF-8), pero lo puedes cambiar: `bash <(curl -fsSL .../bootstrap.sh) -l en_US.UTF-8`
+- Por defecto usa `es_ES.UTF-8`, puedes cambiarlo: `bash <(curl -fsSL .../bootstrap.sh) -l en_US.UTF-8`
 - Clona el repositorio en `~/.linux-setup`, detecta el sistema operativo (Linux, macOS, WSL2)
 - Ejecuta automáticamente todos los scripts bajo `install/`
 - Aplica los dotfiles y herramientas locales
