@@ -1,0 +1,12 @@
+{
+  "repositories": [
+    {
+      "url": "https://github.com/LuisPalacios/git-config-repos",
+      "files": [
+        "./git-config-repos.sh",
+        "./git-status-pull.ps1",
+        "./git-status-pull.sh"
+      ]
+    }
+  ]
+} 
