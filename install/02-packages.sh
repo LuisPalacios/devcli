@@ -37,10 +37,10 @@ while IFS= read -r pkg; do
       PACKAGES_FAILED=$((PACKAGES_FAILED + 1))
     fi
   fi
-done < <(read_json_array "$PACKAGES_CONFIG" "packages")
+done < <(read_packages_with_os_names "$PACKAGES_CONFIG" "packages")
 
 # Instalar Nerd Fonts si lsd está en la lista
-if read_json_array "$PACKAGES_CONFIG" "packages" | grep -q "lsd"; then
+if read_packages_with_os_names "$PACKAGES_CONFIG" "packages" | grep -q "lsd"; then
   install_nerd_fonts
 fi
 
