@@ -210,8 +210,8 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
   # Mensajes especiales para macOS
   if [[ "${OS_TYPE:-}" == "macos" ]]; then
     # Detectar terminal específico de macOS
-    local macos_terminal=$(detect_terminal)
-    
+    macos_terminal=$(detect_terminal)
+
     case "$macos_terminal" in
       "macos-terminal")
         echo
