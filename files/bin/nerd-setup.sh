@@ -323,38 +323,107 @@ configure_iterm() {
 configure_wsl() {
     echo -e "${BLUE}Configurando WSL...${NC}"
 
-    echo -e "${YELLOW}Para WSL, configura tu terminal de Windows:${NC}"
+    # Intentar configurar Windows Terminal automáticamente
+    if command_exists powershell.exe; then
+        echo -e "${BLUE}Intentando configurar Windows Terminal automáticamente...${NC}"
+        
+        # Crear script PowerShell para configurar Windows Terminal
+        local ps_script="/tmp/configure-wt.ps1"
+        cat > "$ps_script" << 'EOF'
+# Script para configurar Windows Terminal con FiraCode Nerd Font
+$settingsPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+
+if (Test-Path $settingsPath) {
+    $settings = Get-Content $settingsPath | ConvertFrom-Json
+    
+    # Buscar el perfil de WSL/Ubuntu
+    foreach ($profile in $settings.profiles.list) {
+        if ($profile.source -eq "Windows.Terminal.Wsl" -or $profile.name -like "*Ubuntu*" -or $profile.name -like "*WSL*") {
+            $profile.font = @{
+                face = "FiraCode Nerd Font"
+                size = 12
+            }
+            Write-Host "Configurando perfil: $($profile.name)"
+        }
+    }
+    
+    # Guardar configuración
+    $settings | ConvertTo-Json -Depth 10 | Set-Content $settingsPath
+    Write-Host "Windows Terminal configurado exitosamente"
+} else {
+    Write-Host "Archivo de configuración de Windows Terminal no encontrado"
+    Write-Host "Configuración manual requerida"
+}
+EOF
+
+        # Ejecutar script PowerShell
+        if powershell.exe -ExecutionPolicy Bypass -File "$ps_script" 2>/dev/null; then
+            echo -e "${GREEN}✓ Windows Terminal configurado automáticamente${NC}"
+        else
+            echo -e "${YELLOW}⚠ Configuración automática falló, usando método manual${NC}"
+        fi
+        
+        # Limpiar script temporal
+        rm -f "$ps_script"
+    fi
+
+    echo -e "${YELLOW}Configuración manual (si la automática falló):${NC}"
     echo -e "${BLUE}1. Windows Terminal:${NC}"
     echo -e "   - Abre Windows Terminal"
-    echo -e "   - Ve a Configuración > Perfil de Ubuntu"
+    echo -e "   - Ve a Configuración (Ctrl+,)"
+    echo -e "   - Busca tu perfil de WSL/Ubuntu"
     echo -e "   - En Apariencia, cambia la fuente a 'FiraCode Nerd Font'"
     echo -e ""
-    echo -e "${BLUE}2. O usa este comando para configurar automáticamente:${NC}"
-    echo -e "   wsl --set-default-version 2"
+    echo -e "${BLUE}2. Alternativas:${NC}"
+    echo -e "   - Usa VSCode con terminal integrado"
+    echo -e "   - Configura Alacritty o Kitty en Windows"
     echo -e ""
     echo -e "${GREEN}✓ Instrucciones para WSL mostradas${NC}"
 }
 
 # Función para verificar si las fuentes están instaladas
 check_fonts() {
+    local fonts_installed=false
+    
+    # Método 1: Verificar con fc-list (Linux/WSL2)
     if command_exists fc-list; then
-        if ! fc-list | grep -q "FiraCode Nerd Font"; then
-            echo -e "${RED}Error: FiraCode Nerd Font no está instalada${NC}"
-            echo -e "${YELLOW}Ejecuta el script de instalación primero${NC}"
-            exit 1
+        if fc-list | grep -q "FiraCode Nerd Font" 2>/dev/null; then
+            fonts_installed=true
         fi
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # En macOS, verificar si las fuentes están en el directorio local
-        local font_dir="$HOME/.local/share/fonts"
-        if ! [[ -d "$font_dir" ]] || ! find "$font_dir" -name "*FiraCode*" -type f | grep -q "FiraCode"; then
-            echo -e "${RED}Error: FiraCode Nerd Font no está instalada${NC}"
-            echo -e "${YELLOW}Ejecuta el script de instalación primero${NC}"
-            exit 1
-        fi
-    else
-        echo -e "${YELLOW}No se puede verificar las fuentes en este sistema${NC}"
-        echo -e "${YELLOW}Continúa manualmente...${NC}"
     fi
+    
+    # Método 2: Verificar directorio estándar
+    if [[ "$fonts_installed" == "false" ]]; then
+        local font_dir="$HOME/.local/share/fonts"
+        if [[ -d "$font_dir" ]] && find "$font_dir" -name "*FiraCode*" -type f | grep -q "FiraCode" 2>/dev/null; then
+            fonts_installed=true
+        fi
+    fi
+    
+    # Método 3: Verificar directorio alternativo
+    if [[ "$fonts_installed" == "false" ]]; then
+        local fonts_dir="$HOME/.fonts"
+        if [[ -d "$fonts_dir" ]] && find "$fonts_dir" -name "*FiraCode*" -type f | grep -q "FiraCode" 2>/dev/null; then
+            fonts_installed=true
+        fi
+    fi
+    
+    # Método 4: Verificar fuentes del sistema (macOS)
+    if [[ "$fonts_installed" == "false" ]] && [[ "$OSTYPE" == "darwin"* ]]; then
+        if command_exists system_profiler; then
+            if system_profiler SPFontsDataType | grep -q "FiraCode" 2>/dev/null; then
+                fonts_installed=true
+            fi
+        fi
+    fi
+    
+    if [[ "$fonts_installed" == "false" ]]; then
+        echo -e "${RED}Error: FiraCode Nerd Font no está instalada${NC}"
+        echo -e "${YELLOW}Ejecuta el script de instalación primero${NC}"
+        exit 1
+    fi
+    
+    echo -e "${GREEN}✓ FiraCode Nerd Font detectada${NC}"
 }
 
 # Main
