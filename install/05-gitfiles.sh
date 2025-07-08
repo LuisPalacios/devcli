@@ -87,22 +87,19 @@ clone_repo_temp() {
 
   log "Clonando repositorio: $repo_url"
 
-  # Crear directorio temporal único
-  local unique_temp_dir="${temp_dir}-$(date +%s)-$$"
-
-  # Clonar repositorio (redirigir todo el output)
-  if ! git clone --depth 1 --quiet "$repo_url" "$unique_temp_dir" >/dev/null 2>&1; then
+  # Clonar repositorio directamente en el directorio temporal
+  if ! git clone --depth 1 --quiet "$repo_url" "$temp_dir" >/dev/null 2>&1; then
     error "No se pudo clonar repositorio: $repo_url"
     return 1
   fi
 
   # Verificar que el directorio se creó correctamente
-  if [[ ! -d "$unique_temp_dir" ]]; then
-    error "Directorio clonado no encontrado: $unique_temp_dir"
+  if [[ ! -d "$temp_dir" ]]; then
+    error "Directorio clonado no encontrado: $temp_dir"
     return 1
   fi
 
-  echo "$unique_temp_dir"
+  return 0
 }
 
 # Función para copiar archivo con permisos apropiados
@@ -143,21 +140,18 @@ process_repository() {
 
   log "Procesando repositorio: $repo_url"
 
-  # Crear directorio temporal
-  local temp_dir="/tmp/gitfiles-$$"
-  mkdir -p "$temp_dir" >/dev/null 2>&1
+  # Crear directorio temporal único
+  local temp_dir="/tmp/gitfiles-$(date +%s)-$$"
 
   # Clonar repositorio
-  local cloned_dir
-  cloned_dir=$(clone_repo_temp "$repo_url" "$temp_dir")
-  if [[ $? -ne 0 ]]; then
+  if ! clone_repo_temp "$repo_url" "$temp_dir"; then
     rm -rf "$temp_dir" >/dev/null 2>&1 || true
     return 1
   fi
 
-  log "Repositorio clonado en: $cloned_dir"
+  log "Repositorio clonado en: $temp_dir"
   log "Contenido del directorio clonado:"
-  ls -la "$cloned_dir" | while read line; do
+  ls -la "$temp_dir" | while read line; do
     log "  $line"
   done
 
@@ -169,7 +163,7 @@ process_repository() {
   while IFS= read -r file_path; do
     # Limpiar path (remover ./ si existe)
     local clean_path="${file_path#./}"
-    local src_file="$cloned_dir/$clean_path"
+    local src_file="$temp_dir/$clean_path"
     local filename=$(basename "$clean_path")
     local dst_file="$BIN_DIR/$filename"
 
@@ -186,7 +180,6 @@ process_repository() {
   done < <(echo "$files_array" | jq -r '.[]')
 
   # Limpiar directorio temporal
-  rm -rf "$cloned_dir" >/dev/null 2>&1 || true
   rm -rf "$temp_dir" >/dev/null 2>&1 || true
 
   log "Repositorio procesado: $repo_files_copied archivos copiados"
