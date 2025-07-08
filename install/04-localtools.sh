@@ -28,13 +28,13 @@ update_nerd_font_variables() {
   if [[ -f "$script_file" ]]; then
     # Crear archivo temporal
     local temp_file=$(mktemp)
-    
+
     # Reemplazar NERD_FONT_NAME
     sed "s/export NERD_FONT_NAME=\"[^\"]*\"/export NERD_FONT_NAME=\"${NERD_FONT_NAME}\"/g" "$script_file" > "$temp_file"
-    
+
     # Reemplazar NERD_FONT_FULL_NAME
     sed "s/export NERD_FONT_FULL_NAME=\"[^\"]*\"/export NERD_FONT_FULL_NAME=\"${NERD_FONT_FULL_NAME}\"/g" "$temp_file" > "$script_file"
-    
+
     # Limpiar archivo temporal
     rm -f "$temp_file" 2>/dev/null || true
   fi
