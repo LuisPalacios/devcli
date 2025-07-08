@@ -101,7 +101,7 @@ detect_terminal() {
   if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
     echo "wsl"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
-    if [[ -n "$TERM_PROGRAM" ]]; then
+    if [[ -n "${TERM_PROGRAM:-}" ]]; then
       case "$TERM_PROGRAM" in
         "vscode") echo "vscode" ;;
         "Apple_Terminal") echo "macos-terminal" ;;
@@ -111,16 +111,16 @@ detect_terminal() {
     else
       echo "macos-terminal"
     fi
-  elif [[ -n "$TERM_PROGRAM" ]]; then
+  elif [[ -n "${TERM_PROGRAM:-}" ]]; then
     case "$TERM_PROGRAM" in
       "vscode") echo "vscode" ;;
       *) echo "unknown" ;;
     esac
-  elif [[ -n "$GNOME_DESKTOP_SESSION_ID" ]]; then
+  elif [[ -n "${GNOME_DESKTOP_SESSION_ID:-}" ]]; then
     echo "gnome-terminal"
-  elif [[ -n "$KDE_FULL_SESSION" ]]; then
+  elif [[ -n "${KDE_FULL_SESSION:-}" ]]; then
     echo "konsole"
-  elif [[ -n "$XFCE_DESKTOP_SESSION_ID" ]]; then
+  elif [[ -n "${XFCE_DESKTOP_SESSION_ID:-}" ]]; then
     echo "xfce4-terminal"
   else
     echo "unknown"
