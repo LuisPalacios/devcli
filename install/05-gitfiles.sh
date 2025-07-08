@@ -90,9 +90,15 @@ clone_repo_temp() {
   # Crear directorio temporal único
   local unique_temp_dir="${temp_dir}-$(date +%s)-$$"
 
-  # Clonar repositorio
+  # Clonar repositorio (redirigir todo el output)
   if ! git clone --depth 1 --quiet "$repo_url" "$unique_temp_dir" >/dev/null 2>&1; then
     error "No se pudo clonar repositorio: $repo_url"
+    return 1
+  fi
+
+  # Verificar que el directorio se creó correctamente
+  if [[ ! -d "$unique_temp_dir" ]]; then
+    error "Directorio clonado no encontrado: $unique_temp_dir"
     return 1
   fi
 
@@ -148,6 +154,12 @@ process_repository() {
     rm -rf "$temp_dir" >/dev/null 2>&1 || true
     return 1
   fi
+
+  log "Repositorio clonado en: $cloned_dir"
+  log "Contenido del directorio clonado:"
+  ls -la "$cloned_dir" | while read line; do
+    log "  $line"
+  done
 
   # Contador de archivos copiados en este repositorio
   local repo_files_copied=0
