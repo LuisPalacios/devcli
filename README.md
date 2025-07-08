@@ -1,6 +1,6 @@
 # Linux Setup
 
-Configura el entorno CLI en sistemas basados en Unix: **Linux**, **macOS** y **WSL2**, utilizando una única línea de instalación. Estaba ya cansado de que cada vez que instalo uno de estos sitemas me lleva un par de horas parametrizándolo, instalar tools, fuentes, scripts de ayuda. He creado este repo para automatizarlo con un solo comando.
+Configura el entorno CLI en sistemas basados en Unix, **Linux**, **macOS** y **WSL2**, utilizando una única línea de instalación. Estaba ya cansado de que me lleva un par de horas parametrizar, instalar herramientas, fuentes, scripts de ayuda. Lo he automatizado con un solo comando.
 
 ## 📋 Requisitos
 
