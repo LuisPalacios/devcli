@@ -37,10 +37,16 @@
       "alignment": "left",
       "segments": [
         {
-          "type": "shell",
+          "type": "os",
           "style": "plain",
-          "foreground": "morado",
-          "template": "[{{ .Env.ZSH_PROMPT_ENV }}] "
+          "foreground": "#26C6DA",
+          //"background": "#546E7A",
+          "template": "[{{.Icon}}] ",
+          "properties": {
+            "macos": "🍎",
+            "windows": "🪟",
+            "linux": "🐧"
+          }
         },
         {
           "type": "session",
