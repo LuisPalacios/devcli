@@ -45,7 +45,8 @@
           "properties": {
             "macos": "🍎",
             "windows": "🪟",
-            "linux": "🐧"
+            "linux": "🐧",
+            "ubuntu": "🐧"
           }
         },
         {
