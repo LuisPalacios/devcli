@@ -484,7 +484,11 @@ else
   if [[ "$OSTYPE" == "darwin"* ]]; then
     export OMP_OS_ICON="🍎"
   elif [[ "$(uname -s)" == "Linux" ]]; then
-    export OMP_OS_ICON="🐧"
+    if [ "$IS_WSL2" = true ] ; then
+        export OMP_OS_ICON="🔳"
+    else
+        export OMP_OS_ICON="🐧"
+    fi
   elif grep -qi microsoft /proc/version 2>/dev/null; then
     export OMP_OS_ICON="🪟"
   else
