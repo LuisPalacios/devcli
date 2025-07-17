@@ -482,13 +482,13 @@ else
 
   # Variable que uso en .luispa.omp.json para mostrar entorno en el prompt
   if [[ "$OSTYPE" == "darwin"* ]]; then
-    export ZSH_PROMPT_ENV="🍎"
-  elif grep -qi microsoft /proc/version 2>/dev/null; then
-    export ZSH_PROMPT_ENV="🪟"
+    export OMP_OS_ICON="🍎"
   elif [[ "$(uname -s)" == "Linux" ]]; then
-    export ZSH_PROMPT_ENV="🐧"
+    export OMP_OS_ICON="🐧"
+  elif grep -qi microsoft /proc/version 2>/dev/null; then
+    export OMP_OS_ICON="🪟"
   else
-    export ZSH_PROMPT_ENV="❓"
+    export OMP_OS_ICON="❓"
   fi
 
   # Arranco Oh My Posh
