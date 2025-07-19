@@ -400,6 +400,25 @@ else
 
 fi
 
+
+# -----------------------------------------------------------------------------
+# Zoxide un gestor de directorios
+# -----------------------------------------------------------------------------
+#
+# Instrucciones de instalación
+# MacOS, Windows y Linux:
+#   Fuente: https://github.com/ajeetdsouza/zoxide
+#
+# WSL2:
+#   sudo apt install zoxide
+#
+# Primero comprobar si está instalado
+if ! command -v zoxide >/dev/null 2>&1; then
+  echo "Necesitas instalar 'zoxide', más info en .zshrc"
+else
+  eval "$(zoxide init zsh)"
+fi
+
 # -----------------------------------------------------------------------------
 # Oh My Posh
 # -----------------------------------------------------------------------------
