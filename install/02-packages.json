@@ -9,6 +9,10 @@
       "macos": "tmux"
     },
     {
+      "linux": "zoxide",
+      "macos": "zoxide"
+    },
+    {
       "linux": "fzf",
       "macos": "fzf"
     },
