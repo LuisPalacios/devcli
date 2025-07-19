@@ -42,6 +42,22 @@
           "template": "{{ if and (eq .Env.TERM_PROGRAM \"vscode\") (eq .Env.OS \"Windows_NT\") }}[💻] {{ else }}[{{ .Env.OMP_OS_ICON }}] {{ end }}"
         },
         {
+          "type": "text",
+          "style": "plain",
+          "template": "{{ if and (eq .Env.TERM_PROGRAM \"vscode\") (eq .Env.OS \"Windows_NT\") }}[💻] {{ end }}"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#c586c0", // Purple (VSCode color)
+          "template": "{{ if and (eq .Env.TERM_PROGRAM \"vscode\") (ne .Env.OS \"Windows_NT\") }}[{{ .Env.OMP_OS_ICON }}] {{ end }}"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "template": "{{ if ne .Env.TERM_PROGRAM \"vscode\" }}[{{ .Env.OMP_OS_ICON }}] {{ end }}"
+        },
+        {
           "type": "session",
           "style": "plain",
           "template": "<p:white><b>{{ if .SSHSession }}\ueba9 {{ end }}{{ .UserName }}</b><p:whitesoft>@{{ .HostName }}:"
