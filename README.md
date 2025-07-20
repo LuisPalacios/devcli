@@ -75,7 +75,6 @@ Requisitos
 ### ⚡ Ejecución en Windows
 
 ```powershell
-# Comando directo (PowerShell 7+)
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
 ```
 

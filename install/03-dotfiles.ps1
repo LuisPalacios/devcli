@@ -1,5 +1,8 @@
 #Requires -Version 7.0
 
+Write-Log "WiP dotfiles"
+exit 0
+
 # Script de instalación de dotfiles para Windows
 # Copia .luispa.omp.json al home del usuario
 
@@ -8,7 +11,7 @@ param()
 
 # Variables de entorno (definidas por bootstrap.ps1)
 $SETUP_LANG = $env:SETUP_LANG ?? "es-ES"
-$SETUP_DIR = $env:SETUP_DIR ?? "$env:USERPROFILE\.cli-setup"
+$SETUP_DIR = $env:SETUP_DIR ?? "$env:USERPROFILE\.devcli"
 $CURRENT_USER = $env:CURRENT_USER ?? $env:USERNAME
 $TARGET_HOME = $env:USERPROFILE
 
