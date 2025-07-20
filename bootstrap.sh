@@ -144,4 +144,4 @@ for f in [0-9][0-9]-*.sh; do
   fi
 done
 
-log "✅ Instalación completada exitosamente"
+log "✅ Instalación completada"
