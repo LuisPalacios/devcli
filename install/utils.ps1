@@ -7,19 +7,19 @@ function Write-Log {
     param(
         [Parameter(Mandatory)]
         [string]$Message,
-        
+
         [string]$Level = "INFO",
-        
+
         [string]$Prefix = $null
     )
-    
+
     $color = switch ($Level) {
         "ERROR" { "Red" }
         "WARNING" { "Yellow" }
         "SUCCESS" { "Green" }
         default { "Cyan" }
     }
-    
+
     $logPrefix = $Prefix ?? (Split-Path $MyInvocation.PSCommandPath -Leaf)
     Write-Host "[$logPrefix] $Message" -ForegroundColor $color
 }
@@ -71,7 +71,7 @@ function New-DirectoryIfNotExists {
         [Parameter(Mandatory)]
         [string]$Path
     )
-    
+
     if (-not (Test-Path $Path)) {
         try {
             New-Item -Path $Path -ItemType Directory -Force | Out-Null
@@ -92,7 +92,7 @@ function Test-WingetPackage {
         [Parameter(Mandatory)]
         [string]$PackageId
     )
-    
+
     try {
         $result = winget list --id $PackageId --exact 2>$null
         return $result -and ($result | Select-String $PackageId)
@@ -102,29 +102,130 @@ function Test-WingetPackage {
     }
 }
 
+# Función para verificar si scoop está instalado
+function Test-Scoop {
+    return $null -ne (Get-Command "scoop" -ErrorAction SilentlyContinue)
+}
+
+# Función para verificar si un paquete scoop está instalado
+function Test-ScoopPackage {
+    param(
+        [Parameter(Mandatory)]
+        [string]$PackageName
+    )
+
+    if (-not (Test-Scoop)) {
+        return $false
+    }
+
+    try {
+        $result = scoop list $PackageName 2>$null
+        return $result -and ($result | Select-String $PackageName)
+    }
+    catch {
+        return $false
+    }
+}
+
+# Función para instalar paquete con scoop
+function Install-ScoopPackage {
+    param(
+        [Parameter(Mandatory)]
+        [string]$PackageName,
+
+        [string]$Description = ""
+    )
+
+    if (-not (Test-Scoop)) {
+        Write-Log "Scoop no está disponible" "ERROR"
+        return $false
+    }
+
+    if (Test-ScoopPackage $PackageName) {
+        Write-Log "$PackageName ya está instalado (scoop)"
+        return $true
+    }
+
+    $displayName = $Description ? "$PackageName ($Description)" : $PackageName
+    Write-Log "Instalando $displayName con scoop..."
+
+    try {
+        $process = Start-Process -FilePath "scoop" -ArgumentList @("install", $PackageName) -Wait -PassThru -NoNewWindow
+
+        if ($process.ExitCode -eq 0) {
+            Write-Log "$PackageName instalado correctamente con scoop" "SUCCESS"
+            return $true
+        }
+        else {
+            Write-Log "Error instalando $PackageName con scoop (código: $($process.ExitCode))" "WARNING"
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Excepción instalando $PackageName con scoop: $($_.Exception.Message)" "WARNING"
+        return $false
+    }
+}
+
+# Función para instalar scoop
+function Install-Scoop {
+    if (Test-Scoop) {
+        Write-Log "Scoop ya está instalado"
+        return $true
+    }
+
+    Write-Log "Instalando Scoop..."
+
+    try {
+        # Configurar política de ejecución si es necesario
+        $currentPolicy = Get-ExecutionPolicy -Scope CurrentUser
+        if ($currentPolicy -eq "Restricted") {
+            Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+            Write-Log "Política de ejecución actualizada a RemoteSigned para el usuario actual"
+        }
+
+        # Instalar scoop
+        Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+        # Verificar instalación
+        if (Test-Scoop) {
+            Write-Log "✅ Scoop instalado correctamente" "SUCCESS"
+            return $true
+        }
+        else {
+            Write-Log "Error: Scoop no se instaló correctamente" "ERROR"
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Error instalando Scoop: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
 # Función para instalar paquete con winget
 function Install-WingetPackage {
     param(
         [Parameter(Mandatory)]
         [string]$PackageId,
-        
+
         [string]$Name = $PackageId,
-        
+
         [string]$Description = ""
     )
-    
+
     if (Test-WingetPackage $PackageId) {
         Write-Log "$Name ya está instalado, omitiendo instalación"
         return $true
     }
-    
+
     $displayName = $Description ? "$Name ($Description)" : $Name
     Write-Log "Instalando $displayName..."
-    
+
     try {
         # Usar Start-Process para mejor control en PowerShell 7
         $process = Start-Process -FilePath "winget" -ArgumentList @("install", $PackageId, "--silent", "--accept-package-agreements", "--accept-source-agreements") -Wait -PassThru -NoNewWindow
-        
+
         if ($process.ExitCode -eq 0) {
             Write-Log "$Name instalado correctamente" "SUCCESS"
             return $true
@@ -155,14 +256,14 @@ function Get-ConfigFromJson {
         [Parameter(Mandatory)]
         [ValidateScript({Test-Path $_})]
         [string]$JsonPath,
-        
+
         [string]$PropertyName = $null
     )
-    
+
     try {
         # PowerShell 7 maneja mejor la lectura directa de JSON
         $config = Get-Content $JsonPath -Raw -Encoding UTF8 | ConvertFrom-Json -AsHashtable
-        
+
         if ($PropertyName) {
             if (-not $config.$PropertyName) {
                 Write-Log "No se encontró sección '$PropertyName' en el JSON" "WARNING"
@@ -170,7 +271,7 @@ function Get-ConfigFromJson {
             }
             return $config.$PropertyName
         }
-        
+
         return $config
     }
     catch {
@@ -184,19 +285,19 @@ function Test-Dependencies {
     param(
         [string[]]$RequiredCommands = @("jq", "git")
     )
-    
+
     $missing = @()
     foreach ($cmd in $RequiredCommands) {
         if (-not (Test-Command $cmd)) {
             $missing += $cmd
         }
     }
-    
+
     if ($missing.Count -gt 0) {
         Write-Log "Dependencias faltantes: $($missing -join ', ')" "ERROR"
         return $false
     }
-    
+
     return $true
 }
 
@@ -212,20 +313,20 @@ function Update-UserPath {
         [Parameter(Mandatory)]
         [string]$NewPath
     )
-    
+
     if (-not (Test-Path $NewPath)) {
         Write-Log "El directorio no existe: $NewPath" "WARNING"
         return $false
     }
-    
+
     try {
         $currentUserPath = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
-        
+
         if ($currentUserPath -notlike "*$NewPath*") {
             $newUserPath = if ($currentUserPath) { "$currentUserPath;$NewPath" } else { $NewPath }
             [System.Environment]::SetEnvironmentVariable("PATH", $newUserPath, [System.EnvironmentVariableTarget]::User)
             Write-Log "PATH de usuario actualizado: $NewPath" "SUCCESS"
-            
+
             # También actualizar PATH de la sesión actual
             $env:PATH += ";$NewPath"
             return $true
@@ -239,4 +340,4 @@ function Update-UserPath {
         Write-Log "Error actualizando PATH: $($_.Exception.Message)" "ERROR"
         return $false
     }
-} 
+}
