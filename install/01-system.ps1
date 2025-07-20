@@ -9,146 +9,9 @@ param()
 Write-Host "WiP system"
 exit 0
 
-# Variables de entorno (definidas por bootstrap.ps1)
-$SETUP_LANG = $env:SETUP_LANG ?? "es-ES"
-$SETUP_DIR = $env:SETUP_DIR ?? "$env:USERPROFILE\.devcli"
-$CURRENT_USER = $env:CURRENT_USER ?? $env:USERNAME
-$BIN_DIR = "$env:USERPROFILE\bin"
-
-# Manejo de directorio original (heredado del bootstrap)
-$script:OriginalDirectory = $env:ORIGINAL_DIRECTORY ?? $PWD.Path
-$script:ShouldRestoreDirectory = $true
-
-# Función de log
-function Write-Log {
-    param([string]$Message, [string]$Level = "INFO")
-    $color = switch ($Level) {
-        "ERROR" { "Red" }
-        "WARNING" { "Yellow" }
-        "SUCCESS" { "Green" }
-        default { "Cyan" }
-    }
-    Write-Host "[01-system] $Message" -ForegroundColor $color
-}
-
-# Funciones para manejo robusto de directorios
-function Restore-OriginalDirectory {
-    if ($script:ShouldRestoreDirectory -and $script:OriginalDirectory) {
-        try {
-            Set-Location $script:OriginalDirectory -ErrorAction SilentlyContinue
-            Write-Log "Directorio restaurado: $script:OriginalDirectory"
-        }
-        catch {
-            Write-Warning "No se pudo restaurar el directorio original: $script:OriginalDirectory"
-        }
-    }
-}
-
-function Handle-ScriptInterruption {
-    Write-Host "`n❌ Script interrumpido por el usuario" -ForegroundColor Red
-    Restore-OriginalDirectory
-    exit 130
-}
-
-function Setup-ScriptInterruptionHandler {
-    try {
-        # Solo CancelKeyPress - suficiente para scripts hijos
-        $null = Register-ObjectEvent -InputObject ([Console]) -EventName CancelKeyPress -Action {
-            $Event.Args[1].Cancel = $true
-            Handle-ScriptInterruption
-        }
-    }
-    catch {
-        Write-Warning "No se pudo configurar el manejador de interrupciones: $_"
-    }
-}
-
-# Función para verificar si un comando existe
-function Test-Command {
-    param([string]$Command)
-    return $null -ne (Get-Command $Command -ErrorAction SilentlyContinue)
-}
-
-# Función para verificar si un paquete winget está instalado
-function Test-WingetPackage {
-    param([string]$PackageId)
-    try {
-        $result = winget list --id $PackageId --exact 2>$null
-        return $result -and ($result | Select-String $PackageId)
-    }
-    catch {
-        return $false
-    }
-}
-
-# Función para instalar paquete con winget
-function Install-WingetPackage {
-    param(
-        [Parameter(Mandatory)]
-        [string]$PackageId,
-
-        [string]$Name = $PackageId
-    )
-
-    if (Test-WingetPackage $PackageId) {
-        Write-Log "$Name ya está instalado, omitiendo instalación"
-        return $true
-    }
-
-    Write-Log "Instalando $Name..."
-    try {
-        $process = Start-Process -FilePath "winget" -ArgumentList @("install", $PackageId, "--silent", "--accept-package-agreements", "--accept-source-agreements") -Wait -PassThru -NoNewWindow
-
-        if ($process.ExitCode -eq 0) {
-            Write-Log "$Name instalado correctamente" "SUCCESS"
-            return $true
-        }
-        else {
-            Write-Log "Error instalando $Name (código: $($process.ExitCode))" "WARNING"
-            return $false
-        }
-    }
-    catch {
-        Write-Log "Excepción instalando $Name`: $($_.Exception.Message)" "WARNING"
-        return $false
-    }
-}
-
-# Función para crear directorio si no existe
-function New-DirectoryIfNotExists {
-    param([string]$Path)
-    if (-not (Test-Path $Path)) {
-        try {
-            New-Item -Path $Path -ItemType Directory -Force | Out-Null
-            Write-Log "Directorio creado: $Path"
-        }
-        catch {
-            Write-Log "Error creando directorio $Path`: $_" "ERROR"
-            return $false
-        }
-    }
-    return $true
-}
-
-# Función para actualizar PATH del usuario
-function Update-UserPath {
-    param([string]$NewPath)
-
-    $currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-    if ($currentPath -split ';' -notcontains $NewPath) {
-        try {
-            $newUserPath = "$currentPath;$NewPath"
-            [Environment]::SetEnvironmentVariable("PATH", $newUserPath, "User")
-
-            $env:PATH += ";$NewPath"
-
-            Write-Log "PATH actualizado con: $NewPath" "SUCCESS"
-        }
-        catch {
-            Write-Log "Error actualizando PATH: $_" "WARNING"
-        }
-    }
-}
+# Cargar variables y funciones comunes
+. "$PSScriptRoot\env.ps1"
+. "$PSScriptRoot\utils.ps1"
 
 # Función principal
 function main {
@@ -159,19 +22,22 @@ function main {
     }
 
     Setup-ScriptInterruptionHandler
-
+    
     try {
         Write-Log "Iniciando configuración base del sistema..."
-        Write-Log "Usuario: $CURRENT_USER | Idioma: $SETUP_LANG"
-        Write-Log "Directorio original: $script:OriginalDirectory"
+        Write-Log "Usuario: $Global:CURRENT_USER | Idioma: $Global:SETUP_LANG"
+        Write-Log "Directorio original: $Global:OriginalDirectory"
 
-        if (-not (New-DirectoryIfNotExists $BIN_DIR)) {
+        # Crear directorio de binarios del usuario
+        if (-not (New-DirectoryIfNotExists $Global:BIN_DIR)) {
             Write-Log "Error creando directorio de binarios" "ERROR"
             exit 1
         }
 
-        Update-UserPath $BIN_DIR
+        # Actualizar PATH para incluir ~/bin
+        Update-UserPath $Global:BIN_DIR
 
+        # Paquetes esenciales obligatorios
         $essentialPackages = @(
             @{ Id = "jqlang.jq"; Name = "jq" },
             @{ Id = "Git.Git"; Name = "git" },
@@ -191,8 +57,10 @@ function main {
             }
         }
 
-        $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
+        # Refrescar PATH para que los comandos recién instalados estén disponibles
+        Update-SessionPath
 
+        # Verificar instalaciones críticas
         $criticalTools = @("jq", "git", "oh-my-posh")
         $missingCritical = @()
 
@@ -207,6 +75,7 @@ function main {
             Write-Log "Intenta ejecutar de nuevo después de reiniciar el terminal" "WARNING"
         }
 
+        # Configurar oh-my-posh en el perfil de PowerShell
         $profilePath = $PROFILE
         if ($profilePath -and (Test-Command oh-my-posh)) {
             try {
@@ -215,26 +84,30 @@ function main {
                     New-Item -Path $profileDir -ItemType Directory -Force | Out-Null
                 }
 
-                $ompConfig = "$env:USERPROFILE\.luispa.omp.json"
-                $ompLine = "oh-my-posh init pwsh --config `"$ompConfig`" | Invoke-Expression"
+                $ompConfigPath = "$env:USERPROFILE\.luispa.omp.json"
+                $initLine = "oh-my-posh init pwsh --config `"$ompConfigPath`" | Invoke-Expression"
 
                 if (Test-Path $profilePath) {
                     $profileContent = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
-                    if ($profileContent -notmatch "oh-my-posh.*\.luispa\.omp\.json") {
-                        Add-Content -Path $profilePath -Value "`n# Oh My Posh`n$ompLine" -Encoding UTF8
+                    if ($profileContent -notlike "*oh-my-posh*") {
+                        Add-Content -Path $profilePath -Value "`n# Oh My Posh Configuration`n$initLine" -Encoding UTF8
                         Write-Log "Oh-My-Posh añadido al perfil de PowerShell" "SUCCESS"
+                    }
+                    else {
+                        Write-Log "Oh-My-Posh ya está configurado en el perfil"
                     }
                 }
                 else {
-                    Set-Content -Path $profilePath -Value "# Oh My Posh`n$ompLine" -Encoding UTF8
+                    Set-Content -Path $profilePath -Value "# PowerShell Profile`n`n# Oh My Posh Configuration`n$initLine" -Encoding UTF8
                     Write-Log "Perfil de PowerShell creado con Oh-My-Posh" "SUCCESS"
                 }
             }
             catch {
-                Write-Log "Error configurando Oh-My-Posh en el perfil: $_" "WARNING"
+                Write-Log "Error configurando Oh-My-Posh en el perfil: $($_.Exception.Message)" "WARNING"
             }
         }
 
+        # Mostrar resumen final
         if ($installedCount -gt 0) {
             Write-Log "✅ Configuración base completada ($installedCount paquetes verificados)" "SUCCESS"
             if ($failedCount -gt 0) {
@@ -249,15 +122,17 @@ function main {
             Write-Log "✅ Todas las herramientas críticas están disponibles" "SUCCESS"
         }
 
-        $script:ShouldRestoreDirectory = $false
+        # Marcar que ya no necesitamos restaurar el directorio
+        $Global:ShouldRestoreDirectory = $false
     }
     finally {
-        if ($script:ShouldRestoreDirectory) {
+        if ($Global:ShouldRestoreDirectory) {
             Restore-OriginalDirectory
         }
     }
 }
 
+# Ejecutar función principal con manejo robusto
 try {
     main
 }

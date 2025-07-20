@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 
-# Script de instalaci?n de archivos desde repositorios Git para Windows
-# Lee configuraci?n desde 04-gitfiles-win.json
+# Script de instalación de archivos desde repositorios Git para Windows
+# Lee configuración desde 04-gitfiles-win.json
 
 [CmdletBinding()]
 param()
@@ -9,79 +9,16 @@ param()
 Write-Host "WiP gitfiles"
 exit 0
 
-$SETUP_LANG = $env:SETUP_LANG ?? "es-ES"
-$SETUP_DIR = $env:SETUP_DIR ?? "$env:USERPROFILE\.devcli"
-$CURRENT_USER = $env:CURRENT_USER ?? $env:USERNAME
-$BIN_DIR = "$env:USERPROFILE\bin"
+# Cargar variables y funciones comunes
+. "$PSScriptRoot\env.ps1"
+. "$PSScriptRoot\utils.ps1"
 
-$script:OriginalDirectory = $env:ORIGINAL_DIRECTORY ?? $PWD.Path
-$script:ShouldRestoreDirectory = $true
-
-function Write-Log {
-    param([string]$Message, [string]$Level = "INFO")
-    $color = switch ($Level) {
-        "ERROR" { "Red" }
-        "WARNING" { "Yellow" }
-        "SUCCESS" { "Green" }
-        default { "Cyan" }
-    }
-    Write-Host "[04-gitfiles] $Message" -ForegroundColor $color
-}
-
-function Restore-OriginalDirectory {
-    if ($script:ShouldRestoreDirectory -and $script:OriginalDirectory) {
-        try {
-            Set-Location $script:OriginalDirectory -ErrorAction SilentlyContinue
-            Write-Log "Directorio restaurado: $script:OriginalDirectory"
-        }
-        catch {
-            Write-Warning "No se pudo restaurar el directorio original: $script:OriginalDirectory"
-        }
-    }
-}
-
-function Handle-ScriptInterruption {
-    Write-Host "`n? Script interrumpido por el usuario" -ForegroundColor Red
-    Restore-OriginalDirectory
-    exit 130
-}
-
-function Setup-ScriptInterruptionHandler {
-    try {
-        # Solo CancelKeyPress - suficiente para scripts hijos
-        $null = Register-ObjectEvent -InputObject ([Console]) -EventName CancelKeyPress -Action {
-            $Event.Args[1].Cancel = $true
-            Handle-ScriptInterruption
-        }
-    }
-    catch {
-        Write-Warning "No se pudo configurar el manejador de interrupciones: $_"
-    }
-}
-
-function Test-Command {
-    param([string]$Command)
-    return $null -ne (Get-Command $Command -ErrorAction SilentlyContinue)
-}
-
-function Test-Dependencies {
-    $missing = @()
-    if (-not (Test-Command "jq")) { $missing += "jq" }
-    if (-not (Test-Command "git")) { $missing += "git" }
-
-    if ($missing.Count -gt 0) {
-        Write-Log "Dependencias faltantes: $($missing -join ', ')" "ERROR"
-        return $false
-    }
-
-    return $true
-}
-
+# Función para validar archivo JSON
 function Test-JsonFile {
     param([string]$JsonPath)
 
     if (-not (Test-Path $JsonPath)) {
-        Write-Log "Archivo de configuraci?n no encontrado: $JsonPath" "ERROR"
+        Write-Log "Archivo de configuración no encontrado: $JsonPath" "ERROR"
         return $false
     }
 
@@ -90,69 +27,73 @@ function Test-JsonFile {
         $config = $jsonContent | ConvertFrom-Json
 
         if (-not $config.repositories) {
-            Write-Log "Estructura JSON inv?lida: falta 'repositories'" "ERROR"
+            Write-Log "Estructura JSON inválida: falta 'repositories'" "ERROR"
             return $false
         }
 
         return $true
     }
     catch {
-        Write-Log "Archivo JSON inv?lido: $_" "ERROR"
+        Write-Log "Archivo JSON inválido: $_" "ERROR"
         return $false
     }
 }
 
+# Función para clonar repositorio temporalmente
 function Get-TempRepository {
     param(
+        [Parameter(Mandatory)]
         [string]$RepoUrl,
+        
+        [Parameter(Mandatory)]
         [string]$TempDir
     )
 
     try {
         $result = git clone --depth 1 --quiet $RepoUrl $TempDir 2>&1
 
-        if ($LASTEXITCODE -ne 0) {
-            Write-Log "Error clonando repositorio: $RepoUrl" "ERROR"
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Repositorio clonado: $RepoUrl"
+            return $true
+        }
+        else {
+            Write-Log "Error clonando repositorio $RepoUrl`: $result" "ERROR"
             return $false
         }
-
-        if (-not (Test-Path $TempDir)) {
-            Write-Log "Directorio clonado no encontrado: $TempDir" "ERROR"
-            return $false
-        }
-
-        return $true
     }
     catch {
-        Write-Log "Excepci?n clonando repositorio $RepoUrl`: $_" "ERROR"
+        Write-Log "Excepción clonando repositorio $RepoUrl`: $_" "ERROR"
         return $false
     }
 }
 
+# Función para copiar archivo con permisos apropiados
 function Copy-FileWithPermissions {
     param(
+        [Parameter(Mandatory)]
         [string]$SourceFile,
+        
+        [Parameter(Mandatory)]
         [string]$DestFile
     )
-
-    if (-not (Test-Path $SourceFile)) {
-        Write-Log "Archivo no encontrado: $SourceFile" "WARNING"
-        return $false
-    }
 
     try {
         Copy-Item $SourceFile $DestFile -Force
         return $true
     }
     catch {
-        Write-Log "Error copiando archivo $SourceFile -> $DestFile`: $_" "ERROR"
+        Write-Log "Error copiando archivo: $($_.Exception.Message)" "ERROR"
         return $false
     }
 }
 
+# Función para procesar un repositorio
 function Invoke-ProcessRepository {
     param(
+        [Parameter(Mandatory)]
         [string]$RepoUrl,
+        
+        [Parameter(Mandatory)]
         [array]$FilesList
     )
 
@@ -170,15 +111,20 @@ function Invoke-ProcessRepository {
         foreach ($filePath in $FilesList) {
             $cleanPath = $filePath -replace '^\./', ''
             $srcFile = Join-Path $tempDir $cleanPath
-            $filename = Split-Path $cleanPath -Leaf
-            $dstFile = Join-Path $BIN_DIR $filename
+            $fileName = Split-Path $cleanPath -Leaf
+            $destFile = Join-Path $Global:BIN_DIR $fileName
 
-            if (Copy-FileWithPermissions -SourceFile $srcFile -DestFile $dstFile) {
-                $filesCopied++
+            if (Test-Path $srcFile) {
+                if (Copy-FileWithPermissions -SourceFile $srcFile -DestFile $destFile) {
+                    Write-Log "Copiado: $fileName"
+                    $filesCopied++
+                }
+            }
+            else {
+                Write-Log "Archivo no encontrado en repositorio: $cleanPath" "WARNING"
             }
         }
 
-        Write-Log "Repositorio procesado: $filesCopied archivos copiados"
         return $filesCopied
     }
     finally {
@@ -187,30 +133,16 @@ function Invoke-ProcessRepository {
                 Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
             }
             catch {
-                Write-Log "Advertencia: no se pudo limpiar directorio temporal $tempDir" "WARNING"
+                Write-Log "Advertencia: No se pudo limpiar directorio temporal: $tempDir" "WARNING"
             }
         }
     }
 }
 
-function New-DirectoryIfNotExists {
-    param([string]$Path)
-    if (-not (Test-Path $Path)) {
-        try {
-            New-Item -Path $Path -ItemType Directory -Force | Out-Null
-            return $true
-        }
-        catch {
-            Write-Log "Error creando directorio $Path`: $_" "ERROR"
-            return $false
-        }
-    }
-    return $true
-}
-
+# Función principal
 function main {
     trap {
-        Write-Log "?? Excepci?n no manejada: $($_.Exception.Message)" "ERROR"
+        Write-Log "🛑 Excepción no manejada: $($_.Exception.Message)" "ERROR"
         Restore-OriginalDirectory
         exit 1
     }
@@ -218,32 +150,36 @@ function main {
     Setup-ScriptInterruptionHandler
 
     try {
-        Write-Log "Iniciando instalaci?n de archivos desde repositorios Git..."
+        Write-Log "Iniciando instalación de archivos desde repositorios Git..."
 
-        if (-not (Test-Dependencies)) {
+        # Verificar dependencias
+        if (-not (Test-Dependencies @("jq", "git"))) {
             Write-Log "Abortando: dependencias faltantes" "ERROR"
             exit 1
         }
 
-        if (-not (New-DirectoryIfNotExists $BIN_DIR)) {
+        # Asegurar que existe el directorio de binarios
+        if (-not (New-DirectoryIfNotExists $Global:BIN_DIR)) {
             Write-Log "Error creando directorio de binarios" "ERROR"
             exit 1
         }
 
+        # Archivo de configuración
         $gitfilesConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\04-gitfiles-win.json"
 
+        # Validar archivo de configuración
         if (-not (Test-JsonFile $gitfilesConfig)) {
-            Write-Log "Configuraci?n inv?lida - abortando" "ERROR"
+            Write-Log "Configuración inválida - abortando" "ERROR"
             exit 1
         }
 
+        # Leer configuración usando función común
         try {
-            $jsonContent = Get-Content $gitfilesConfig -Raw -Encoding UTF8
-            $config = $jsonContent | ConvertFrom-Json
+            $config = Get-ConfigFromJson -JsonPath $gitfilesConfig
             $repositories = $config.repositories
         }
         catch {
-            Write-Log "Error leyendo configuraci?n: $_" "ERROR"
+            Write-Log "Error leyendo configuración: $($_.Exception.Message)" "ERROR"
             exit 1
         }
 
@@ -254,37 +190,40 @@ function main {
 
         $totalFilesCopied = 0
 
+        # Procesar cada repositorio
         foreach ($repo in $repositories) {
             if ($repo.url -and $repo.files) {
                 $filesCopied = Invoke-ProcessRepository -RepoUrl $repo.url -FilesList $repo.files
                 $totalFilesCopied += $filesCopied
             }
             else {
-                Write-Log "Repositorio con configuraci?n incompleta omitido" "WARNING"
+                Write-Log "Repositorio con configuración incompleta omitido" "WARNING"
             }
         }
 
+        # Mostrar resumen final
         if ($totalFilesCopied -gt 0) {
-            Write-Log "? Archivos desde repositorios Git instalados ($totalFilesCopied archivos)" "SUCCESS"
+            Write-Log "✅ Archivos desde repositorios Git instalados ($totalFilesCopied archivos)" "SUCCESS"
         }
         else {
             Write-Log "No se copiaron archivos desde repositorios Git"
         }
 
-        $script:ShouldRestoreDirectory = $false
+        $Global:ShouldRestoreDirectory = $false
     }
     finally {
-        if ($script:ShouldRestoreDirectory) {
+        if ($Global:ShouldRestoreDirectory) {
             Restore-OriginalDirectory
         }
     }
 }
 
+# Ejecutar función principal con manejo robusto
 try {
     main
 }
 catch {
-    Write-Error "? Error cr?tico en script: $($_.Exception.Message)"
+    Write-Error "❌ Error crítico en script: $($_.Exception.Message)"
     Restore-OriginalDirectory
     exit 1
 }
