@@ -80,13 +80,12 @@ main() {
 
   # Procesar cada dotfile del JSON
   while IFS= read -r line; do
-    echo "line: $line"
     [[ -n "$line" ]] || continue
 
     local dotfile_info
     if ! dotfile_info=$(echo "$line" | base64 --decode 2>/dev/null); then
       warning "Error decodificando entrada JSON"
-      ((failed_count++))
+      failed_count=$((failed_count + 1))
       continue
     fi
 
@@ -96,12 +95,11 @@ main() {
 
     if [[ -z "$file" ]]; then
       warning "Dotfile con configuración incompleta omitido"
-      ((failed_count++))
+      failed_count=$((failed_count + 1))
       continue
     fi
 
     local src="$dotfiles_dir/$file"
-    echo "src: $src"
     # Construir ruta de destino
     local dst_dir
     if [[ "$dst_relative" == "./" || "$dst_relative" == "." ]]; then
@@ -115,7 +113,7 @@ main() {
     # Validar que el archivo fuente existe
     if [[ ! -f "$src" ]]; then
       warning "Archivo fuente no encontrado: $src"
-      ((failed_count++))
+      failed_count=$((failed_count + 1))
       continue
     fi
 
@@ -125,7 +123,7 @@ main() {
         log "Directorio creado: $dst_dir"
       else
         warning "No se pudo crear directorio: $dst_dir"
-        ((failed_count++))
+        failed_count=$((failed_count + 1))
         continue
       fi
     fi
@@ -140,24 +138,21 @@ main() {
     # fi
 
     # Copiar archivo
-    echo "Copiando $src a $dst"
     if cp -f "$src" "$dst" 2>/dev/null; then
       local dst_display="${dst_relative%/}"
       [[ "$dst_display" == "./" || "$dst_display" == "." ]] && dst_display="(home)"
-      echo "✅ Copiado: $file → $dst_display"
-      ((installed_count++))
-      echo "✅ después de copiar: $file → $dst_display"
+      success "✅ Copiado: $file → $dst_display"
+      installed_count=$((installed_count + 1))
 
       # Personalizar .zshrc si es necesario
-      # if [[ "$file" == ".zshrc" ]]; then
-      #   log "Personalizando .zshrc..."
-      #   customize_zshrc "$dst"
-      # fi
+      if [[ "$file" == ".zshrc" ]]; then
+        log "Personalizando .zshrc..."
+        customize_zshrc "$dst"
+      fi
     else
       warning "Error copiando $file"
-      ((failed_count++))
+      failed_count=$((failed_count + 1))
     fi
-    echo "--------------------------------"
   done <<< "$dotfiles_data"
 
   # Cambiar shell a zsh si está disponible y el sistema lo requiere
