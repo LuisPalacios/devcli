@@ -1,13 +1,13 @@
 #Requires -Version 7.0
 
-Write-Host "WiP localtools"
-exit 0
-
 # Script de instalación de herramientas locales para Windows
 # Lee configuración desde 05-localtools-win.json
 
 [CmdletBinding()]
 param()
+
+Write-Host "WiP localtools"
+exit 0
 
 $SETUP_LANG = $env:SETUP_LANG ?? "es-ES"
 $SETUP_DIR = $env:SETUP_DIR ?? "$env:USERPROFILE\.devcli"
@@ -52,9 +52,8 @@ function Handle-ScriptInterruption {
 function Setup-ScriptInterruptionHandler {
     try {
         # Solo CancelKeyPress - suficiente para scripts hijos
-        [Console]::CancelKeyPress += {
-            param($sender, $e)
-            $e.Cancel = $true
+        $null = Register-ObjectEvent -InputObject ([Console]) -EventName CancelKeyPress -Action {
+            $Event.Args[1].Cancel = $true
             Handle-ScriptInterruption
         }
     }

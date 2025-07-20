@@ -58,10 +58,9 @@ function Setup-InterruptionHandler {
         }
 
         # Capturar señales de cancelación
-        # CancelKeyPress para Ctrl-C inmediato
-        [Console]::CancelKeyPress += {
-            param($sender, $e)
-            $e.Cancel = $true
+        # CancelKeyPress para Ctrl-C inmediato usando sintaxis correcta
+        $null = Register-ObjectEvent -InputObject ([Console]) -EventName CancelKeyPress -Action {
+            $Event.Args[1].Cancel = $true
             Handle-Interruption
         }
     }

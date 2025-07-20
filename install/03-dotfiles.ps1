@@ -1,13 +1,13 @@
 #Requires -Version 7.0
 
-Write-Host "WiP dotfiles"
-exit 0
-
 # Script de instalación de dotfiles para Windows
 # Copia .luispa.omp.json al home del usuario
 
 [CmdletBinding()]
 param()
+
+Write-Host "WiP dotfiles"
+exit 0
 
 # Variables de entorno (definidas por bootstrap.ps1)
 $SETUP_LANG = $env:SETUP_LANG ?? "es-ES"
@@ -52,9 +52,8 @@ function Handle-ScriptInterruption {
 function Setup-ScriptInterruptionHandler {
     try {
         # Solo CancelKeyPress - suficiente para scripts hijos
-        [Console]::CancelKeyPress += {
-            param($sender, $e)
-            $e.Cancel = $true
+        $null = Register-ObjectEvent -InputObject ([Console]) -EventName CancelKeyPress -Action {
+            $Event.Args[1].Cancel = $true
             Handle-ScriptInterruption
         }
     }

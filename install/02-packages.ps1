@@ -1,13 +1,13 @@
 #Requires -Version 7.0
 
-Write-Host "WiP packages"
-exit 0
-
 # Script de instalación de herramientas de productividad para Windows
 # Lee configuración desde 02-packages-win.json
 
 [CmdletBinding()]
 param()
+
+Write-Host "WiP packages"
+exit 0
 
 # Variables de entorno (definidas por bootstrap.ps1)
 $SETUP_LANG = $env:SETUP_LANG ?? "es-ES"
@@ -53,9 +53,8 @@ function Handle-ScriptInterruption {
 function Setup-ScriptInterruptionHandler {
     try {
         # Solo CancelKeyPress - suficiente para scripts hijos
-        [Console]::CancelKeyPress += {
-            param($sender, $e)
-            $e.Cancel = $true
+        $null = Register-ObjectEvent -InputObject ([Console]) -EventName CancelKeyPress -Action {
+            $Event.Args[1].Cancel = $true
             Handle-ScriptInterruption
         }
     }
