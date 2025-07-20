@@ -1,5 +1,8 @@
 #Requires -Version 7.0
 
+Write-Log "WiP gitfiles"
+exit 0
+
 # Script de instalación de archivos desde repositorios Git para Windows
 # Lee configuración desde 04-gitfiles-win.json
 
@@ -8,7 +11,7 @@ param()
 
 # Variables de entorno (definidas por bootstrap.ps1)
 $SETUP_LANG = $env:SETUP_LANG ?? "es-ES"
-$SETUP_DIR = $env:SETUP_DIR ?? "$env:USERPROFILE\.cli-setup"
+$SETUP_DIR = $env:SETUP_DIR ?? "$env:USERPROFILE\.devcli"
 $CURRENT_USER = $env:CURRENT_USER ?? $env:USERNAME
 $BIN_DIR = "$env:USERPROFILE\bin"
 
@@ -33,41 +36,41 @@ function Test-Command {
 # Función para verificar dependencias
 function Test-Dependencies {
     $missing = @()
-    
+
     if (-not (Test-Command "jq")) {
         $missing += "jq"
     }
-    
+
     if (-not (Test-Command "git")) {
         $missing += "git"
     }
-    
+
     if ($missing.Count -gt 0) {
         Write-Log "Dependencias faltantes: $($missing -join ', ')" "ERROR"
         return $false
     }
-    
+
     return $true
 }
 
 # Función para validar archivo JSON
 function Test-JsonFile {
     param([string]$JsonPath)
-    
+
     if (-not (Test-Path $JsonPath)) {
         Write-Log "Archivo de configuración no encontrado: $JsonPath" "ERROR"
         return $false
     }
-    
+
     try {
         $jsonContent = Get-Content $JsonPath -Raw -Encoding UTF8
         $config = $jsonContent | ConvertFrom-Json
-        
+
         if (-not $config.repositories) {
             Write-Log "Estructura JSON inválida: falta 'repositories'" "ERROR"
             return $false
         }
-        
+
         return $true
     }
     catch {
@@ -82,21 +85,21 @@ function Get-TempRepository {
         [string]$RepoUrl,
         [string]$TempDir
     )
-    
+
     try {
         # Clonar repositorio
         $result = git clone --depth 1 --quiet $RepoUrl $TempDir 2>&1
-        
+
         if ($LASTEXITCODE -ne 0) {
             Write-Log "Error clonando repositorio: $RepoUrl" "ERROR"
             return $false
         }
-        
+
         if (-not (Test-Path $TempDir)) {
             Write-Log "Directorio clonado no encontrado: $TempDir" "ERROR"
             return $false
         }
-        
+
         return $true
     }
     catch {
@@ -111,21 +114,21 @@ function Copy-FileWithPermissions {
         [string]$SourceFile,
         [string]$DestFile
     )
-    
+
     if (-not (Test-Path $SourceFile)) {
         Write-Log "Archivo no encontrado: $SourceFile" "WARNING"
         return $false
     }
-    
+
     try {
         # Copiar archivo
         Copy-Item $SourceFile $DestFile -Force
-        
+
         $filename = Split-Path $SourceFile -Leaf
-        
+
         # Para archivos .ps1, mantener permisos originales
         # Para otros archivos, no hay necesidad de chmod en Windows
-        
+
         return $true
     }
     catch {
@@ -140,21 +143,21 @@ function Invoke-ProcessRepository {
         [string]$RepoUrl,
         [array]$FilesList
     )
-    
+
     Write-Log "Procesando repositorio: $RepoUrl"
-    
+
     # Crear directorio temporal único
     $tempDirName = "gitfiles-$(Get-Date -Format 'yyyyMMddHHmmss')-$PID"
     $tempDir = Join-Path $env:TEMP $tempDirName
-    
+
     try {
         # Clonar repositorio
         if (-not (Get-TempRepository -RepoUrl $RepoUrl -TempDir $tempDir)) {
             return 0
         }
-        
+
         $filesCopied = 0
-        
+
         # Procesar cada archivo
         foreach ($filePath in $FilesList) {
             # Limpiar path (remover ./ si existe)
@@ -162,12 +165,12 @@ function Invoke-ProcessRepository {
             $srcFile = Join-Path $tempDir $cleanPath
             $filename = Split-Path $cleanPath -Leaf
             $dstFile = Join-Path $BIN_DIR $filename
-            
+
             if (Copy-FileWithPermissions -SourceFile $srcFile -DestFile $dstFile) {
                 $filesCopied++
             }
         }
-        
+
         Write-Log "Repositorio procesado: $filesCopied archivos copiados"
         return $filesCopied
     }
@@ -203,28 +206,28 @@ function New-DirectoryIfNotExists {
 # Función principal
 function main {
     Write-Log "Iniciando instalación de archivos desde repositorios Git..."
-    
+
     # Verificar dependencias
     if (-not (Test-Dependencies)) {
         Write-Log "Abortando: dependencias faltantes" "ERROR"
         exit 1
     }
-    
+
     # Asegurar que existe el directorio de binarios
     if (-not (New-DirectoryIfNotExists $BIN_DIR)) {
         Write-Log "Error creando directorio de binarios" "ERROR"
         exit 1
     }
-    
+
     # Archivo de configuración
     $gitfilesConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\04-gitfiles-win.json"
-    
+
     # Validar archivo de configuración
     if (-not (Test-JsonFile $gitfilesConfig)) {
         Write-Log "Configuración inválida - abortando" "ERROR"
         exit 1
     }
-    
+
     # Leer configuración
     try {
         $jsonContent = Get-Content $gitfilesConfig -Raw -Encoding UTF8
@@ -235,14 +238,14 @@ function main {
         Write-Log "Error leyendo configuración: $_" "ERROR"
         exit 1
     }
-    
+
     if ($repositories.Count -eq 0) {
         Write-Log "No hay repositorios configurados"
         return
     }
-    
+
     $totalFilesCopied = 0
-    
+
     # Procesar cada repositorio
     foreach ($repo in $repositories) {
         if ($repo.url -and $repo.files) {
@@ -253,7 +256,7 @@ function main {
             Write-Log "Repositorio con configuración incompleta omitido" "WARNING"
         }
     }
-    
+
     # Mostrar resumen final
     if ($totalFilesCopied -gt 0) {
         Write-Log "��� Archivos desde repositorios Git instalados ($totalFilesCopied archivos)" "SUCCESS"
@@ -264,4 +267,4 @@ function main {
 }
 
 # Ejecutar función principal
-main 
+main
