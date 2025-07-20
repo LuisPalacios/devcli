@@ -15,10 +15,59 @@ $BRANCH = "main"
 $CURRENT_USER = $env:USERNAME
 $SETUP_DIR = "$env:USERPROFILE\.devcli"
 
+# Guardar directorio original para restaurarlo en caso de interrupción
+$script:OriginalDirectory = $PWD.Path
+
+# Flag para controlar si debemos restaurar el directorio
+$script:ShouldRestoreDirectory = $true
+
 # Función de log minimalista
 function Write-Log {
     param([string]$Message)
     Write-Host "[bootstrap] $Message" -ForegroundColor Cyan
+}
+
+# Función para restaurar directorio original
+function Restore-OriginalDirectory {
+    if ($script:ShouldRestoreDirectory -and $script:OriginalDirectory) {
+        try {
+            Set-Location $script:OriginalDirectory -ErrorAction SilentlyContinue
+            Write-Log "Directorio restaurado: $script:OriginalDirectory"
+        }
+        catch {
+            Write-Warning "No se pudo restaurar el directorio original: $script:OriginalDirectory"
+        }
+    }
+}
+
+# Función para manejar interrupción por Ctrl-C
+function Handle-Interruption {
+    Write-Host "`n❌ Operación interrumpida por el usuario" -ForegroundColor Red
+    Restore-OriginalDirectory
+    exit 130 # Código de salida estándar para Ctrl-C
+}
+
+# Configurar manejo de Ctrl-C
+function Setup-InterruptionHandler {
+    try {
+        # Register-EngineEvent funciona en el proceso principal
+        $null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
+            if ($script:ShouldRestoreDirectory) {
+                Restore-OriginalDirectory
+            }
+        }
+
+        # Capturar señales de cancelación
+        # CancelKeyPress para Ctrl-C inmediato
+        [Console]::CancelKeyPress += {
+            param($sender, $e)
+            $e.Cancel = $true
+            Handle-Interruption
+        }
+    }
+    catch {
+        Write-Warning "No se pudo configurar el manejador de interrupciones: $_"
+    }
 }
 
 # Función de ayuda
@@ -111,71 +160,113 @@ function Test-Prerequisites {
 
 # Función principal
 function main {
-    Write-Log "Iniciando configuración CLI para Windows..."
-
-    $windowsInfo = Test-WindowsVersion
-    $isAdmin = Test-Administrator
-
-    Write-Log "Windows 11: $($windowsInfo.IsWindows11) | Admin: $isAdmin | Usuario: $CURRENT_USER"
-    Write-Log "Idioma: $Lang"
-
-    # Verificar prerequisitos
-    Test-Prerequisites
-
-    # Clonar o actualizar repositorio
-    Write-Log "Preparando repositorio..."
-    if (Test-Path $SETUP_DIR) {
-        try {
-            Push-Location $SETUP_DIR
-            git reset --hard HEAD *>$null
-            git clean -fd *>$null
-            git pull *>$null
-            Pop-Location
-        }
-        catch {
-            Write-Warning "Error actualizando repositorio, clonando de nuevo..."
-            Remove-Item $SETUP_DIR -Recurse -Force -ErrorAction SilentlyContinue
-            git clone --branch $BRANCH $REPO_URL $SETUP_DIR *>$null
-        }
-    }
-    else {
-        git clone --branch $BRANCH $REPO_URL $SETUP_DIR *>$null
-    }
-
-    if (-not (Test-Path $SETUP_DIR)) {
-        Write-Error "❌ Error clonando repositorio"
+    trap {
+        Write-Log "🛑 Excepción no manejada en bootstrap: $($_.Exception.Message)" "ERROR"
+        Restore-OriginalDirectory
         exit 1
     }
 
-    # Establecer variables de entorno para los scripts
-    $env:SETUP_LANG = $Lang
-    $env:SETUP_DIR = $SETUP_DIR
-    $env:CURRENT_USER = $CURRENT_USER
+    # Configurar manejo de interrupciones
+    Setup-InterruptionHandler
 
-    # Ejecutar scripts de instalación
-    Push-Location "$SETUP_DIR\install"
+    try {
+        Write-Log "Iniciando configuración CLI para Windows..."
+        Write-Log "Directorio actual: $script:OriginalDirectory"
 
-    Write-Log "Ejecutando scripts de instalación:"
-    $scripts = Get-ChildItem "*.ps1" | Where-Object { $_.Name -match '^\d{2}-.*\.ps1$' } | Sort-Object Name
+        $windowsInfo = Test-WindowsVersion
+        $isAdmin = Test-Administrator
 
-    foreach ($script in $scripts) {
-        Write-Log "▶ Ejecutando $($script.Name)..."
-        try {
-            & $script.FullName
+        Write-Log "Windows 11: $($windowsInfo.IsWindows11) | Admin: $isAdmin | Usuario: $CURRENT_USER"
+        Write-Log "Idioma: $Lang"
+
+        # Verificar prerequisitos
+        Test-Prerequisites
+
+        # Clonar o actualizar repositorio
+        Write-Log "Preparando repositorio..."
+        if (Test-Path $SETUP_DIR) {
+            try {
+                Push-Location $SETUP_DIR
+                try {
+                    git reset --hard HEAD *>$null
+                    git clean -fd *>$null
+                    git pull *>$null
+                }
+                finally {
+                    Pop-Location
+                }
+            }
+            catch {
+                Write-Warning "Error actualizando repositorio, clonando de nuevo..."
+                Remove-Item $SETUP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+                git clone --branch $BRANCH $REPO_URL $SETUP_DIR *>$null
+            }
         }
-        catch {
-            Write-Error "❌ Error ejecutando $($script.Name): $_"
+        else {
+            git clone --branch $BRANCH $REPO_URL $SETUP_DIR *>$null
+        }
+
+        if (-not (Test-Path $SETUP_DIR)) {
+            Write-Error "❌ Error clonando repositorio" -ErrorAction Stop
+        }
+
+        # Establecer variables de entorno para los scripts
+        $env:SETUP_LANG = $Lang
+        $env:SETUP_DIR = $SETUP_DIR
+        $env:CURRENT_USER = $CURRENT_USER
+        # Pasar el directorio original a los scripts hijos
+        $env:ORIGINAL_DIRECTORY = $script:OriginalDirectory
+
+        # Ejecutar scripts de instalación
+        $installDir = "$SETUP_DIR\install"
+        Push-Location $installDir
+
+        try {
+            Write-Log "Ejecutando scripts de instalación desde: $installDir"
+            $scripts = Get-ChildItem "*.ps1" | Where-Object { $_.Name -match '^\d{2}-.*\.ps1$' } | Sort-Object Name
+
+            foreach ($script in $scripts) {
+                Write-Log "▶ Ejecutando $($script.Name)..."
+                try {
+                    & $script.FullName
+                    if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) {
+                        throw "El script $($script.Name) terminó con código de error: $LASTEXITCODE"
+                    }
+                }
+                catch {
+                    Write-Error "❌ Error ejecutando $($script.Name): $($_.Exception.Message)" -ErrorAction Stop
+                }
+            }
+        }
+        finally {
             Pop-Location
-            exit 1
+        }
+
+        # Marcar que ya no necesitamos restaurar el directorio automáticamente
+        $script:ShouldRestoreDirectory = $false
+
+        Write-Log "✅ Instalación completada"
+        Write-Host ""
+        Write-Host "🎉 ¡Configuración completada! Reinicia tu terminal para aplicar los cambios." -ForegroundColor Green
+    }
+    catch {
+        Write-Error "❌ Error durante la instalación: $($_.Exception.Message)"
+        exit 1
+    }
+    finally {
+        # Restaurar directorio original si es necesario
+        if ($script:ShouldRestoreDirectory) {
+            Restore-OriginalDirectory
         }
     }
-
-    Pop-Location
-
-    Write-Log "✅ Instalación completada"
-    Write-Host ""
-    Write-Host "🎉 ¡Configuración completada! Reinicia tu terminal para aplicar los cambios." -ForegroundColor Green
 }
 
-# Ejecutar función principal
-main
+# Ejecutar función principal con manejo robusto
+try {
+    main
+}
+catch {
+    Write-Error "❌ Error crítico: $($_.Exception.Message)"
+    Restore-OriginalDirectory
+    exit 1
+}

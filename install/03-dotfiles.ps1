@@ -1,6 +1,6 @@
 #Requires -Version 7.0
 
-Write-Log "WiP dotfiles"
+Write-Host "WiP dotfiles"
 exit 0
 
 # Script de instalación de dotfiles para Windows
@@ -15,6 +15,10 @@ $SETUP_DIR = $env:SETUP_DIR ?? "$env:USERPROFILE\.devcli"
 $CURRENT_USER = $env:CURRENT_USER ?? $env:USERNAME
 $TARGET_HOME = $env:USERPROFILE
 
+# Manejo de directorio original (heredado del bootstrap)
+$script:OriginalDirectory = $env:ORIGINAL_DIRECTORY ?? $PWD.Path
+$script:ShouldRestoreDirectory = $true
+
 # Función de log
 function Write-Log {
     param([string]$Message, [string]$Level = "INFO")
@@ -27,13 +31,43 @@ function Write-Log {
     Write-Host "[03-dotfiles] $Message" -ForegroundColor $color
 }
 
-# Función para verificar si un comando existe
+function Restore-OriginalDirectory {
+    if ($script:ShouldRestoreDirectory -and $script:OriginalDirectory) {
+        try {
+            Set-Location $script:OriginalDirectory -ErrorAction SilentlyContinue
+            Write-Log "Directorio restaurado: $script:OriginalDirectory"
+        }
+        catch {
+            Write-Warning "No se pudo restaurar el directorio original: $script:OriginalDirectory"
+        }
+    }
+}
+
+function Handle-ScriptInterruption {
+    Write-Host "`n❌ Script interrumpido por el usuario" -ForegroundColor Red
+    Restore-OriginalDirectory
+    exit 130
+}
+
+function Setup-ScriptInterruptionHandler {
+    try {
+        # Solo CancelKeyPress - suficiente para scripts hijos
+        [Console]::CancelKeyPress += {
+            param($sender, $e)
+            $e.Cancel = $true
+            Handle-ScriptInterruption
+        }
+    }
+    catch {
+        Write-Warning "No se pudo configurar el manejador de interrupciones: $_"
+    }
+}
+
 function Test-Command {
     param([string]$Command)
     return $null -ne (Get-Command $Command -ErrorAction SilentlyContinue)
 }
 
-# Función para personalizar archivo de configuración
 function Update-OmpConfig {
     param([string]$ConfigFile)
 
@@ -43,16 +77,11 @@ function Update-OmpConfig {
     }
 
     try {
-        # Leer contenido del archivo usando PowerShell 7 encoding mejorado
         $content = Get-Content $ConfigFile -Raw -Encoding UTF8NoBOM
-
-        # Crear backup con timestamp más preciso
         $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
         $backupFile = "$ConfigFile.backup.$timestamp"
         Copy-Item $ConfigFile $backupFile -Force
 
-        # Reemplazar configuraciones específicas para Windows si es necesario
-        # Por ahora solo informamos que se ha copiado
         Write-Log "Configuración Oh-My-Posh personalizada para Windows"
         Write-Log "Backup creado: $backupFile"
 
@@ -64,7 +93,6 @@ function Update-OmpConfig {
     }
 }
 
-# Función para configurar oh-my-posh en PowerShell
 function Set-OhMyPoshProfile {
     param([string]$ConfigPath)
 
@@ -73,7 +101,6 @@ function Set-OhMyPoshProfile {
         return $false
     }
 
-    # Obtener la ruta del perfil de PowerShell
     $profilePath = $PROFILE
     if (-not $profilePath) {
         Write-Log "No se puede determinar la ruta del perfil de PowerShell" "WARNING"
@@ -81,17 +108,14 @@ function Set-OhMyPoshProfile {
     }
 
     try {
-        # Crear directorio del perfil si no existe
         $profileDir = Split-Path $profilePath -Parent
         if (-not (Test-Path $profileDir)) {
             New-Item -Path $profileDir -ItemType Directory -Force | Out-Null
             Write-Log "Directorio del perfil creado: $profileDir"
         }
 
-        # Línea de inicialización para Oh-My-Posh
         $ompLine = "oh-my-posh init pwsh --config `"$ConfigPath`" | Invoke-Expression"
 
-        # Verificar si ya está configurado
         if (Test-Path $profilePath) {
             $profileContent = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
             if ($profileContent -and ($profileContent -match "oh-my-posh.*\.luispa\.omp\.json")) {
@@ -100,7 +124,6 @@ function Set-OhMyPoshProfile {
             }
         }
 
-        # Añadir configuración al perfil
         if (Test-Path $profilePath) {
             Add-Content -Path $profilePath -Value "`n# Oh My Posh Configuration`n$ompLine" -Encoding UTF8
         }
@@ -117,81 +140,91 @@ function Set-OhMyPoshProfile {
     }
 }
 
-# Función principal
 function main {
-    Write-Log "Iniciando instalación de dotfiles..."
-
-    # Directorio de dotfiles
-    $dotfilesDir = Join-Path $SETUP_DIR "dotfiles"
-
-    if (-not (Test-Path $dotfilesDir)) {
-        Write-Log "Directorio de dotfiles no encontrado: $dotfilesDir" "ERROR"
+    trap {
+        Write-Log "🛑 Excepción no manejada: $($_.Exception.Message)" "ERROR"
+        Restore-OriginalDirectory
         exit 1
     }
 
-    # Lista de dotfiles a instalar (solo para Windows)
-    $dotfilesList = @(".luispa.omp.json")
+    Setup-ScriptInterruptionHandler
 
-    $installedCount = 0
+    try {
+        Write-Log "Iniciando instalación de dotfiles..."
 
-    Write-Log "Instalando dotfiles..."
-    foreach ($file in $dotfilesList) {
-        $src = Join-Path $dotfilesDir $file
-        $dst = Join-Path $TARGET_HOME $file
+        $dotfilesDir = Join-Path $SETUP_DIR "dotfiles"
 
-        # Verificar que el archivo fuente existe
-        if (-not (Test-Path $src)) {
-            Write-Log "Dotfile no encontrado: $src" "WARNING"
-            continue
+        if (-not (Test-Path $dotfilesDir)) {
+            Write-Log "Directorio de dotfiles no encontrado: $dotfilesDir" "ERROR"
+            exit 1
+        }
+
+        $dotfilesList = @(".luispa.omp.json")
+        $installedCount = 0
+
+        Write-Log "Instalando dotfiles..."
+        foreach ($file in $dotfilesList) {
+            $src = Join-Path $dotfilesDir $file
+            $dst = Join-Path $TARGET_HOME $file
+
+            if (-not (Test-Path $src)) {
+                Write-Log "Dotfile no encontrado: $src" "WARNING"
+                continue
+            }
+
+            try {
+                Copy-Item $src $dst -Force
+                Write-Log "Copiado: $file"
+                $installedCount++
+
+                if ($file -eq ".luispa.omp.json") {
+                    Update-OmpConfig $dst
+                    Set-OhMyPoshProfile $dst
+                }
+            }
+            catch {
+                Write-Log "Error copiando $file`: $_" "WARNING"
+            }
         }
 
         try {
-            # Copiar archivo
-            Copy-Item $src $dst -Force
-            Write-Log "Copiado: $file"
-            $installedCount++
-
-            # Personalizar archivo si es necesario
-            if ($file -eq ".luispa.omp.json") {
-                Update-OmpConfig $dst
-
-                # Configurar en el perfil de PowerShell
-                Set-OhMyPoshProfile $dst
-            }
+            [Environment]::SetEnvironmentVariable("OMP_OS_ICON", "🪟", "User")
+            Write-Log "Variable de entorno OMP_OS_ICON configurada"
         }
         catch {
-            Write-Log "Error copiando $file`: $_" "WARNING"
+            Write-Log "Error configurando variables de entorno: $_" "WARNING"
         }
-    }
 
-    # Configurar variables de entorno específicas para Windows Terminal
-    try {
-        # Variable para detectar Windows en oh-my-posh
-        [Environment]::SetEnvironmentVariable("OMP_OS_ICON", "🪟", "User")
-        Write-Log "Variable de entorno OMP_OS_ICON configurada"
-    }
-    catch {
-        Write-Log "Error configurando variables de entorno: $_" "WARNING"
-    }
+        if ($installedCount -gt 0) {
+            Write-Log "✅ Dotfiles instalados ($installedCount archivos)" "SUCCESS"
+            Write-Log ""
+            Write-Log "🎨 Configuración aplicada:" "SUCCESS"
+            Write-Log "  • Oh-My-Posh configurado con tema personalizado"
+            Write-Log "  • Perfil de PowerShell actualizado"
+            Write-Log "  • Variables de entorno configuradas"
+            Write-Log ""
+            Write-Log "💡 Para aplicar los cambios:"
+            Write-Log "  1. Reinicia tu terminal"
+            Write-Log "  2. O ejecuta: . `$PROFILE"
+        }
+        else {
+            Write-Log "No se instalaron dotfiles"
+        }
 
-    # Mostrar resumen final
-    if ($installedCount -gt 0) {
-        Write-Log "✅ Dotfiles instalados ($installedCount archivos)" "SUCCESS"
-
-        Write-Log ""
-        Write-Log "🎨 Configuración aplicada:" "SUCCESS"
-        Write-Log "  • Oh-My-Posh configurado con tema personalizado"
-        Write-Log "  • Perfil de PowerShell actualizado"
-        Write-Log "  • Variables de entorno configuradas"
-        Write-Log ""
-        Write-Log "💡 Para aplicar los cambios:"
-        Write-Log "  1. Reinicia tu terminal"
-        Write-Log "  2. O ejecuta: . `$PROFILE"
+        $script:ShouldRestoreDirectory = $false
     }
-    else {
-        Write-Log "No se instalaron dotfiles"
+    finally {
+        if ($script:ShouldRestoreDirectory) {
+            Restore-OriginalDirectory
+        }
     }
 }
 
-# Ejecutar función principal
-main
+try {
+    main
+}
+catch {
+    Write-Error "❌ Error crítico en script: $($_.Exception.Message)"
+    Restore-OriginalDirectory
+    exit 1
+}
