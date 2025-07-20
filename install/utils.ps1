@@ -104,7 +104,56 @@ function Test-WingetPackage {
 
 # Función para verificar si scoop está instalado
 function Test-Scoop {
-    return $null -ne (Get-Command "scoop" -ErrorAction SilentlyContinue)
+    $scoopCmd = Get-Command "scoop" -ErrorAction SilentlyContinue
+    if ($scoopCmd) {
+        # Verificar que scoop funciona ejecutando un comando simple
+        try {
+            $null = & scoop --version 2>$null
+            return $LASTEXITCODE -eq 0
+        }
+        catch {
+            return $false
+        }
+    }
+    return $false
+}
+
+# Función de diagnóstico para scoop
+function Test-ScoopDiagnostic {
+    Write-Log "=== Diagnóstico de Scoop ===" "INFO"
+
+    # Verificar comando scoop
+    $scoopCmd = Get-Command "scoop" -ErrorAction SilentlyContinue
+    if ($scoopCmd) {
+        Write-Log "✅ Comando scoop encontrado en: $($scoopCmd.Source)" "SUCCESS"
+    }
+    else {
+        Write-Log "❌ Comando scoop no encontrado" "ERROR"
+        return
+    }
+
+    # Verificar versión
+    try {
+        $version = & scoop --version 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "✅ Versión de scoop: $version" "SUCCESS"
+        }
+        else {
+            Write-Log "❌ Error obteniendo versión: $version" "ERROR"
+        }
+    }
+    catch {
+        Write-Log "❌ Excepción obteniendo versión: $($_.Exception.Message)" "ERROR"
+    }
+
+    # Verificar directorio de scoop
+    $scoopDir = "$env:USERPROFILE\scoop"
+    if (Test-Path $scoopDir) {
+        Write-Log "✅ Directorio scoop encontrado: $scoopDir" "SUCCESS"
+    }
+    else {
+        Write-Log "❌ Directorio scoop no encontrado: $scoopDir" "ERROR"
+    }
 }
 
 # Función para verificar si un paquete scoop está instalado
@@ -119,8 +168,15 @@ function Test-ScoopPackage {
     }
 
     try {
-        $result = scoop list $PackageName 2>$null
-        return $result -and ($result | Select-String $PackageName)
+        # Ejecutar scoop list directamente
+        $result = & scoop list $PackageName 2>$null
+
+        # Verificar si el paquete aparece en la lista
+        if ($LASTEXITCODE -eq 0 -and $result) {
+            return $result -match $PackageName
+        }
+
+        return $false
     }
     catch {
         return $false
@@ -150,14 +206,16 @@ function Install-ScoopPackage {
     Write-Log "Instalando $displayName con scoop..."
 
     try {
-        $process = Start-Process -FilePath "scoop" -ArgumentList @("install", $PackageName) -Wait -PassThru -NoNewWindow
+        # Ejecutar scoop directamente (no usar Start-Process)
+        $result = & scoop install $PackageName 2>&1
 
-        if ($process.ExitCode -eq 0) {
+        if ($LASTEXITCODE -eq 0) {
             Write-Log "$PackageName instalado correctamente con scoop" "SUCCESS"
             return $true
         }
         else {
-            Write-Log "Error instalando $PackageName con scoop (código: $($process.ExitCode))" "WARNING"
+            Write-Log "Error instalando $PackageName con scoop (código: $LASTEXITCODE)" "WARNING"
+            Write-Log "Salida: $result" "WARNING"
             return $false
         }
     }
@@ -187,6 +245,12 @@ function Install-Scoop {
         # Instalar scoop
         Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 
+        # Refrescar PATH después de la instalación
+        $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+
+        # Esperar un momento para que se complete la instalación
+        Start-Sleep -Seconds 2
+
         # Verificar instalación
         if (Test-Scoop) {
             Write-Log "✅ Scoop instalado correctamente" "SUCCESS"
@@ -194,6 +258,7 @@ function Install-Scoop {
         }
         else {
             Write-Log "Error: Scoop no se instaló correctamente" "ERROR"
+            Write-Log "Intenta reiniciar PowerShell y ejecutar de nuevo" "WARNING"
             return $false
         }
     }
