@@ -23,9 +23,56 @@ En macOS tienes que tener preinstalado **Homebrew** - mira cómo en [brew.sh](ht
 
 ### ⚡ Ejecución en Linux, macOS y WSL2
 
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
-```
+<div style="
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+">
+  <div style="
+    background: #1e1e1e;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    position: relative;
+    overflow: hidden;
+  ">
+    <div style="
+      color: #00ff00;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    ">
+      <span style="margin-right: 8px;">🚀</span>
+      <strong>Ejecutar en Terminal:</strong>
+    </div>
+    <div style="
+      background: #2d2d2d;
+      border-radius: 6px;
+      padding: 12px;
+      border-left: 4px solid #00ff00;
+    ">
+      <code style="
+        color: #ffffff;
+        font-size: 14px;
+        line-height: 1.4;
+        display: block;
+        word-break: break-all;
+      ">bash &lt;(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)</code>
+    </div>
+    <div style="
+      margin-top: 8px;
+      font-size: 12px;
+      color: #888;
+      text-align: right;
+    ">
+      ← Copia y pega en tu terminal
+    </div>
+  </div>
+</div>
 
 Usa por defecto `es_ES.UTF-8`, puedes cambiarlo: `bash <(curl -fsSL .../bootstrap.sh) -l en_US.UTF-8`
 
@@ -33,7 +80,7 @@ Automatiza la configuración inicial de un entorno personalizado para sistemas L
 
 - Herramientas: git, curl, wget, nano, htop, tmux, fzf, bat, fd-find, ripgrep, tree, jq, lsd
 - El mejor prompt, Oh-My-Posh, para cualquier Shell.
-- Establece la variable LANG (por defecto a `s_ES.UTF-8`)
+- Establece la variable LANG (por defecto a `es_ES.UTF-8`)
 - Copia mis ficheros ~/.luispa.omp.json y ~/.zshrc
 - Herramientas de Git que tengo en el repositorio git-config-repos.
 - Crea unos cuantos scripts en ~/bin que uso con frecuencia: e, s, confcat
@@ -74,9 +121,56 @@ Requisitos
 
 ### ⚡ Ejecución en Windows
 
-```powershell
-iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
-```
+<div style="
+  background: linear-gradient(135deg, #0078d4 0%, #106ebe 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 8px 32px rgba(0, 120, 212, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+">
+  <div style="
+    background: #012456;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    position: relative;
+    overflow: hidden;
+  ">
+    <div style="
+      color: #5bc0f8;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    ">
+      <span style="margin-right: 8px;">🪟</span>
+      <strong>Ejecutar en PowerShell:</strong>
+    </div>
+    <div style="
+      background: #1e3a5f;
+      border-radius: 6px;
+      padding: 12px;
+      border-left: 4px solid #5bc0f8;
+    ">
+      <code style="
+        color: #ffffff;
+        font-size: 14px;
+        line-height: 1.4;
+        display: block;
+        word-break: break-all;
+      ">iex (irm &quot;https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1&quot;)</code>
+    </div>
+    <div style="
+      margin-top: 8px;
+      font-size: 12px;
+      color: #7fb3d3;
+      text-align: right;
+    ">
+      ← Copia y pega en PowerShell
+    </div>
+  </div>
+</div>
 
 Automatiza la configuración inicial de un entorno personalizado para Windows. Está diseñado con un enfoque modular e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
 
