@@ -144,7 +144,7 @@ main() {
     if cp -f "$src" "$dst" 2>/dev/null; then
       local dst_display="${dst_relative%/}"
       [[ "$dst_display" == "./" || "$dst_display" == "." ]] && dst_display="(home)"
-      success "✅ Copiado: $file → $dst_display"
+      echo "✅ Copiado: $file → $dst_display"
       ((installed_count++))
 
       # Personalizar .zshrc si es necesario
@@ -156,7 +156,7 @@ main() {
       warning "Error copiando $file"
       ((failed_count++))
     fi
-
+    echo "--------------------------------"
   done <<< "$dotfiles_data"
 
   # Cambiar shell a zsh si está disponible y el sistema lo requiere
