@@ -86,12 +86,12 @@ function main {
                 }
 
                 # Crear backup si el archivo ya existe
-                if (Test-Path $dst) {
-                    $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-                    $backupFile = "$dst.backup.$timestamp"
-                    Copy-Item $dst $backupFile -Force
-                    Write-Log "Backup creado: $backupFile"
-                }
+                # if (Test-Path $dst) {
+                #     $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+                #     $backupFile = "$dst.backup.$timestamp"
+                #     Copy-Item $dst $backupFile -Force
+                #     Write-Log "Backup creado: $backupFile"
+                # }
 
                 # Copiar archivo
                 Copy-Item $src $dst -Force
