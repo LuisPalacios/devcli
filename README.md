@@ -101,10 +101,10 @@ nerd-setup.ps1 auto
 
 ## 🧰 Gestores de paquetes por sistema operativo
 
-| Sistema Operativo     | Gestor de Paquetes | Rol Principal                                      | ¿Por qué lo usas?                                                                 |
+| Sistema Operativo     | Gestor de Paquetes | Rol Principal                                      | ¿Por qué lo uso?                                                                 |
 |------------------------|--------------------|----------------------------------------------------|------------------------------------------------------------------------------------|
 | 🐧 Linux (Debian/Ubuntu) | `apt`              | Gestor nativo del sistema                          | Estándar en Debian/Ubuntu, robusto, bien mantenido, con soporte oficial           |
 | 🐧 WSL2 (Ubuntu)        | `apt`              | Paquetes de sistema y herramientas Unix            | Mismo entorno que Linux, total compatibilidad, sin reinventar la rueda            |
 | 🍎 macOS               | `brew`             | CLI tools, apps de usuario, compilación cruzada    | Flexible, no requiere admin, ecosistema maduro para devs                          |
-| 🪟 Windows 11          | `scoop`            | Utilidades CLI portables, estilo Unix              | Limpio, sin UAC, sin registro, scriptable, ideal para herramientas de desarrollo  |
-| 🪟 Windows 11          | `winget`           | Aplicaciones GUI y binarios estándar               | Mantenido por Microsoft, buena integración con Store y apps Win32                 |
+| 🪟 Windows 11          | `scoop`            | Utilidades CLI portables, estilo Unix              | Limpio, sin UAC, sin registro, scriptable, ideal para herramientas de desarrollo y cualquier "herramientas" del CLI.  |
+| 🪟 Windows 11          | `winget`           | Aplicaciones GUI y binarios estándar               | Mantenido por Microsoft, buena integración con Store y apps Win32. Lo uso para aplicaciones complejas GUI.  |
