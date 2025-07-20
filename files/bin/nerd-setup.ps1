@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# Script para configurar terminal con Nerd Fonts en Windows
+# Script para mostrar instrucciones de configuración de Nerd Fonts en Windows
 # Uso: nerd-setup.ps1 [terminal]
 
 [CmdletBinding()]
@@ -17,7 +17,7 @@ function Show-Help {
     $helpText = @"
 Uso: nerd-setup.ps1 [TERMINAL]
 
-Configura tu terminal para usar $NERD_FONT_FULL_NAME.
+Muestra instrucciones para configurar tu terminal con $NERD_FONT_FULL_NAME.
 
 Terminales soportados:
   windows-terminal     Windows Terminal
@@ -29,6 +29,8 @@ Terminales soportados:
 Ejemplos:
   nerd-setup.ps1 windows-terminal
   nerd-setup.ps1 auto
+
+Nota: Este script solo muestra instrucciones, no modifica archivos automáticamente.
 "@
     Write-Host $helpText
 }
@@ -36,14 +38,14 @@ Ejemplos:
 # Función para verificar si las fuentes están instaladas
 function Test-Fonts {
     Write-Host "🔍 Verificando instalación de fuentes..." -ForegroundColor Cyan
-    
+
     $fontsDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
     $systemFontsDir = "$env:WINDIR\Fonts"
-    
+
     # Buscar archivos de fuente FiraCode
     $userFonts = Get-ChildItem -Path $fontsDir -Filter "*FiraCode*" -ErrorAction SilentlyContinue
     $systemFonts = Get-ChildItem -Path $systemFontsDir -Filter "*FiraCode*" -ErrorAction SilentlyContinue
-    
+
     if ($userFonts.Count -gt 0 -or $systemFonts.Count -gt 0) {
         Write-Host "✓ $NERD_FONT_FULL_NAME encontrada" -ForegroundColor Green
         return $true
@@ -72,121 +74,137 @@ function Get-Terminal {
     }
 }
 
-# Función para configurar Windows Terminal
-function Set-WindowsTerminal {
-    Write-Host "🔧 Configurando Windows Terminal..." -ForegroundColor Cyan
-    
+# Función para mostrar instrucciones de Windows Terminal
+function Show-WindowsTerminalInstructions {
+    Write-Host "🔧 Configuración de Windows Terminal:" -ForegroundColor Cyan
+    Write-Host ""
+
     $settingsPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-    
+
     if (-not (Test-Path $settingsPath)) {
         Write-Host "❌ Windows Terminal settings.json no encontrado" -ForegroundColor Red
         Write-Host "💡 Abre Windows Terminal al menos una vez para crear la configuración" -ForegroundColor Yellow
+        Write-Host ""
         return $false
     }
-    
-    try {
-        # Leer configuración actual
-        $settings = Get-Content $settingsPath -Raw | ConvertFrom-Json
-        
-        # Crear backup
-        $backupPath = "$settingsPath.backup.$(Get-Date -Format 'yyyyMMddHHmmss')"
-        Copy-Item $settingsPath $backupPath
-        
-        # Configurar fuente en el perfil por defecto
-        if (-not $settings.profiles) {
-            $settings | Add-Member -Type NoteProperty -Name "profiles" -Value @{}
-        }
-        
-        if (-not $settings.profiles.defaults) {
-            $settings.profiles | Add-Member -Type NoteProperty -Name "defaults" -Value @{}
-        }
-        
-        if (-not $settings.profiles.defaults.font) {
-            $settings.profiles.defaults | Add-Member -Type NoteProperty -Name "font" -Value @{}
-        }
-        
-        $settings.profiles.defaults.font.face = $NERD_FONT_FULL_NAME
-        
-        # Guardar configuración
-        $settings | ConvertTo-Json -Depth 10 | Set-Content $settingsPath -Encoding UTF8
-        
-        Write-Host "✓ Windows Terminal configurado" -ForegroundColor Green
-        Write-Host "📄 Backup creado: $backupPath" -ForegroundColor Blue
-        return $true
-    }
-    catch {
-        Write-Host "❌ Error configurando Windows Terminal: $_" -ForegroundColor Red
-        return $false
-    }
+
+    Write-Host "📋 Instrucciones paso a paso:" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "   Método 1 - Interfaz Gráfica (Recomendado):" -ForegroundColor Green
+    Write-Host "   1. Abre Windows Terminal" -ForegroundColor White
+    Write-Host "   2. Presiona Ctrl + , (o ve a Configuración)" -ForegroundColor White
+    Write-Host "   3. En la sidebar izquierda, selecciona 'Valores predeterminados'" -ForegroundColor White
+    Write-Host "   4. Busca la sección 'Apariencia'" -ForegroundColor White
+    Write-Host "   5. En 'Tipo de letra', selecciona:" -ForegroundColor White
+    Write-Host "      '$NERD_FONT_FULL_NAME'" -ForegroundColor Cyan
+    Write-Host "   6. Haz clic en 'Guardar'" -ForegroundColor White
+    Write-Host ""
+
+    Write-Host "   Método 2 - Edición Manual del JSON:" -ForegroundColor Green
+    Write-Host "   1. Abre: $settingsPath" -ForegroundColor White
+    Write-Host "   2. En la sección 'profiles' -> 'defaults', añade o modifica:" -ForegroundColor White
+    Write-Host '      "font": {' -ForegroundColor Cyan
+    Write-Host "          `"face`": `"$NERD_FONT_FULL_NAME`"" -ForegroundColor Cyan
+    Write-Host '      }' -ForegroundColor Cyan
+    Write-Host "   3. Guarda el archivo (Ctrl + S)" -ForegroundColor White
+    Write-Host ""
+
+    Write-Host "💡 Tip: También puedes configurar la fuente por perfil específico en lugar de globalmente" -ForegroundColor Blue
+
+    return $true
 }
 
-# Función para configurar Visual Studio Code
-function Set-VSCode {
-    Write-Host "🔧 Configurando Visual Studio Code..." -ForegroundColor Cyan
-    
-    $settingsPath = "$env:APPDATA\Code\User\settings.json"
-    
-    try {
-        $settings = @{}
-        
-        # Leer configuración existente si existe
-        if (Test-Path $settingsPath) {
-            $existingSettings = Get-Content $settingsPath -Raw | ConvertFrom-Json
-            $settings = $existingSettings
-        }
-        
-        # Configurar fuente del terminal
-        $settings."terminal.integrated.fontFamily" = "'$NERD_FONT_FULL_NAME', Consolas, 'Courier New', monospace"
-        
-        # Crear directorio si no existe
-        $settingsDir = Split-Path $settingsPath -Parent
-        if (-not (Test-Path $settingsDir)) {
-            New-Item -Path $settingsDir -ItemType Directory -Force | Out-Null
-        }
-        
-        # Guardar configuración
-        $settings | ConvertTo-Json -Depth 10 | Set-Content $settingsPath -Encoding UTF8
-        
-        Write-Host "✓ Visual Studio Code configurado" -ForegroundColor Green
-        return $true
-    }
-    catch {
-        Write-Host "❌ Error configurando Visual Studio Code: $_" -ForegroundColor Red
-        return $false
-    }
+# Función para mostrar instrucciones de Visual Studio Code
+function Show-VSCodeInstructions {
+    Write-Host "🔧 Configuración de Visual Studio Code:" -ForegroundColor Cyan
+    Write-Host ""
+
+    Write-Host "📋 Instrucciones paso a paso:" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "   Método 1 - Interfaz Gráfica (Recomendado):" -ForegroundColor Green
+    Write-Host "   1. Abre Visual Studio Code" -ForegroundColor White
+    Write-Host "   2. Presiona Ctrl + , (o ve a File > Preferences > Settings)" -ForegroundColor White
+    Write-Host "   3. En el buscador, escribe: 'terminal font'" -ForegroundColor White
+    Write-Host "   4. Busca 'Terminal › Integrated: Font Family'" -ForegroundColor White
+    Write-Host "   5. En el campo, escribe:" -ForegroundColor White
+    Write-Host "      '$NERD_FONT_FULL_NAME'" -ForegroundColor Cyan
+    Write-Host "   6. Los cambios se guardan automáticamente" -ForegroundColor White
+    Write-Host ""
+
+    Write-Host "   Método 2 - Edición Manual del settings.json:" -ForegroundColor Green
+    Write-Host "   1. Presiona Ctrl + Shift + P" -ForegroundColor White
+    Write-Host "   2. Escribe: 'Preferences: Open Settings (JSON)'" -ForegroundColor White
+    Write-Host "   3. Añade o modifica esta línea:" -ForegroundColor White
+    Write-Host "      `"terminal.integrated.fontFamily`": `"'$NERD_FONT_FULL_NAME', Consolas, 'Courier New', monospace`"" -ForegroundColor Cyan
+    Write-Host "   4. Guarda el archivo (Ctrl + S)" -ForegroundColor White
+    Write-Host ""
+
+    Write-Host "💡 Tip: También puedes configurar 'editor.fontFamily' para usar Nerd Font en el editor" -ForegroundColor Blue
+
+    return $true
 }
 
-# Función para configurar PowerShell Console
-function Set-PowerShellConsole {
-    Write-Host "🔧 Configurando PowerShell Console..." -ForegroundColor Cyan
-    
-    try {
-        # Intentar cambiar la fuente del console actual
-        if ($Host.UI.RawUI) {
-            Write-Host "💡 Para PowerShell Console:" -ForegroundColor Yellow
-            Write-Host "  1. Haz clic derecho en la barra de título" -ForegroundColor Yellow
-            Write-Host "  2. Selecciona 'Propiedades'" -ForegroundColor Yellow
-            Write-Host "  3. Ve a la pestaña 'Fuente'" -ForegroundColor Yellow
-            Write-Host "  4. Selecciona '$NERD_FONT_FULL_NAME'" -ForegroundColor Yellow
-            Write-Host "  5. Haz clic en 'Aceptar'" -ForegroundColor Yellow
-        }
-        
-        return $true
-    }
-    catch {
-        Write-Host "❌ Error configurando PowerShell Console: $_" -ForegroundColor Red
-        return $false
-    }
+# Función para mostrar instrucciones de PowerShell Console
+function Show-PowerShellInstructions {
+    Write-Host "🔧 Configuración de PowerShell Console:" -ForegroundColor Cyan
+    Write-Host ""
+
+    Write-Host "📋 Instrucciones paso a paso:" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "   1. Haz clic derecho en la barra de título de PowerShell" -ForegroundColor White
+    Write-Host "   2. Selecciona 'Propiedades' en el menú" -ForegroundColor White
+    Write-Host "   3. Ve a la pestaña 'Fuente'" -ForegroundColor White
+    Write-Host "   4. En la lista de fuentes, selecciona:" -ForegroundColor White
+    Write-Host "      '$NERD_FONT_FULL_NAME'" -ForegroundColor Cyan
+    Write-Host "   5. Ajusta el tamaño si es necesario (recomendado: 12-14)" -ForegroundColor White
+    Write-Host "   6. Haz clic en 'Aceptar'" -ForegroundColor White
+    Write-Host "   7. Elige si aplicar solo a esta ventana o a todas las futuras" -ForegroundColor White
+    Write-Host ""
+
+    Write-Host "💡 Nota: Los cambios se aplicarán inmediatamente" -ForegroundColor Blue
+
+    return $true
+}
+
+# Función para mostrar instrucciones de Command Prompt
+function Show-CmdInstructions {
+    Write-Host "🔧 Configuración de Command Prompt:" -ForegroundColor Cyan
+    Write-Host ""
+
+    Write-Host "📋 Instrucciones paso a paso:" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "   1. Abre Command Prompt (cmd)" -ForegroundColor White
+    Write-Host "   2. Haz clic derecho en la barra de título" -ForegroundColor White
+    Write-Host "   3. Selecciona 'Propiedades'" -ForegroundColor White
+    Write-Host "   4. Ve a la pestaña 'Fuente'" -ForegroundColor White
+    Write-Host "   5. En la lista de fuentes, selecciona:" -ForegroundColor White
+    Write-Host "      '$NERD_FONT_FULL_NAME'" -ForegroundColor Cyan
+    Write-Host "   6. Ajusta el tamaño si es necesario" -ForegroundColor White
+    Write-Host "   7. Haz clic en 'Aceptar'" -ForegroundColor White
+    Write-Host ""
+
+    Write-Host "💡 Nota: Command Prompt tiene soporte limitado para iconos Unicode" -ForegroundColor Blue
+
+    return $true
 }
 
 # Función para mostrar instrucciones generales
 function Show-GeneralInstructions {
-    Write-Host "💡 Instrucciones generales:" -ForegroundColor Yellow
-    Write-Host "  1. Asegúrate de que '$NERD_FONT_FULL_NAME' esté instalada" -ForegroundColor Yellow
-    Write-Host "  2. Abre la configuración de tu terminal" -ForegroundColor Yellow
-    Write-Host "  3. Busca la opción de 'Fuente' o 'Font'" -ForegroundColor Yellow
-    Write-Host "  4. Selecciona '$NERD_FONT_FULL_NAME'" -ForegroundColor Yellow
-    Write-Host "  5. Reinicia el terminal para aplicar los cambios" -ForegroundColor Yellow
+    Write-Host "💡 Instrucciones generales para otros terminales:" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "   1. Asegúrate de que '$NERD_FONT_FULL_NAME' esté instalada" -ForegroundColor White
+    Write-Host "   2. Abre la configuración/preferencias de tu terminal" -ForegroundColor White
+    Write-Host "   3. Busca la opción de 'Fuente', 'Font' o 'Tipografía'" -ForegroundColor White
+    Write-Host "   4. Selecciona '$NERD_FONT_FULL_NAME' de la lista" -ForegroundColor White
+    Write-Host "   5. Guarda los cambios" -ForegroundColor White
+    Write-Host "   6. Reinicia el terminal para aplicar los cambios" -ForegroundColor White
+    Write-Host ""
+
+    Write-Host "🔍 Terminales populares:" -ForegroundColor Blue
+    Write-Host "   • Hyper: Edit > Preferences > fontFamily" -ForegroundColor Gray
+    Write-Host "   • Terminus: Settings > Appearance > Font" -ForegroundColor Gray
+    Write-Host "   • ConEmu: Settings > Main > Font" -ForegroundColor Gray
+    Write-Host "   • Cmder: Settings > Main > Font" -ForegroundColor Gray
 }
 
 # Función principal
@@ -195,51 +213,42 @@ function main {
         Show-Help
         return
     }
-    
-    Write-Host "🚀 Configurando Nerd Fonts para Windows..." -ForegroundColor Green
+
+    Write-Host "🚀 Instrucciones para configurar Nerd Fonts en Windows..." -ForegroundColor Green
     Write-Host ""
-    
+
     # Verificar que las fuentes estén instaladas
     if (-not (Test-Fonts)) {
         return
     }
-    
+
     # Detectar terminal si es auto
     if ($Terminal -eq "auto") {
         $Terminal = Get-Terminal
         Write-Host "🔍 Terminal detectado: $Terminal" -ForegroundColor Cyan
     }
-    
+
     Write-Host ""
-    
-    # Configurar según el terminal
+
+    # Mostrar instrucciones según el terminal
     $success = switch ($Terminal) {
-        "windows-terminal" { Set-WindowsTerminal }
-        "vscode" { Set-VSCode }
-        "powershell" { Set-PowerShellConsole }
-        "cmd" { 
-            Write-Host "💡 Command Prompt usa la configuración del sistema" -ForegroundColor Yellow
-            Show-GeneralInstructions
-            $true
-        }
+        "windows-terminal" { Show-WindowsTerminalInstructions }
+        "vscode" { Show-VSCodeInstructions }
+        "powershell" { Show-PowerShellInstructions }
+        "cmd" { Show-CmdInstructions }
         default {
             Write-Host "❌ Terminal no soportado: $Terminal" -ForegroundColor Red
             Write-Host ""
             Show-GeneralInstructions
-            $false
+            $true
         }
     }
-    
+
     Write-Host ""
-    
-    if ($success) {
-        Write-Host "✅ Configuración completada para $Terminal" -ForegroundColor Green
-        Write-Host "💡 Reinicia tu terminal para ver los cambios" -ForegroundColor Blue
-    }
-    else {
-        Write-Host "⚠️ Configuración completada con advertencias" -ForegroundColor Yellow
-    }
+    Write-Host "✅ Instrucciones mostradas para $Terminal" -ForegroundColor Green
+    Write-Host "💡 Una vez configurado, reinicia tu terminal para ver los iconos de Nerd Font" -ForegroundColor Blue
+    Write-Host "🧪 Ejecuta 'nerd-verify.ps1' para verificar que todo funciona correctamente" -ForegroundColor Magenta
 }
 
 # Ejecutar función principal
-main 
+main
