@@ -1,0 +1,6 @@
+{
+  "tools": [
+    "nerd-setup.ps1",
+    "nerd-verify.ps1"
+  ]
+} 
