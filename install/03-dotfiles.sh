@@ -80,6 +80,7 @@ main() {
 
   # Procesar cada dotfile del JSON
   while IFS= read -r line; do
+    echo "line: $line"
     [[ -n "$line" ]] || continue
 
     local dotfile_info
@@ -147,10 +148,10 @@ main() {
       ((installed_count++))
 
       # Personalizar .zshrc si es necesario
-      # if [[ "$file" == ".zshrc" ]]; then
-      #   log "Personalizando .zshrc..."
-      #   customize_zshrc "$dst"
-      # fi
+      if [[ "$file" == ".zshrc" ]]; then
+        log "Personalizando .zshrc..."
+        customize_zshrc "$dst"
+      fi
     else
       warning "Error copiando $file"
       ((failed_count++))
