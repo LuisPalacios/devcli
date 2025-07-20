@@ -381,7 +381,7 @@ function Update-UserPath {
 
     if (-not (Test-Path $NewPath)) {
         Write-Log "El directorio no existe: $NewPath" "WARNING"
-        return $false
+        return
     }
 
     try {
@@ -394,15 +394,12 @@ function Update-UserPath {
 
             # También actualizar PATH de la sesión actual
             $env:PATH += ";$NewPath"
-            return $true
         }
         else {
             Write-Log "Directorio ya está en PATH: $NewPath"
-            return $true
         }
     }
     catch {
         Write-Log "Error actualizando PATH: $($_.Exception.Message)" "ERROR"
-        return $false
     }
 }
