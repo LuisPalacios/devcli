@@ -1,0 +1,12 @@
+{
+  "dotfiles": [
+    {
+      "file": ".luispa.omp.json",
+      "dst": ".\\"
+    },
+    {
+      "file": "Microsoft.PowerShell_profile.ps1",
+      "dst": "Documents\\PowerShell\\"
+    }
+  ]
+}
