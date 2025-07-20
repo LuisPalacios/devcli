@@ -146,12 +146,13 @@ main() {
       [[ "$dst_display" == "./" || "$dst_display" == "." ]] && dst_display="(home)"
       echo "✅ Copiado: $file → $dst_display"
       ((installed_count++))
+      echo "✅ después de copiar: $file → $dst_display"
 
       # Personalizar .zshrc si es necesario
-      if [[ "$file" == ".zshrc" ]]; then
-        log "Personalizando .zshrc..."
-        customize_zshrc "$dst"
-      fi
+      # if [[ "$file" == ".zshrc" ]]; then
+      #   log "Personalizando .zshrc..."
+      #   customize_zshrc "$dst"
+      # fi
     else
       warning "Error copiando $file"
       ((failed_count++))
