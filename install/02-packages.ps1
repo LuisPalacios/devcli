@@ -1,13 +1,10 @@
 #Requires -Version 7.0
 
 # Script de instalación de herramientas de productividad para Windows
-# Lee configuración desde 02-packages-win.json
+# Lee configuración desde 02-packages-win.json y usa Scoop
 
 [CmdletBinding()]
 param()
-
-Write-Host "WiP packages"
-exit 0
 
 # Cargar variables y funciones comunes
 . "$PSScriptRoot\env.ps1"
@@ -16,7 +13,7 @@ exit 0
 # Función para instalar Nerd Fonts
 function Install-NerdFonts {
     Write-Log "Instalando FiraCode Nerd Font..."
-    
+
     try {
         $fontsDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
         if (-not (Test-Path $fontsDir)) {
@@ -73,20 +70,23 @@ function main {
     }
 
     Setup-ScriptInterruptionHandler
-    
+
     try {
         Write-Log "Iniciando instalación de herramientas de productividad..."
+        Write-Log "Usuario: $env:USERNAME | Idioma: $Global:LOCALE"
         Write-Log "Directorio original: $Global:OriginalDirectory"
 
-        # Verificar que jq esté disponible
-        if (-not (Test-Jq)) {
-            Write-Log "Abortando: jq es requerido para procesar la configuración" "ERROR"
+        # Verificar que Scoop esté disponible
+        if (-not (Test-Scoop)) {
+            Write-Log "Scoop no está disponible. Ejecutando diagnóstico..." "WARNING"
+            Test-ScoopDiagnostic
+            Write-Log "Abortando: Scoop es requerido para instalar herramientas" "ERROR"
             exit 1
         }
 
         # Archivo de configuración
         $packagesConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\02-packages-win.json"
-        
+
         # Leer paquetes desde JSON usando función común
         $packages = Get-ConfigFromJson -JsonPath $packagesConfig -PropertyName "packages"
 
@@ -97,16 +97,12 @@ function main {
 
         $installedCount = 0
         $failedCount = 0
+        $scoopPackages = @()
 
-        Write-Log "Instalando herramientas de productividad..."
+        # Separar paquetes para Scoop
         foreach ($package in $packages) {
-            if ($package.id -and $package.name) {
-                if (Install-WingetPackage -PackageId $package.id -Name $package.name -Description $package.description) {
-                    $installedCount++
-                }
-                else {
-                    $failedCount++
-                }
+            if ($package.name) {
+                $scoopPackages += $package.name
             }
             else {
                 Write-Log "Paquete con configuración incompleta omitido" "WARNING"
@@ -114,8 +110,22 @@ function main {
             }
         }
 
+        # Instalar paquetes con Scoop
+        if ($scoopPackages.Count -gt 0) {
+            Write-Log "Instalando herramientas de productividad con scoop..."
+
+            foreach ($packageName in $scoopPackages) {
+                if (Install-ScoopPackage -PackageName $packageName) {
+                    $installedCount++
+                }
+                else {
+                    $failedCount++
+                }
+            }
+        }
+
         # Instalar Nerd Fonts si lsd está en la lista
-        $hasLsd = $packages | Where-Object { $_.id -eq "lsd-rs.lsd" }
+        $hasLsd = $scoopPackages -contains "lsd"
         if ($hasLsd) {
             Install-NerdFonts | Out-Null
         }
@@ -143,6 +153,16 @@ btm %*
             }
         }
 
+        # Verificar herramientas críticas instaladas
+        $criticalTools = @("lsd", "fzf", "fd", "ripgrep")
+        $missingTools = @()
+
+        foreach ($tool in $criticalTools) {
+            if (-not (Test-ScoopPackage -PackageName $tool)) {
+                $missingTools += $tool
+            }
+        }
+
         # Mostrar resumen final
         if ($installedCount -gt 0) {
             Write-Log "✅ Herramientas de productividad instaladas ($installedCount paquetes)" "SUCCESS"
@@ -155,6 +175,11 @@ btm %*
         }
         else {
             Write-Log "No se instalaron nuevos paquetes"
+        }
+
+        if ($missingTools.Count -gt 0) {
+            Write-Log "❌ Herramientas críticas no disponibles: $($missingTools -join ', ')" "WARNING"
+            Write-Log "Intenta ejecutar de nuevo después de reiniciar el terminal" "WARNING"
         }
 
         # Marcar que ya no necesitamos restaurar el directorio

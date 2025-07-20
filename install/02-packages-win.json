@@ -1,34 +1,28 @@
 {
   "packages": [
     {
-      "id": "Clement.bottom",
       "name": "bottom",
       "description": "htop equivalente"
     },
     {
-      "id": "lsd-rs.lsd", 
       "name": "lsd",
       "description": "ls con iconos y colores"
     },
     {
-      "id": "ajeetdsouza.zoxide",
-      "name": "zoxide", 
+      "name": "zoxide",
       "description": "cd inteligente"
     },
     {
-      "id": "sharkdp.fd",
       "name": "fd",
       "description": "find moderno"
     },
     {
-      "id": "junegunn.fzf",
-      "name": "fzf", 
+      "name": "fzf",
       "description": "fuzzy finder"
     },
     {
-      "id": "BurntSushi.ripgrep.MSVC",
       "name": "ripgrep",
       "description": "grep moderno"
     }
   ]
-} 
+}
