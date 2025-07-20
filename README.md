@@ -23,56 +23,9 @@ En macOS tienes que tener preinstalado **Homebrew** - mira cómo en [brew.sh](ht
 
 ### ⚡ Ejecución en Linux, macOS y WSL2
 
-<div style="
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  padding: 20px;
-  margin: 20px 0;
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-">
-  <div style="
-    background: #1e1e1e;
-    border-radius: 8px;
-    padding: 16px;
-    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-    position: relative;
-    overflow: hidden;
-  ">
-    <div style="
-      color: #00ff00;
-      font-size: 14px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-    ">
-      <span style="margin-right: 8px;">🚀</span>
-      <strong>Ejecutar en Terminal:</strong>
-    </div>
-    <div style="
-      background: #2d2d2d;
-      border-radius: 6px;
-      padding: 12px;
-      border-left: 4px solid #00ff00;
-    ">
-      <code style="
-        color: #ffffff;
-        font-size: 14px;
-        line-height: 1.4;
-        display: block;
-        word-break: break-all;
-      ">bash &lt;(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)</code>
-    </div>
-    <div style="
-      margin-top: 8px;
-      font-size: 12px;
-      color: #888;
-      text-align: right;
-    ">
-      ← Copia y pega en tu terminal
-    </div>
-  </div>
-</div>
+```console
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
+```
 
 Usa por defecto `es_ES.UTF-8`, puedes cambiarlo: `bash <(curl -fsSL .../bootstrap.sh) -l en_US.UTF-8`
 
@@ -80,7 +33,7 @@ Automatiza la configuración inicial de un entorno personalizado para sistemas L
 
 - Herramientas: git, curl, wget, nano, htop, tmux, fzf, bat, fd-find, ripgrep, tree, jq, lsd
 - El mejor prompt, Oh-My-Posh, para cualquier Shell.
-- Establece la variable LANG (por defecto a `es_ES.UTF-8`)
+- Establece la variable LANG (por defecto a `s_ES.UTF-8`)
 - Copia mis ficheros ~/.luispa.omp.json y ~/.zshrc
 - Herramientas de Git que tengo en el repositorio git-config-repos.
 - Crea unos cuantos scripts en ~/bin que uso con frecuencia: e, s, confcat
@@ -121,56 +74,9 @@ Requisitos
 
 ### ⚡ Ejecución en Windows
 
-<div style="
-  background: linear-gradient(135deg, #0078d4 0%, #106ebe 100%);
-  border-radius: 12px;
-  padding: 20px;
-  margin: 20px 0;
-  box-shadow: 0 8px 32px rgba(0, 120, 212, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-">
-  <div style="
-    background: #012456;
-    border-radius: 8px;
-    padding: 16px;
-    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-    position: relative;
-    overflow: hidden;
-  ">
-    <div style="
-      color: #5bc0f8;
-      font-size: 14px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-    ">
-      <span style="margin-right: 8px;">🪟</span>
-      <strong>Ejecutar en PowerShell:</strong>
-    </div>
-    <div style="
-      background: #1e3a5f;
-      border-radius: 6px;
-      padding: 12px;
-      border-left: 4px solid #5bc0f8;
-    ">
-      <code style="
-        color: #ffffff;
-        font-size: 14px;
-        line-height: 1.4;
-        display: block;
-        word-break: break-all;
-      ">iex (irm &quot;https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1&quot;)</code>
-    </div>
-    <div style="
-      margin-top: 8px;
-      font-size: 12px;
-      color: #7fb3d3;
-      text-align: right;
-    ">
-      ← Copia y pega en PowerShell
-    </div>
-  </div>
-</div>
+```powershell
+iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
+```
 
 Automatiza la configuración inicial de un entorno personalizado para Windows. Está diseñado con un enfoque modular e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
 
@@ -202,3 +108,188 @@ nerd-setup.ps1 auto
 | 🍎 macOS               | `brew`             | CLI tools, apps de usuario, compilación cruzada    | Flexible, no requiere admin, ecosistema maduro para devs                          |
 | 🪟 Windows 11          | `scoop`            | Utilidades CLI portables, estilo Unix              | Limpio, sin UAC, sin registro, scriptable, ideal para herramientas de desarrollo y cualquier "herramientas" del CLI.  |
 | 🪟 Windows 11          | `winget`           | Aplicaciones GUI y binarios estándar               | Mantenido por Microsoft, buena integración con Store y apps Win32. Lo uso para aplicaciones complejas GUI.  |
+
+## 🎨 **Opción 1: HTML/CSS (Más atractiva)**
+
+```html
+<code_block_to_apply_changes_from>
+```
+
+## 🎨 **Opción 2: Estilo Terminal Retro**
+
+```html
+<div style="
+  background: #000;
+  border: 2px solid #00ff00;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  font-family: 'Courier New', monospace;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+">
+  <div style="color: #00ff00; margin-bottom: 8px;">
+    <span style="animation: blink 1s infinite;">▊</span> <strong>~/terminal $</strong>
+  </div>
+  <div style="
+    background: #111;
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid #333;
+  ">
+    <code style="color: #00ff00; font-size: 13px;">
+      bash &lt;(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
+    </code>
+  </div>
+</div>
+
+<style>
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+</style>
+```
+
+## 🎨 **Opción 3: Markdown con cajas ASCII (Más simple)**
+
+```markdown
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│  🚀 **Instalación Rápida - Linux/macOS/WSL2**                                        │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  ```bash                                                                            │
+│  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)  │
+│  ```                                                                                │
+│                                                                                     │
+│  💡 **Opcional:** Cambiar idioma con `-l en_US.UTF-8`                               │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## 🎨 **Opción 4: CSS + Botón Copiar (Más interactiva)**
+
+```html
+<div style="
+  background: linear-gradient(145deg, #667eea, #764ba2);
+  padding: 2px;
+  border-radius: 12px;
+  margin: 20px 0;
+">
+  <div style="
+    background: #1a1a1a;
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+  ">
+    <div style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    ">
+      <span style="color: #00ff88; font-weight: bold;">
+        🚀 Ejecutar Bootstrap
+      </span>
+      <button onclick="navigator.clipboard.writeText('bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)')"
+              style="
+                background: #00ff88;
+                border: none;
+                border-radius: 6px;
+                padding: 6px 12px;
+                color: #000;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 12px;
+              ">
+        📋 Copiar
+      </button>
+    </div>
+
+    <div style="
+      background: #2d2d2d;
+      border-radius: 8px;
+      padding: 16px;
+      border-left: 4px solid #00ff88;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    ">
+      <code style="
+        color: #ffffff;
+        font-size: 14px;
+        line-height: 1.5;
+        display: block;
+        word-wrap: break-word;
+      ">bash &lt;(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)</code>
+    </div>
+
+    <div style="
+      margin-top: 8px;
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+    ">
+      Compatible con Linux, macOS y WSL2
+    </div>
+  </div>
+</div>
+```
+
+## 🎨 **Opción 5: Estilo GitHub/GitLab (Profesional)**
+
+```html
+<div style="
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+  margin: 16px 0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+">
+  <div style="
+    background: #f6f8fa;
+    padding: 8px 16px;
+    border-bottom: 1px solid #d1d9e0;
+    font-weight: 600;
+    color: #24292e;
+    font-size: 14px;
+  ">
+    🚀 Instalación Automática
+  </div>
+  <div style="
+    background: #24292e;
+    padding: 16px;
+    position: relative;
+  ">
+    <pre style="
+      margin: 0;
+      color: #e1e4e8;
+      font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-x: auto;
+    "><code>bash &lt;(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)</code></pre>
+
+    <div style="
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      padding: 4px 8px;
+      font-size: 11px;
+      color: #959da5;
+    ">
+      bash
+    </div>
+  </div>
+</div>
+```
+
+## 💡 **Mi recomendación:**
+
+Para el **README.md**, usa la **Opción 1** (HTML/CSS con gradiente) porque:
+
+✅ **Muy atractiva visualmente**
+✅ **Se ve bien en GitHub/GitLab**
+✅ **Resalta el comando importante**
+✅ **Incluye iconos y colores**
+✅ **Responsive y profesional**
+
+¿Cuál te gusta más? ¿O quieres que combine elementos de varias opciones? 🎨
