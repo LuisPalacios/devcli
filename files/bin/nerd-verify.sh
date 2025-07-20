@@ -309,14 +309,14 @@ show_recommendations() {
     if [[ "$1" -ne 0 ]]; then
       echo -e "${RED}✗ Fuentes no instaladas${NC}"
       echo -e "${YELLOW}Para instalar las fuentes:${NC}"
-      echo "cd ~/.linux-setup/install && ./02-packages.sh"
+      echo "cd ~/.devcli/install && ./02-packages.sh"
       echo
     fi
 
     if [[ "$2" -ne 0 ]]; then
       echo -e "${RED}✗ Terminal no configurado${NC}"
       echo -e "${YELLOW}Para configurar el terminal:${NC}"
-      echo "linux-setup-terminal.sh $terminal"
+      echo "nerd-setup.sh $terminal"
       echo
     fi
   fi

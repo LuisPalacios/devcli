@@ -194,7 +194,7 @@ if [[ "$(check_nerd_fonts_installed)" == "true" ]]; then
     log "'${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}' no detectada"
     log "Para instalar las fuentes y configurar tu terminal:"
     log "  1. Ejecuta: nerd-setup.sh auto"
-    log "  2. O instala las fuentes primero: cd ~/.linux-setup/install && ./02-packages.sh"
+    log "  2. O instala las fuentes primero: cd ~/.devcli/install && ./02-packages.sh"
   fi
 
   # Mensaje especial

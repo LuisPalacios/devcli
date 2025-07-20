@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+#Requires -Version 7.0
 
 # Script de instalación de herramientas locales para Windows
 # Lee configuración desde 05-localtools-win.json

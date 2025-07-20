@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+#Requires -Version 7.0
 
 # Script de instalaciÃ³n de archivos desde repositorios Git para Windows
 # Lee configuraciÃ³n desde 04-gitfiles-win.json
@@ -256,7 +256,7 @@ function main {
     
     # Mostrar resumen final
     if ($totalFilesCopied -gt 0) {
-        Write-Log "âœ… Archivos desde repositorios Git instalados ($totalFilesCopied archivos)" "SUCCESS"
+        Write-Log "âÿÿ Archivos desde repositorios Git instalados ($totalFilesCopied archivos)" "SUCCESS"
     }
     else {
         Write-Log "No se copiaron archivos desde repositorios Git"

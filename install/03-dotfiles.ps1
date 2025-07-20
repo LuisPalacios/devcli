@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+#Requires -Version 7.0
 
 # Script de instalación de dotfiles para Windows
 # Copia .luispa.omp.json al home del usuario
@@ -33,25 +33,26 @@ function Test-Command {
 # Función para personalizar archivo de configuración
 function Update-OmpConfig {
     param([string]$ConfigFile)
-    
+
     if (-not (Test-Path $ConfigFile)) {
         Write-Log "Archivo de configuración no encontrado: $ConfigFile" "WARNING"
         return $false
     }
-    
+
     try {
-        # Leer contenido del archivo
-        $content = Get-Content $ConfigFile -Raw -Encoding UTF8
-        
-        # Crear backup
-        $backupFile = "$ConfigFile.backup.$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+        # Leer contenido del archivo usando PowerShell 7 encoding mejorado
+        $content = Get-Content $ConfigFile -Raw -Encoding UTF8NoBOM
+
+        # Crear backup con timestamp más preciso
+        $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+        $backupFile = "$ConfigFile.backup.$timestamp"
         Copy-Item $ConfigFile $backupFile -Force
-        
+
         # Reemplazar configuraciones específicas para Windows si es necesario
         # Por ahora solo informamos que se ha copiado
         Write-Log "Configuración Oh-My-Posh personalizada para Windows"
         Write-Log "Backup creado: $backupFile"
-        
+
         return $true
     }
     catch {
@@ -63,19 +64,19 @@ function Update-OmpConfig {
 # Función para configurar oh-my-posh en PowerShell
 function Set-OhMyPoshProfile {
     param([string]$ConfigPath)
-    
+
     if (-not (Test-Command "oh-my-posh")) {
         Write-Log "oh-my-posh no está disponible" "WARNING"
         return $false
     }
-    
+
     # Obtener la ruta del perfil de PowerShell
     $profilePath = $PROFILE
     if (-not $profilePath) {
         Write-Log "No se puede determinar la ruta del perfil de PowerShell" "WARNING"
         return $false
     }
-    
+
     try {
         # Crear directorio del perfil si no existe
         $profileDir = Split-Path $profilePath -Parent
@@ -83,10 +84,10 @@ function Set-OhMyPoshProfile {
             New-Item -Path $profileDir -ItemType Directory -Force | Out-Null
             Write-Log "Directorio del perfil creado: $profileDir"
         }
-        
+
         # Línea de inicialización para Oh-My-Posh
         $ompLine = "oh-my-posh init pwsh --config `"$ConfigPath`" | Invoke-Expression"
-        
+
         # Verificar si ya está configurado
         if (Test-Path $profilePath) {
             $profileContent = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
@@ -95,7 +96,7 @@ function Set-OhMyPoshProfile {
                 return $true
             }
         }
-        
+
         # Añadir configuración al perfil
         if (Test-Path $profilePath) {
             Add-Content -Path $profilePath -Value "`n# Oh My Posh Configuration`n$ompLine" -Encoding UTF8
@@ -103,7 +104,7 @@ function Set-OhMyPoshProfile {
         else {
             Set-Content -Path $profilePath -Value "# Oh My Posh Configuration`n$ompLine" -Encoding UTF8
         }
-        
+
         Write-Log "Oh-My-Posh configurado en el perfil de PowerShell" "SUCCESS"
         return $true
     }
@@ -116,41 +117,41 @@ function Set-OhMyPoshProfile {
 # Función principal
 function main {
     Write-Log "Iniciando instalación de dotfiles..."
-    
+
     # Directorio de dotfiles
     $dotfilesDir = Join-Path $SETUP_DIR "dotfiles"
-    
+
     if (-not (Test-Path $dotfilesDir)) {
         Write-Log "Directorio de dotfiles no encontrado: $dotfilesDir" "ERROR"
         exit 1
     }
-    
+
     # Lista de dotfiles a instalar (solo para Windows)
     $dotfilesList = @(".luispa.omp.json")
-    
+
     $installedCount = 0
-    
+
     Write-Log "Instalando dotfiles..."
     foreach ($file in $dotfilesList) {
         $src = Join-Path $dotfilesDir $file
         $dst = Join-Path $TARGET_HOME $file
-        
+
         # Verificar que el archivo fuente existe
         if (-not (Test-Path $src)) {
             Write-Log "Dotfile no encontrado: $src" "WARNING"
             continue
         }
-        
+
         try {
             # Copiar archivo
             Copy-Item $src $dst -Force
             Write-Log "Copiado: $file"
             $installedCount++
-            
+
             # Personalizar archivo si es necesario
             if ($file -eq ".luispa.omp.json") {
                 Update-OmpConfig $dst
-                
+
                 # Configurar en el perfil de PowerShell
                 Set-OhMyPoshProfile $dst
             }
@@ -159,7 +160,7 @@ function main {
             Write-Log "Error copiando $file`: $_" "WARNING"
         }
     }
-    
+
     # Configurar variables de entorno específicas para Windows Terminal
     try {
         # Variable para detectar Windows en oh-my-posh
@@ -169,11 +170,11 @@ function main {
     catch {
         Write-Log "Error configurando variables de entorno: $_" "WARNING"
     }
-    
+
     # Mostrar resumen final
     if ($installedCount -gt 0) {
         Write-Log "✅ Dotfiles instalados ($installedCount archivos)" "SUCCESS"
-        
+
         Write-Log ""
         Write-Log "🎨 Configuración aplicada:" "SUCCESS"
         Write-Log "  • Oh-My-Posh configurado con tema personalizado"
@@ -190,4 +191,4 @@ function main {
 }
 
 # Ejecutar función principal
-main 
+main

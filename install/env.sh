@@ -4,7 +4,7 @@
 # -------------------------------------------------------------------
 
 # URL del repositorio
-export REPO_URL="https://github.com/LuisPalacios/linux-setup.git"
+export REPO_URL="https://github.com/LuisPalacios/devcli.git"
 
 # Rama del repositorio
 export BRANCH="main"
@@ -13,7 +13,7 @@ export BRANCH="main"
 export CURRENT_USER="$(id -un)"
 
 # Directorio de instalación
-export SETUP_DIR="$HOME/.linux-setup"
+export SETUP_DIR="$HOME/.devcli"
 
 # Binarios de usuario
 export BIN_DIR="$HOME/bin"
@@ -64,7 +64,7 @@ validate_environment() {
     echo "[env.sh] ❌ No se detecta un terminal interactivo"
     exit 1
   fi
-  
+
   # Verificar permisos de escritura en HOME
   if [[ ! -w "$HOME" ]]; then
     echo "[env.sh] ❌ No hay permisos de escritura en $HOME"
