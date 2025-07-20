@@ -104,18 +104,11 @@ function Test-WingetPackage {
 
 # Función para verificar si scoop está instalado
 function Test-Scoop {
+    # Solo verificar que el comando existe y el directorio de scoop existe
     $scoopCmd = Get-Command "scoop" -ErrorAction SilentlyContinue
-    if ($scoopCmd) {
-        # Verificar que scoop funciona ejecutando un comando simple
-        try {
-            $null = & scoop --version 2>$null
-            return $LASTEXITCODE -eq 0
-        }
-        catch {
-            return $false
-        }
-    }
-    return $false
+    $scoopDir = Test-Path "$env:USERPROFILE\scoop"
+
+    return $scoopCmd -and $scoopDir
 }
 
 # Función de diagnóstico para scoop
@@ -134,12 +127,12 @@ function Test-ScoopDiagnostic {
 
     # Verificar versión
     try {
-        $version = & scoop --version 2>&1
+        $version = & scoop --version *>$null 2>&1
         if ($LASTEXITCODE -eq 0) {
-            Write-Log "✅ Versión de scoop: $version" "SUCCESS"
+            Write-Log "✅ Scoop funciona correctamente" "SUCCESS"
         }
         else {
-            Write-Log "❌ Error obteniendo versión: $version" "ERROR"
+            Write-Log "❌ Error ejecutando scoop --version" "ERROR"
         }
     }
     catch {
@@ -163,25 +156,10 @@ function Test-ScoopPackage {
         [string]$PackageName
     )
 
-    if (-not (Test-Scoop)) {
-        return $false
-    }
-
     try {
-        # Método 1: Verificar directorio de instalación (más silencioso)
+        # Solo verificar directorio - método 100% silencioso
         $scoopAppsDir = "$env:USERPROFILE\scoop\apps\$PackageName"
-        if (Test-Path $scoopAppsDir) {
-            return $true
-        }
-
-        # Método 2: Usar scoop list pero completamente silencioso
-        $null = & scoop list $PackageName *>$null 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            # Verificar nuevamente con directorio para confirmar
-            return Test-Path $scoopAppsDir
-        }
-
-        return $false
+        return Test-Path $scoopAppsDir
     }
     catch {
         return $false
@@ -210,9 +188,9 @@ function Install-ScoopPackage {
     $displayName = $Description ? "$PackageName ($Description)" : $PackageName
     Write-Log "Instalando $displayName con scoop..."
 
-        try {
-        # Ejecutar scoop con opciones silenciosas
-        $result = & scoop install $PackageName --quiet --no-update-scoop 2>&1
+            try {
+        # Ejecutar scoop silenciosamente (sin opciones que no existen)
+        $result = & scoop install $PackageName --no-update-scoop *>$null 2>&1
 
         if ($LASTEXITCODE -eq 0) {
             Write-Log "$PackageName instalado correctamente con scoop" "SUCCESS"
@@ -247,14 +225,15 @@ function Install-Scoop {
             Write-Log "Política de ejecución actualizada a RemoteSigned para el usuario actual"
         }
 
-        # Instalar scoop
-        Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+                        # Instalar scoop silenciosamente
+        $installScript = Invoke-RestMethod -Uri https://get.scoop.sh
+        $null = Invoke-Expression $installScript *>$null 2>$null
 
         # Refrescar PATH después de la instalación
         $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
 
         # Esperar un momento para que se complete la instalación
-        Start-Sleep -Seconds 2
+        Start-Sleep -Seconds 3
 
         # Verificar instalación
         if (Test-Scoop) {
