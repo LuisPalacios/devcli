@@ -20,7 +20,7 @@
     "background": "transparent"
   },
   "transient_prompt": {
-    "template": "{{ if and (eq .Env.TERM_PROGRAM \"vscode\") (eq .Env.OS \"Windows_NT\") }}[💻] {{ else }}[{{ .Env.OMP_OS_ICON }}] {{ end }}<p:cyan>{{ .Folder }}</> <foreground>\u276f</> ",
+    "template": "{{ if and (eq .Env.TERM_PROGRAM \"vscode\") (eq .Env.OS \"Windows_NT\") }}[💻] {{ else }}[{{ .Env.OMP_OS_ICON }}] Luis{{ end }}<p:cyan>{{ .Folder }}</> <foreground>\u276f</> ",
     "foreground": "p:whitesoft",
     "background": "transparent"
   },
