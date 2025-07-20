@@ -158,17 +158,17 @@ function main {
     Write-Log "Ejecutando scripts de instalación:"
     $scripts = Get-ChildItem "*.ps1" | Where-Object { $_.Name -match '^\d{2}-.*\.ps1$' } | Sort-Object Name
 
-    foreach ($script in $scripts) {
-        Write-Log "▶ Ejecutando $($script.Name)..."
-        try {
-            & $script.FullName
-        }
-        catch {
-            Write-Error "❌ Error ejecutando $($script.Name): $_"
-            Pop-Location
-            exit 1
-        }
-    }
+    # foreach ($script in $scripts) {
+    #     Write-Log "▶ Ejecutando $($script.Name)..."
+    #     try {
+    #         & $script.FullName
+    #     }
+    #     catch {
+    #         Write-Error "❌ Error ejecutando $($script.Name): $_"
+    #         Pop-Location
+    #         exit 1
+    #     }
+    # }
 
     Pop-Location
 
