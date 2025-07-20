@@ -100,7 +100,7 @@ main() {
     fi
 
     local src="$dotfiles_dir/$file"
-
+    echo "src: $src"
     # Construir ruta de destino
     local dst_dir
     if [[ "$dst_relative" == "./" || "$dst_relative" == "." ]]; then
