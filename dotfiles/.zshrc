@@ -417,6 +417,7 @@ if ! command -v zoxide >/dev/null 2>&1; then
   echo "Necesitas instalar 'zoxide', más info en .zshrc"
 else
   eval "$(zoxide init zsh)"
+  alias cd="__zoxide_z"
 fi
 
 # -----------------------------------------------------------------------------
