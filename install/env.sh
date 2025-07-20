@@ -25,9 +25,6 @@ export SETUP_LANG="es_ES.UTF-8"
 export NERD_FONT_NAME="FiraCode"
 export NERD_FONT_FULL_NAME="FiraCode Nerd Font"
 
-# Dotfiles a instalar (relativos al repo)
-export DOTFILES_LIST=(.zshrc .luispa.omp.json)
-
 # Función para detectar el usuario actual de forma dinámica
 detect_current_user() {
   # Priorizar variables de entorno comunes

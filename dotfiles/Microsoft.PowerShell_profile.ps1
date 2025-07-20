@@ -47,6 +47,17 @@ function ls {
 }
 
 # ==================================================================
+# Cambio de cd a zoxide https://github.com/ajeetdsouza/zoxide
+# ==================================================================
+#
+if (Get-Alias cd -ErrorAction SilentlyContinue) {
+    Remove-Item Alias:cd -Force
+}
+function cd {
+    zoxide @args
+}
+
+# ==================================================================
 # Elimino el alias a where para evitar conflictos con where.exe
 # ==================================================================
 #

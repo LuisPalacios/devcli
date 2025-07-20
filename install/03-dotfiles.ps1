@@ -1,89 +1,14 @@
 #Requires -Version 7.0
 
 # Script de instalación de dotfiles para Windows
-# Copia .luispa.omp.json al home del usuario
+# Lee configuración desde 03-dotfiles-win.json
 
 [CmdletBinding()]
 param()
 
-Write-Host "WiP dotfiles"
-exit 0
-
 # Cargar variables y funciones comunes
 . "$PSScriptRoot\env.ps1"
 . "$PSScriptRoot\utils.ps1"
-
-# Función para personalizar archivo de configuración
-function Update-OmpConfig {
-    param([string]$ConfigFile)
-    
-    if (-not (Test-Path $ConfigFile)) {
-        Write-Log "Archivo de configuración no encontrado: $ConfigFile" "WARNING"
-        return $false
-    }
-    
-    try {
-        $content = Get-Content $ConfigFile -Raw -Encoding UTF8NoBOM
-        $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-        $backupFile = "$ConfigFile.backup.$timestamp"
-        Copy-Item $ConfigFile $backupFile -Force
-        
-        Write-Log "Configuración Oh-My-Posh personalizada para Windows"
-        Write-Log "Backup creado: $backupFile"
-        return $true
-    }
-    catch {
-        Write-Log "Error personalizando configuración: $($_.Exception.Message)" "WARNING"
-        return $false
-    }
-}
-
-# Función para configurar oh-my-posh en PowerShell
-function Set-OhMyPoshProfile {
-    param([string]$ConfigPath)
-    
-    if (-not (Test-Path $ConfigPath)) {
-        Write-Log "Archivo de configuración no encontrado: $ConfigPath" "WARNING"
-        return $false
-    }
-    
-    $profilePath = $PROFILE
-    if (-not $profilePath) {
-        Write-Log "No se puede determinar la ruta del perfil de PowerShell" "WARNING"
-        return $false
-    }
-    
-    try {
-        $profileDir = Split-Path $profilePath -Parent
-        if (-not (Test-Path $profileDir)) {
-            New-Item -Path $profileDir -ItemType Directory -Force | Out-Null
-            Write-Log "Directorio de perfil creado: $profileDir"
-        }
-        
-        $ompLine = "oh-my-posh init pwsh --config `"$ConfigPath`" | Invoke-Expression"
-        
-        if (Test-Path $profilePath) {
-            $profileContent = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
-            if ($profileContent -and $profileContent -notlike "*oh-my-posh*") {
-                Add-Content -Path $profilePath -Value "`n# Oh My Posh Configuration`n$ompLine" -Encoding UTF8
-                Write-Log "Oh-My-Posh añadido al perfil existente" "SUCCESS"
-            }
-            else {
-                Write-Log "Oh-My-Posh ya está configurado en el perfil"
-            }
-        }
-        else {
-            Set-Content -Path $profilePath -Value "# PowerShell Profile`n`n# Oh My Posh Configuration`n$ompLine" -Encoding UTF8
-            Write-Log "Perfil de PowerShell creado con Oh-My-Posh" "SUCCESS"
-        }
-        
-        return $true
-    }
-    catch {
-        Write-Log "Error configurando perfil: $($_.Exception.Message)" "WARNING"
-        return $false
-    }
-}
 
 # Función principal
 function main {
@@ -97,41 +22,85 @@ function main {
 
     try {
         Write-Log "Iniciando instalación de dotfiles..."
+        Write-Log "Usuario: $env:USERNAME | Idioma: $Global:LOCALE"
+        Write-Log "Directorio original: $Global:OriginalDirectory"
 
         # Directorio de dotfiles
         $dotfilesDir = Join-Path $Global:SETUP_DIR "dotfiles"
-        
+
         if (-not (Test-Path $dotfilesDir)) {
             Write-Log "Directorio de dotfiles no encontrado: $dotfilesDir" "ERROR"
             exit 1
         }
 
-        # Lista de dotfiles a instalar (solo para Windows)
-        $dotfilesList = @(".luispa.omp.json")
-        $installedCount = 0
+        # Archivo de configuración
+        $dotfilesConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\03-dotfiles-win.json"
 
-        Write-Log "Instalando dotfiles..."
-        foreach ($file in $dotfilesList) {
-            $src = Join-Path $dotfilesDir $file
-            $dst = Join-Path $env:USERPROFILE $file
+        # Leer dotfiles desde JSON usando función común
+        $dotfiles = Get-ConfigFromJson -JsonPath $dotfilesConfig -PropertyName "dotfiles"
+
+        if ($dotfiles.Count -eq 0) {
+            Write-Log "No hay dotfiles para instalar"
+            return
+        }
+
+        $installedCount = 0
+        $failedCount = 0
+
+        Write-Log "Copiando dotfiles según configuración..."
+        foreach ($dotfile in $dotfiles) {
+            if (-not $dotfile.file) {
+                Write-Log "Dotfile con configuración incompleta omitido" "WARNING"
+                $failedCount++
+                continue
+            }
+
+            $src = Join-Path $dotfilesDir $dotfile.file
+
+            # Construir ruta de destino
+            $dstRelative = if ($dotfile.dst -and $dotfile.dst -ne ".\" -and $dotfile.dst -ne ".") {
+                $dotfile.dst.TrimEnd('\')
+            } else {
+                ""
+            }
+
+            $dstDir = if ($dstRelative) {
+                Join-Path $env:USERPROFILE $dstRelative
+            } else {
+                $env:USERPROFILE
+            }
+
+            $dst = Join-Path $dstDir $dotfile.file
 
             if (-not (Test-Path $src)) {
-                Write-Log "Dotfile no encontrado: $src" "WARNING"
+                Write-Log "Archivo fuente no encontrado: $src" "WARNING"
+                $failedCount++
                 continue
             }
 
             try {
-                Copy-Item $src $dst -Force
-                Write-Log "Copiado: $file"
-                $installedCount++
-
-                if ($file -eq ".luispa.omp.json") {
-                    Update-OmpConfig $dst
-                    Set-OhMyPoshProfile $dst
+                # Crear directorio de destino si no existe
+                if (-not (Test-Path $dstDir)) {
+                    New-Item -Path $dstDir -ItemType Directory -Force | Out-Null
+                    Write-Log "Directorio creado: $dstDir"
                 }
+
+                # Crear backup si el archivo ya existe
+                if (Test-Path $dst) {
+                    $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+                    $backupFile = "$dst.backup.$timestamp"
+                    Copy-Item $dst $backupFile -Force
+                    Write-Log "Backup creado: $backupFile"
+                }
+
+                # Copiar archivo
+                Copy-Item $src $dst -Force
+                Write-Log "✅ Copiado: $($dotfile.file) → $dstRelative" "SUCCESS"
+                $installedCount++
             }
             catch {
-                Write-Log "Error copiando $file`: $($_.Exception.Message)" "WARNING"
+                Write-Log "Error copiando $($dotfile.file): $($_.Exception.Message)" "WARNING"
+                $failedCount++
             }
         }
 
@@ -147,9 +116,27 @@ function main {
         # Mostrar resumen final
         if ($installedCount -gt 0) {
             Write-Log "✅ Dotfiles instalados ($installedCount archivos)" "SUCCESS"
+            if ($failedCount -gt 0) {
+                Write-Log "$failedCount archivos fallaron en la copia" "WARNING"
+            }
         }
         else {
-            Write-Log "No se instalaron dotfiles"
+            Write-Log "No se instalaron dotfiles nuevos"
+        }
+
+        # Verificar archivos críticos instalados
+        $criticalFiles = @(".luispa.omp.json")
+        $missingFiles = @()
+
+        foreach ($file in $criticalFiles) {
+            $filePath = Join-Path $env:USERPROFILE $file
+            if (-not (Test-Path $filePath)) {
+                $missingFiles += $file
+            }
+        }
+
+        if ($missingFiles.Count -gt 0) {
+            Write-Log "❌ Archivos críticos no disponibles: $($missingFiles -join ', ')" "WARNING"
         }
 
         $Global:ShouldRestoreDirectory = $false

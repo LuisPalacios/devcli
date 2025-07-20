@@ -1,0 +1,12 @@
+{
+  "dotfiles": [
+    {
+      "file": ".zshrc",
+      "dst": "./"
+    },
+    {
+      "file": ".luispa.omp.json",
+      "dst": "./"
+    }
+  ]
+}
