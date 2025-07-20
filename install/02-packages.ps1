@@ -18,17 +18,38 @@ function Install-NerdFonts {
         # Verificar que Scoop esté disponible
         if (-not (Test-Scoop)) {
             Write-Log "Scoop no está disponible para instalar fuentes" "WARNING"
-            return $false
+            return $true  # No es un error crítico, continúa
+        }
+
+        # Verificar buckets existentes de manera más robusta
+        $hasBucket = $false
+        try {
+            $buckets = & scoop bucket list 2>$null | Where-Object { $_ -match "nerd-fonts" }
+            if ($buckets) {
+                $hasBucket = $true
+                Write-Log "Bucket nerd-fonts ya está disponible"
+            }
+        }
+        catch {
+            Write-Log "Error verificando buckets, intentando añadir nerd-fonts..." "WARNING"
         }
 
         # Añadir bucket de nerd-fonts si no está agregado
-        $bucketsOutput = & scoop bucket list *>$null 2>$null
-        if ($bucketsOutput -notlike "*nerd-fonts*") {
+        if (-not $hasBucket) {
             Write-Log "Añadiendo bucket nerd-fonts..."
-            & scoop bucket add nerd-fonts https://github.com/matthewjberger/scoop-nerd-fonts *>$null 2>$null
-            if ($LASTEXITCODE -ne 0) {
-                Write-Log "Error añadiendo bucket nerd-fonts" "WARNING"
-                return $false
+            try {
+                & scoop bucket add nerd-fonts https://github.com/matthewjberger/scoop-nerd-fonts 2>$null | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Log "Bucket nerd-fonts añadido correctamente"
+                }
+                else {
+                    Write-Log "Error añadiendo bucket nerd-fonts (código: $LASTEXITCODE)" "WARNING"
+                    return $true  # No es crítico, continúa
+                }
+            }
+            catch {
+                Write-Log "Excepción añadiendo bucket: $($_.Exception.Message)" "WARNING"
+                return $true  # No es crítico, continúa
             }
         }
 
@@ -46,13 +67,13 @@ function Install-NerdFonts {
             return $true
         }
         else {
-            Write-Log "Error instalando FiraCode Nerd Font con scoop" "WARNING"
-            return $false
+            Write-Log "No se pudo instalar FiraCode-NF, pero continuando..." "WARNING"
+            return $true  # No es crítico, continúa
         }
     }
     catch {
         Write-Log "Error instalando Nerd Fonts: $($_.Exception.Message)" "WARNING"
-        return $false
+        return $true  # No es crítico, continúa
     }
 }
 
