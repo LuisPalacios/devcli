@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+#Requires -Version 7.0
 
 # Script de instalación de herramientas de productividad para Windows
 # Lee configuración desde 02-packages-win.json
@@ -54,8 +54,11 @@ function Test-WingetPackage {
 # Función para instalar paquete con winget
 function Install-WingetPackage {
     param(
+        [Parameter(Mandatory)]
         [string]$PackageId,
+        
         [string]$Name = $PackageId,
+        
         [string]$Description = ""
     )
     
@@ -64,38 +67,39 @@ function Install-WingetPackage {
         return $true
     }
     
-    $displayName = if ($Description) { "$Name ($Description)" } else { $Name }
+    $displayName = $Description ? "$Name ($Description)" : $Name
     Write-Log "Instalando $displayName..."
     
     try {
-        $result = winget install $PackageId --silent --accept-package-agreements --accept-source-agreements 2>&1
-        if ($LASTEXITCODE -eq 0) {
+        # Usar operador de llamada mejorado de PowerShell 7
+        $process = Start-Process -FilePath "winget" -ArgumentList @("install", $PackageId, "--silent", "--accept-package-agreements", "--accept-source-agreements") -Wait -PassThru -NoNewWindow
+        
+        if ($process.ExitCode -eq 0) {
             Write-Log "$Name instalado correctamente" "SUCCESS"
             return $true
         }
         else {
-            Write-Log "Error instalando $Name (código: $LASTEXITCODE)" "WARNING"
+            Write-Log "Error instalando $Name (código: $($process.ExitCode))" "WARNING"
             return $false
         }
     }
     catch {
-        Write-Log "Excepción instalando $Name`: $_" "WARNING"
+        Write-Log "Excepción instalando $Name`: $($_.Exception.Message)" "WARNING"
         return $false
     }
 }
 
 # Función para leer paquetes desde JSON
 function Get-PackagesFromJson {
-    param([string]$JsonPath)
-    
-    if (-not (Test-Path $JsonPath)) {
-        Write-Log "Archivo de configuración no encontrado: $JsonPath" "ERROR"
-        return @()
-    }
+    param(
+        [Parameter(Mandatory)]
+        [ValidateScript({Test-Path $_})]
+        [string]$JsonPath
+    )
     
     try {
-        $jsonContent = Get-Content $JsonPath -Raw -Encoding UTF8
-        $config = $jsonContent | ConvertFrom-Json
+        # PowerShell 7 maneja mejor la lectura directa de JSON
+        $config = Get-Content $JsonPath -Raw -Encoding UTF8 | ConvertFrom-Json -AsHashtable
         
         if (-not $config.packages) {
             Write-Log "No se encontró sección 'packages' en el JSON" "WARNING"
@@ -105,7 +109,7 @@ function Get-PackagesFromJson {
         return $config.packages
     }
     catch {
-        Write-Log "Error leyendo configuración JSON: $_" "ERROR"
+        Write-Log "Error leyendo configuración JSON: $($_.Exception.Message)" "ERROR"
         return @()
     }
 }

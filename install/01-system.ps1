@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+#Requires -Version 7.0
 
 # Script de configuración base del sistema para Windows
 # Instala herramientas esenciales: jq, git, oh-my-posh
@@ -45,7 +45,9 @@ function Test-WingetPackage {
 # Función para instalar paquete con winget
 function Install-WingetPackage {
     param(
+        [Parameter(Mandatory)]
         [string]$PackageId,
+        
         [string]$Name = $PackageId
     )
     
@@ -56,18 +58,20 @@ function Install-WingetPackage {
     
     Write-Log "Instalando $Name..."
     try {
-        $result = winget install $PackageId --silent --accept-package-agreements --accept-source-agreements 2>&1
-        if ($LASTEXITCODE -eq 0) {
+        # Usar Start-Process para mejor control en PowerShell 7
+        $process = Start-Process -FilePath "winget" -ArgumentList @("install", $PackageId, "--silent", "--accept-package-agreements", "--accept-source-agreements") -Wait -PassThru -NoNewWindow
+        
+        if ($process.ExitCode -eq 0) {
             Write-Log "$Name instalado correctamente" "SUCCESS"
             return $true
         }
         else {
-            Write-Log "Error instalando $Name (código: $LASTEXITCODE)" "WARNING"
+            Write-Log "Error instalando $Name (código: $($process.ExitCode))" "WARNING"
             return $false
         }
     }
     catch {
-        Write-Log "Excepción instalando $Name`: $_" "WARNING"
+        Write-Log "Excepción instalando $Name`: $($_.Exception.Message)" "WARNING"
         return $false
     }
 }

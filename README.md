@@ -24,7 +24,7 @@ En macOS tienes que tener preinstalado **Homebrew** - mira cómo en [brew.sh](ht
 ### ⚡ Ejecución
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
 ```
 
 Usa por defecto `es_ES.UTF-8`, puedes cambiarlo: `bash <(curl -fsSL .../bootstrap.sh) -l en_US.UTF-8`
@@ -39,12 +39,7 @@ Automatiza la configuración inicial de un entorno personalizado para sistemas L
 - Crea unos cuantos scripts en ~/bin que uso con frecuencia: e, s, confcat
 - Instala automáticamente **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`.
 
-Post instalación (fuentes): puede que necesites configurar tu terminal para usar la fuente:
-
-```bash
-# Configuración automática (detecta tu terminal)
-nerd-setup.sh auto | <nombre del terminal>
-```
+Post instalación: verifica que te funciona bien la fuente Nerd
 
 ```bash
 # Verificación completa de Nerd Fonts
@@ -57,33 +52,39 @@ fc-list | grep "FiraCode Nerd Font"
 lsd --version
 ```
 
+Si no funciona, ejecuta lo siguiente:
+
+```bash
+# Configuración automática (detecta tu terminal)
+nerd-setup.sh auto | <nombre del terminal>
+```
+
 ## Windows
 
 Configuración automatizada para **Windows 11** (y Windows 10) usando **PowerShell** y **winget**.
 
-### 📋 Requisitos
+Requisitos
 
 - Windows 11 (recomendado) o Windows 10 con las últimas actualizaciones
-- PowerShell 5.1 o superior (viene preinstalado)
+- PowerShell 7.0 o superior (descargar desde [GitHub](https://github.com/PowerShell/PowerShell/releases) o Microsoft Store)
 - App Installer (winget) instalado desde Microsoft Store
 - Permisos para instalar aplicaciones con winget
 
-### ⚡ Ejecución
+> **Nota sobre PowerShell 7**: Lo prefiero para aprovechar las mejoras en sintaxis moderna, mejor manejo de errores y compatibilidad mejorada con las herramientas CLI actuales.
+
+### ⚡ Ejecución en Windows
 
 ```powershell
 # Comando directo (PowerShell 7+)
-iex (irm "https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.ps1")
-
-# Comando con bypass temporal de ExecutionPolicy
-powershell -ExecutionPolicy Bypass -Command "iex (irm 'https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.ps1')"
+iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
 
 # Con idioma inglés
-iex "& {$(irm https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.ps1)} -Lang en-US"
+iex "& {$(irm https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1)} -Lang en-US"
 ```
 
 Automatiza la configuración inicial de un entorno personalizado para Windows. Está diseñado con un enfoque modular e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
 
-- **Herramientas**: git, oh-my-posh, jq, lsd, zoxide, fd, fzf, ripgrep, bottom (htop equivalente)
+- **Herramientas**: git, oh-my-posh, jq, lsd, zoxide, fd, fzf, ripgrep, bottom (equivalente a htop)
 - **El mejor prompt**: Oh-My-Posh configurado con el tema personalizado
 - **Copia mis ficheros**: `~/.luispa.omp.json` al perfil de usuario
 - **Scripts útiles**: `nerd-setup.ps1`, `nerd-verify.ps1` en `~/bin`

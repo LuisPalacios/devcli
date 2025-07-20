@@ -3,10 +3,10 @@
 set -euo pipefail
 
 # Variables básicas para bootstrap (sin cargar env.sh)
-REPO_URL="https://github.com/LuisPalacios/linux-setup.git"
+REPO_URL="https://github.com/LuisPalacios/devcli.git"
 BRANCH="main"
 CURRENT_USER="$(id -un)"
-SETUP_DIR="$HOME/.linux-setup"
+SETUP_DIR="$HOME/.devcli"
 
 # Función de log minimalista
 log() {
@@ -18,7 +18,7 @@ show_help() {
   cat << EOF
 Linux Setup - Configuración automatizada de entorno CLI
 
-Uso: bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh) [OPCIONES]
+Uso: bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) [OPCIONES]
 
 OPCIONES:
   -l, --lang LOCALE     Configurar idioma (ej: en_US.UTF-8, es_ES.UTF-8)
@@ -26,13 +26,13 @@ OPCIONES:
 
 EJEMPLOS:
   # Instalación con idioma por defecto (español)
-  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh)
+  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
 
   # Instalación con idioma inglés
-  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh) -l en_US.UTF-8
+  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -l en_US.UTF-8
 
   # Instalación con idioma francés
-  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.sh) -l fr_FR.UTF-8
+  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -l fr_FR.UTF-8
 
 IDIOMAS SOPORTADOS:
   es_ES.UTF-8 (español, por defecto)

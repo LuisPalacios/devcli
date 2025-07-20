@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+#Requires -Version 7.0
 # Script para configurar terminal con Nerd Fonts en Windows
 # Uso: nerd-setup.ps1 [terminal]
 

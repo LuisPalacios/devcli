@@ -3,7 +3,7 @@
 # Utilizado en MacOS (brew), Linux (Ubuntu), Windows WSL2
 #
 # Referencias:
-# - Proyecto padre - https://github.com/LuisPalacios/linux-setup
+# - Proyecto padre - https://github.com/LuisPalacios/devcli
 # - Versión antigua - https://github.com/LuisPalacios/zsh-zshrc
 # - ¡Adiós Bash, hola Zsh! - https://www.luispa.com/administraci%C3%B3n/2024/04/23/zsh.html
 # - Terminales con tmux - https://www.luispa.com/administraci%C3%B3n/2024/04/25/tmux.html
@@ -460,7 +460,7 @@ else
 
   # Compruebo si tengo mi tema
   LOCAL_FILE=~/.luispa.omp.json
-  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/dotfiles/.luispa.omp.json"
+  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/devcli/main/dotfiles/.luispa.omp.json"
   TEMP_REMOTE_FILE="/tmp/.luispa.omp_remote.json"
 
   # Detectar el sistema operativo para usar el comando 'date' correcto

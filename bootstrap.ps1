@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+#Requires -Version 7.0
 
 [CmdletBinding()]
 param(
@@ -10,7 +10,7 @@ param(
 )
 
 # Variables básicas para bootstrap
-$REPO_URL = "https://github.com/LuisPalacios/linux-setup.git"
+$REPO_URL = "https://github.com/LuisPalacios/devcli.git"
 $BRANCH = "main"
 $CURRENT_USER = $env:USERNAME
 $SETUP_DIR = "$env:USERPROFILE\.cli-setup"
@@ -34,10 +34,10 @@ OPCIONES:
 
 EJEMPLOS:
   # Instalación con idioma por defecto (español)
-  iex (irm "https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.ps1")
+  iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
 
   # Instalación con idioma inglés
-  iex "& {`$(irm https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.ps1)} -Lang en-US"
+  iex "& {`$(irm https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1)} -Lang en-US"
 
 IDIOMAS SOPORTADOS:
   es-ES (español, por defecto)
@@ -92,8 +92,7 @@ function Test-Administrator {
 function Test-Prerequisites {
     # Verificar winget
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        Write-Error "❌ winget no está disponible. Instala App Installer desde Microsoft Store"
-        exit 1
+        Write-Error "❌ winget no está disponible. Instala App Installer desde Microsoft Store" -ErrorAction Stop
     }
 
     # Verificar git
@@ -101,12 +100,11 @@ function Test-Prerequisites {
         Write-Log "Instalando git con winget..."
         try {
             winget install Git.Git --silent --accept-package-agreements --accept-source-agreements
-            # Refrescar PATH
-            $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
+            # Refrescar PATH usando método más eficiente de PowerShell 7
+            $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
         }
         catch {
-            Write-Error "❌ No se pudo instalar git automáticamente"
-            exit 1
+            Write-Error "❌ No se pudo instalar git automáticamente" -ErrorAction Stop
         }
     }
 }
