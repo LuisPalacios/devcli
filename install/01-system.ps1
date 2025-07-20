@@ -43,26 +43,30 @@ function main {
         $installedCount = 0
         $failedCount = 0
 
-        Write-Log "Instalando paquetes base con scoop..."
+        # Instalar paquetes con scoop
+        if ($scoopPackages.Count -gt 0) {
+            Write-Log "Instalando paquetes base con scoop..."
 
-        # Verificar que scoop funciona antes de intentar instalar
-        if (-not (Test-Scoop)) {
-            Write-Log "Scoop no está funcionando correctamente. Ejecutando diagnóstico..." "WARNING"
-            Test-ScoopDiagnostic
-            Write-Log "Abortando instalación con scoop" "ERROR"
-            $failedCount += $scoopPackages.Count
-        }
-        else {
-            foreach ($package in $scoopPackages) {
-                if (Install-ScoopPackage -PackageName $package) {
-                    $installedCount++
-                }
-                else {
-                    $failedCount++
+            # Verificar que scoop funciona antes de intentar instalar
+            if (-not (Test-Scoop)) {
+                Write-Log "Scoop no está funcionando correctamente. Ejecutando diagnóstico..." "WARNING"
+                Test-ScoopDiagnostic
+                Write-Log "Abortando instalación con scoop" "ERROR"
+                $failedCount += $scoopPackages.Count
+            }
+            else {
+                foreach ($package in $scoopPackages) {
+                    if (Install-ScoopPackage -PackageName $package) {
+                        $installedCount++
+                    }
+                    else {
+                        $failedCount++
+                    }
                 }
             }
         }
 
+        # Instalar paquetes con winget
         if ($wingetPackages.Count -gt 0) {
             Write-Log "Instalando paquetes base con winget..."
             foreach ($package in $wingetPackages) {
