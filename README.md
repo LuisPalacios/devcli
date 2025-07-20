@@ -33,7 +33,7 @@ Automatiza la configuración inicial de un entorno personalizado para sistemas L
 
 - Herramientas: git, curl, wget, nano, htop, tmux, fzf, bat, fd-find, ripgrep, tree, jq, lsd
 - El mejor prompt, Oh-My-Posh, para cualquier Shell.
-- Establece la variable LANG (por defecto a ``es_ES.UTF-8`)
+- Establece la variable LANG (por defecto a `s_ES.UTF-8`)
 - Copia mis ficheros ~/.luispa.omp.json y ~/.zshrc
 - Herramientas de Git que tengo en el repositorio git-config-repos.
 - Crea unos cuantos scripts en ~/bin que uso con frecuencia: e, s, confcat
@@ -86,36 +86,25 @@ Automatiza la configuración inicial de un entorno personalizado para Windows. E
 - **Scripts útiles**: `nerd-setup.ps1`, `nerd-verify.ps1` en `~/bin`
 - **Instala automáticamente**: **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`
 
-### 🎨 Post instalación
-
-Después de la instalación, es recomendable:
+Después de la instalación:
 
 1. **Reiniciar el terminal** para aplicar los cambios de PATH
-2. **Configurar la fuente** en tu terminal:
+2. **Verifica que tienes el Nerd font** en tu terminal:
 
 ```powershell
-# Configuración automática de fuentes (detecta tu terminal)
-nerd-setup.ps1 auto
-
 # Verificación completa de Nerd Fonts
 nerd-verify.ps1
+
+# Instrucciones para configurarlo (detecta tu terminal)
+nerd-setup.ps1 auto
 ```
 
-3. **Configurar oh-my-posh** en tu perfil de PowerShell si no se aplicó automáticamente:
+## 🧰 Gestores de paquetes por sistema operativo
 
-```powershell
-# Añadir al perfil de PowerShell
-oh-my-posh init pwsh --config "$env:USERPROFILE\.luispa.omp.json" | Invoke-Expression
-```
-
-### 🛠️ Gestión de paquetes
-
-El proyecto utiliza **winget** como gestor principal de paquetes:
-
-```powershell
-# Ver qué se instaló
-winget list | Select-String "git|oh-my-posh|jq|lsd|zoxide|fd|fzf|ripgrep|bottom"
-
-# Actualizar todas las herramientas
-winget upgrade --all
-```
+| Sistema Operativo     | Gestor de Paquetes | Rol Principal                                      | ¿Por qué lo usas?                                                                 |
+|------------------------|--------------------|----------------------------------------------------|------------------------------------------------------------------------------------|
+| 🐧 Linux (Debian/Ubuntu) | `apt`              | Gestor nativo del sistema                          | Estándar en Debian/Ubuntu, robusto, bien mantenido, con soporte oficial           |
+| 🐧 WSL2 (Ubuntu)        | `apt`              | Paquetes de sistema y herramientas Unix            | Mismo entorno que Linux, total compatibilidad, sin reinventar la rueda            |
+| 🍎 macOS               | `brew`             | CLI tools, apps de usuario, compilación cruzada    | Flexible, no requiere admin, ecosistema maduro para devs                          |
+| 🪟 Windows 11          | `scoop`            | Utilidades CLI portables, estilo Unix              | Limpio, sin UAC, sin registro, scriptable, ideal para herramientas de desarrollo  |
+| 🪟 Windows 11          | `winget`           | Aplicaciones GUI y binarios estándar               | Mantenido por Microsoft, buena integración con Store y apps Win32                 |
