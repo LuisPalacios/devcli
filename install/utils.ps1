@@ -167,13 +167,18 @@ function Test-ScoopPackage {
         return $false
     }
 
-        try {
-        # Ejecutar scoop list con modo silencioso
-        $result = & scoop list $PackageName --quiet 2>$null
+    try {
+        # Método 1: Verificar directorio de instalación (más silencioso)
+        $scoopAppsDir = "$env:USERPROFILE\scoop\apps\$PackageName"
+        if (Test-Path $scoopAppsDir) {
+            return $true
+        }
 
-        # Verificar si el paquete aparece en la lista
-        if ($LASTEXITCODE -eq 0 -and $result) {
-            return $result -match $PackageName
+        # Método 2: Usar scoop list pero completamente silencioso
+        $null = & scoop list $PackageName *>$null 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            # Verificar nuevamente con directorio para confirmar
+            return Test-Path $scoopAppsDir
         }
 
         return $false
