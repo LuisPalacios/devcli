@@ -1,8 +1,8 @@
 # CLI Setup
 
-Configura el entorno CLI en sistemas basados en Unix, **Linux**, **macOS** y **WSL2** y para **Windows**. Estaba ya cansado de perder un par de horas cuando tengo que configurarme uno de esos sistemas y añadir las herramientas CLI, ejecutables, scripts o fuentes, que siempre quiero tener disponibles
+Configura el entorno CLI en **Linux**, **macOS**, **WSL2** y **Windows**. Estaba ya cansado de perder un par de horas cuando tengo que configurarme uno de esos sistemas y añadir mis tipicas herramientas CLI, ejecutables, scripts o fuentes.
 
-Lo automatizo todo con un solo comando que se puede ejecutar en el terminal, descarga este repositorio y procede a instalar todo lo que quiero.
+Lo automatizo todo con un solo comando que descarga este repositorio y procede a instalar todo lo que necesito.
 
 > IMPORTANTE: Lee este readme, se modifican archivos muy importantes, asegúrate de que **no rompe nada de tu instalación** y ejecútalo bajo tu responsabilidad. Si no entiendes que hace todo esto, no lo ejecutes.
 
