@@ -59,4 +59,66 @@ lsd --version
 
 ## Windows
 
-PENDIENTE
+Configuración automatizada para **Windows 11** (y Windows 10) usando **PowerShell** y **winget**.
+
+### 📋 Requisitos
+
+- Windows 11 (recomendado) o Windows 10 con las últimas actualizaciones
+- PowerShell 5.1 o superior (viene preinstalado)
+- App Installer (winget) instalado desde Microsoft Store
+- Permisos para instalar aplicaciones con winget
+
+### ⚡ Ejecución
+
+```powershell
+# Comando directo (PowerShell 7+)
+iex (irm "https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.ps1")
+
+# Comando con bypass temporal de ExecutionPolicy
+powershell -ExecutionPolicy Bypass -Command "iex (irm 'https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.ps1')"
+
+# Con idioma inglés
+iex "& {$(irm https://raw.githubusercontent.com/LuisPalacios/linux-setup/main/bootstrap.ps1)} -Lang en-US"
+```
+
+Automatiza la configuración inicial de un entorno personalizado para Windows. Está diseñado con un enfoque modular e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
+
+- **Herramientas**: git, oh-my-posh, jq, lsd, zoxide, fd, fzf, ripgrep, bottom (htop equivalente)
+- **El mejor prompt**: Oh-My-Posh configurado con el tema personalizado
+- **Copia mis ficheros**: `~/.luispa.omp.json` al perfil de usuario
+- **Scripts útiles**: `nerd-setup.ps1`, `nerd-verify.ps1` en `~/bin`
+- **Instala automáticamente**: **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`
+
+### 🎨 Post instalación
+
+Después de la instalación, es recomendable:
+
+1. **Reiniciar el terminal** para aplicar los cambios de PATH
+2. **Configurar la fuente** en tu terminal:
+
+```powershell
+# Configuración automática de fuentes (detecta tu terminal)
+nerd-setup.ps1 auto
+
+# Verificación completa de Nerd Fonts
+nerd-verify.ps1
+```
+
+3. **Configurar oh-my-posh** en tu perfil de PowerShell si no se aplicó automáticamente:
+
+```powershell
+# Añadir al perfil de PowerShell
+oh-my-posh init pwsh --config "$env:USERPROFILE\.luispa.omp.json" | Invoke-Expression
+```
+
+### 🛠️ Gestión de paquetes
+
+El proyecto utiliza **winget** como gestor principal de paquetes:
+
+```powershell
+# Ver qué se instaló
+winget list | Select-String "git|oh-my-posh|jq|lsd|zoxide|fd|fzf|ripgrep|bottom"
+
+# Actualizar todas las herramientas
+winget upgrade --all
+```
