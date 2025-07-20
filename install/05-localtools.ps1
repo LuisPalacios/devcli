@@ -6,9 +6,6 @@
 [CmdletBinding()]
 param()
 
-Write-Host "WiP localtools"
-exit 0
-
 # Cargar variables y funciones comunes
 . "$PSScriptRoot\env.ps1"
 . "$PSScriptRoot\utils.ps1"
