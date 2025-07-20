@@ -6,9 +6,6 @@
 [CmdletBinding()]
 param()
 
-Write-Host "WiP gitfiles"
-exit 0
-
 # Cargar variables y funciones comunes
 . "$PSScriptRoot\env.ps1"
 . "$PSScriptRoot\utils.ps1"
@@ -44,7 +41,7 @@ function Get-TempRepository {
     param(
         [Parameter(Mandatory)]
         [string]$RepoUrl,
-        
+
         [Parameter(Mandatory)]
         [string]$TempDir
     )
@@ -72,7 +69,7 @@ function Copy-FileWithPermissions {
     param(
         [Parameter(Mandatory)]
         [string]$SourceFile,
-        
+
         [Parameter(Mandatory)]
         [string]$DestFile
     )
@@ -92,7 +89,7 @@ function Invoke-ProcessRepository {
     param(
         [Parameter(Mandatory)]
         [string]$RepoUrl,
-        
+
         [Parameter(Mandatory)]
         [array]$FilesList
     )
