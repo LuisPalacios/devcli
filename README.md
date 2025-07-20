@@ -21,7 +21,7 @@ sudo visudo
 
 En macOS tienes que tener preinstalado **Homebrew** - mira cómo en [brew.sh](https://brew.sh)
 
-### ⚡ Ejecución
+### ⚡ Ejecución en Linux, macOS y WSL2
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
@@ -77,9 +77,6 @@ Requisitos
 ```powershell
 # Comando directo (PowerShell 7+)
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
-
-# Con idioma inglés
-iex "& {$(irm https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1)} -Lang en-US"
 ```
 
 Automatiza la configuración inicial de un entorno personalizado para Windows. Está diseñado con un enfoque modular e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
