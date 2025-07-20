@@ -84,8 +84,12 @@ function main {
 
                     # Actualizar variables de Nerd Fonts en scripts específicos
                     if ($tool -eq "nerd-setup.ps1" -or $tool -eq "nerd-verify.ps1") {
-                        Update-NerdFontVariables $dst
-                        Write-Log "Variables de Nerd Fonts actualizadas en $tool"
+                        $updateResult = Update-NerdFontVariables $dst
+                        if ($updateResult) {
+                            Write-Log "Variables de Nerd Fonts actualizadas en $tool"
+                        } else {
+                            Write-Log "Error actualizando variables de Nerd Fonts en $tool" "WARNING"
+                        }
                     }
 
                     Write-Log "Copiado: $tool"
