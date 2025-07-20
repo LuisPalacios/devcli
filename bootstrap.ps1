@@ -143,16 +143,54 @@ function Test-Prerequisites {
         Write-Error "❌ winget no está disponible. Instala App Installer desde Microsoft Store" -ErrorAction Stop
     }
 
-    # Verificar git
+    # Verificar e instalar scoop si es necesario
+    if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+        Write-Log "Scoop no está instalado. Instalando..."
+        try {
+            # Configurar política de ejecución si es necesario
+            $currentPolicy = Get-ExecutionPolicy -Scope CurrentUser
+            if ($currentPolicy -eq "Restricted") {
+                Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+                Write-Log "Política de ejecución actualizada a RemoteSigned"
+            }
+
+            # Instalar scoop
+            Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+            # Refrescar PATH para que scoop esté disponible
+            $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+
+            # Verificar instalación
+            if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+                Write-Error "❌ No se pudo instalar scoop automáticamente" -ErrorAction Stop
+            }
+            else {
+                Write-Log "✅ Scoop instalado correctamente" -ForegroundColor Green
+            }
+        }
+        catch {
+            Write-Error "❌ Error instalando scoop: $_" -ErrorAction Stop
+        }
+    }
+
+    # Verificar e instalar git si es necesario (con winget)
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         Write-Log "Instalando git con winget..."
         try {
             winget install Git.Git --silent --accept-package-agreements --accept-source-agreements
-            # Refrescar PATH usando método más eficiente de PowerShell 7
+            # Refrescar PATH para que git esté disponible
             $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+
+            # Verificar instalación
+            if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+                Write-Error "❌ No se pudo instalar git automáticamente" -ErrorAction Stop
+            }
+            else {
+                Write-Log "✅ Git instalado correctamente" -ForegroundColor Green
+            }
         }
         catch {
-            Write-Error "❌ No se pudo instalar git automáticamente" -ErrorAction Stop
+            Write-Error "❌ Error instalando git: $_" -ErrorAction Stop
         }
     }
 }

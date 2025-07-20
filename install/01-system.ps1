@@ -22,7 +22,7 @@ function main {
     }
 
     Setup-ScriptInterruptionHandler
-    
+
     try {
         Write-Log "Iniciando configuración base del sistema..."
         Write-Log "Usuario: $Global:CURRENT_USER | Idioma: $Global:SETUP_LANG"
@@ -37,23 +37,34 @@ function main {
         # Actualizar PATH para incluir ~/bin
         Update-UserPath $Global:BIN_DIR
 
-        # Paquetes esenciales obligatorios
-        $essentialPackages = @(
-            @{ Id = "jqlang.jq"; Name = "jq" },
-            @{ Id = "Git.Git"; Name = "git" },
-            @{ Id = "JanDeDobbeleer.OhMyPosh"; Name = "oh-my-posh" }
-        )
+        # Paquetes con scoop
+        $scoopPackages = @("jq", "oh-my-posh")
+
+        # Paquetes con winget (git ya se instala en bootstrap.ps1)
+        $wingetPackages = @()
 
         $installedCount = 0
         $failedCount = 0
 
-        Write-Log "Instalando paquetes base..."
-        foreach ($package in $essentialPackages) {
-            if (Install-WingetPackage -PackageId $package.Id -Name $package.Name) {
+        Write-Log "Instalando paquetes base con scoop..."
+        foreach ($package in $scoopPackages) {
+            if (Install-ScoopPackage -PackageName $package) {
                 $installedCount++
             }
             else {
                 $failedCount++
+            }
+        }
+
+        if ($wingetPackages.Count -gt 0) {
+            Write-Log "Instalando paquetes base con winget..."
+            foreach ($package in $wingetPackages) {
+                if (Install-WingetPackage -PackageId $package.Id -Name $package.Name) {
+                    $installedCount++
+                }
+                else {
+                    $failedCount++
+                }
             }
         }
 
@@ -73,38 +84,6 @@ function main {
         if ($missingCritical.Count -gt 0) {
             Write-Log "❌ Herramientas críticas no disponibles: $($missingCritical -join ', ')" "ERROR"
             Write-Log "Intenta ejecutar de nuevo después de reiniciar el terminal" "WARNING"
-        }
-
-        # Configurar oh-my-posh en el perfil de PowerShell
-        $profilePath = $PROFILE
-        if ($profilePath -and (Test-Command oh-my-posh)) {
-            try {
-                $profileDir = Split-Path $profilePath -Parent
-                if (-not (Test-Path $profileDir)) {
-                    New-Item -Path $profileDir -ItemType Directory -Force | Out-Null
-                }
-
-                $ompConfigPath = "$env:USERPROFILE\.luispa.omp.json"
-                $initLine = "oh-my-posh init pwsh --config `"$ompConfigPath`" | Invoke-Expression"
-
-                if (Test-Path $profilePath) {
-                    $profileContent = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
-                    if ($profileContent -notlike "*oh-my-posh*") {
-                        Add-Content -Path $profilePath -Value "`n# Oh My Posh Configuration`n$initLine" -Encoding UTF8
-                        Write-Log "Oh-My-Posh añadido al perfil de PowerShell" "SUCCESS"
-                    }
-                    else {
-                        Write-Log "Oh-My-Posh ya está configurado en el perfil"
-                    }
-                }
-                else {
-                    Set-Content -Path $profilePath -Value "# PowerShell Profile`n`n# Oh My Posh Configuration`n$initLine" -Encoding UTF8
-                    Write-Log "Perfil de PowerShell creado con Oh-My-Posh" "SUCCESS"
-                }
-            }
-            catch {
-                Write-Log "Error configurando Oh-My-Posh en el perfil: $($_.Exception.Message)" "WARNING"
-            }
         }
 
         # Mostrar resumen final
