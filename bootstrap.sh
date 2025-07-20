@@ -119,12 +119,9 @@ fi
 
 # Clona o actualiza el repo (completamente silencioso)
 if [[ -d "$SETUP_DIR" ]]; then
-  git -C "$SETUP_DIR" reset --hard HEAD >/dev/null 2>&1
-  git -C "$SETUP_DIR" clean -fd >/dev/null 2>&1
-  git -C "$SETUP_DIR" pull >/dev/null 2>&1
-else
-  git clone --branch "$BRANCH" "$REPO_URL" "$SETUP_DIR" >/dev/null 2>&1
+  rm -fr "$SETUP_DIR"
 fi
+git clone --branch "$BRANCH" "$REPO_URL" "$SETUP_DIR" >/dev/null 2>&1
 
 # Dar permisos de ejecución a todos los scripts de instalación
 chmod +x "$SETUP_DIR/install"/*.sh >/dev/null 2>&1
