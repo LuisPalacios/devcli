@@ -144,3 +144,49 @@ Set-PSReadLineOption -PredictionSource HistoryAndPlugin
 Set-PSReadLineOption -PredictionViewStyle ListView
 Set-PSReadLineOption -EditMode Windows
 
+# ==================================================================
+# ⚙️ Configuración de variables de entorno críticas
+# ==================================================================
+
+# Variables de entorno críticas para lsd, oh-my-posh y colores
+$envVarsToSet = @()
+
+# Verificar OMP_OS_ICON (icono del OS para oh-my-posh)
+if (-not [Environment]::GetEnvironmentVariable("OMP_OS_ICON", "User")) {
+    try {
+        setx OMP_OS_ICON "🪟" >$null 2>&1
+        $envVarsToSet += "OMP_OS_ICON"
+        Write-Host "✅ Variable OMP_OS_ICON configurada" -ForegroundColor Green
+    }
+    catch {
+        Write-Warning "No se pudo configurar OMP_OS_ICON: $_"
+    }
+}
+
+# Verificar LS_COLORS (colores para lsd y directorios)
+if (-not [Environment]::GetEnvironmentVariable("LS_COLORS", "User")) {
+    try {
+        $lsColors = "fi=00:mi=00:mh=00:ln=01;94:or=01;31:di=01;36:ow=04;01;34:st=34:tw=04;34:pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01;35:ex=01;32:*.cmd=00;32:*.exe=01;32:*.com=01;32:*.bat=01;32:*.btm=01;32:*.dll=01;32:*.tar=00;31:*.tbz=00;31:*.tgz=00;31:*.rpm=00;31:*.deb=00;31:*.arj=00;31:*.taz=00;31:*.lzh=00;31:*.lzma=00;31:*.zip=00;31:*.zoo=00;31:*.z=00;31:*.Z=00;31:*.gz=00;31:*.bz2=00;31:*.tb2=00;31:*.tz2=00;31:*.tbz2=00;31:*.avi=01;35:*.bmp=01;35:*.fli=01;35:*.gif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mng=01;35:*.mov=01;35:*.mpg=01;35:*.pcx=01;35:*.pbm=01;35:*.pgm=01;35:*.png=01;35:*.ppm=01;35:*.tga=01;35:*.tif=01;35:*.xbm=01;35:*.xpm=01;35:*.dl=01;35:*.gl=01;35:*.wmv=01;35"
+        setx LS_COLORS $lsColors >$null 2>&1
+        $envVarsToSet += "LS_COLORS"
+        Write-Host "✅ Variable LS_COLORS configurada" -ForegroundColor Green
+    }
+    catch {
+        Write-Warning "No se pudo configurar LS_COLORS: $_"
+    }
+}
+
+# Mostrar mensaje importante si se configuraron variables
+if ($envVarsToSet.Count -gt 0) {
+    Write-Host ""
+    Write-Host "🔄 " -NoNewline -ForegroundColor Yellow
+    Write-Host "IMPORTANTE: " -NoNewline -ForegroundColor Red -BackgroundColor Yellow
+    Write-Host "Variables de entorno configuradas: " -NoNewline -ForegroundColor Yellow
+    Write-Host ($envVarsToSet -join ", ") -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "⚠️  Para que los cambios surtan efecto, necesitas " -NoNewline -ForegroundColor Yellow
+    Write-Host "REINICIAR WINDOWS" -ForegroundColor Red -BackgroundColor Black
+    Write-Host "   o abrir una nueva sesión de PowerShell después del reinicio." -ForegroundColor Yellow
+    Write-Host ""
+}
+
