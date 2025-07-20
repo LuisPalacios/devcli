@@ -20,7 +20,30 @@ function Write-Log {
         default { "Cyan" }
     }
 
-    $logPrefix = $Prefix ?? (Split-Path $MyInvocation.PSCommandPath -Leaf)
+    # Detectar nombre del script de manera más robusta
+    if ($Prefix) {
+        $logPrefix = $Prefix
+    } else {
+        # Intentar obtener el nombre desde el call stack
+        $callStack = Get-PSCallStack
+        $scriptPath = $null
+        
+        # Buscar el primer archivo .ps1 en el call stack que no sea utils.ps1
+        foreach ($frame in $callStack) {
+            if ($frame.ScriptName -and $frame.ScriptName -like "*.ps1" -and $frame.ScriptName -notlike "*utils.ps1") {
+                $scriptPath = $frame.ScriptName
+                break
+            }
+        }
+        
+        if ($scriptPath) {
+            $scriptName = Split-Path $scriptPath -Leaf
+            $logPrefix = $scriptName -replace '\.ps1$', ''
+        } else {
+            $logPrefix = "unknown"
+        }
+    }
+
     Write-Host "[$logPrefix] $Message" -ForegroundColor $color
 }
 

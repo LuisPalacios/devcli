@@ -186,7 +186,7 @@ if ($envVarsToSet.Count -gt 0) {
     Write-Host ""
     Write-Host "⚠️  Para que los cambios surtan efecto, necesitas " -NoNewline -ForegroundColor Yellow
     Write-Host "REINICIAR WINDOWS" -ForegroundColor Red -BackgroundColor Black
-    Write-Host "   o abrir una nueva sesión de PowerShell después del reinicio." -ForegroundColor Yellow
+    Write-Host "   y abrir una nueva sesión de PowerShell después del reinicio." -ForegroundColor Yellow
     Write-Host ""
 }
 

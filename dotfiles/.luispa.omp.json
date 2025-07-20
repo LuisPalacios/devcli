@@ -26,7 +26,7 @@
   },
   "console_title_template": "{{ .Shell }} in {{ .Folder }}",
   "upgrade": {
-    "notice": true,
+    "notice": false,
     "interval": "168h",
     "auto": false,
     "source": "cdn"
