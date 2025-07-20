@@ -1,6 +1,6 @@
 #Requires -Version 7.0
 
-Write-Log "WiP localtools"
+Write-Host "WiP localtools"
 exit 0
 
 # Script de instalación de herramientas locales para Windows
@@ -9,17 +9,17 @@ exit 0
 [CmdletBinding()]
 param()
 
-# Variables de entorno (definidas por bootstrap.ps1)
 $SETUP_LANG = $env:SETUP_LANG ?? "es-ES"
 $SETUP_DIR = $env:SETUP_DIR ?? "$env:USERPROFILE\.devcli"
 $CURRENT_USER = $env:CURRENT_USER ?? $env:USERNAME
 $BIN_DIR = "$env:USERPROFILE\bin"
 
-# Configuración de Nerd Fonts para Windows
+$script:OriginalDirectory = $env:ORIGINAL_DIRECTORY ?? $PWD.Path
+$script:ShouldRestoreDirectory = $true
+
 $NERD_FONT_NAME = "FiraCode"
 $NERD_FONT_FULL_NAME = "FiraCode Nerd Font"
 
-# Función de log
 function Write-Log {
     param([string]$Message, [string]$Level = "INFO")
     $color = switch ($Level) {
@@ -31,7 +31,38 @@ function Write-Log {
     Write-Host "[05-localtools] $Message" -ForegroundColor $color
 }
 
-# Función para crear directorio si no existe
+function Restore-OriginalDirectory {
+    if ($script:ShouldRestoreDirectory -and $script:OriginalDirectory) {
+        try {
+            Set-Location $script:OriginalDirectory -ErrorAction SilentlyContinue
+            Write-Log "Directorio restaurado: $script:OriginalDirectory"
+        }
+        catch {
+            Write-Warning "No se pudo restaurar el directorio original: $script:OriginalDirectory"
+        }
+    }
+}
+
+function Handle-ScriptInterruption {
+    Write-Host "`n❌ Script interrumpido por el usuario" -ForegroundColor Red
+    Restore-OriginalDirectory
+    exit 130
+}
+
+function Setup-ScriptInterruptionHandler {
+    try {
+        # Solo CancelKeyPress - suficiente para scripts hijos
+        [Console]::CancelKeyPress += {
+            param($sender, $e)
+            $e.Cancel = $true
+            Handle-ScriptInterruption
+        }
+    }
+    catch {
+        Write-Warning "No se pudo configurar el manejador de interrupciones: $_"
+    }
+}
+
 function New-DirectoryIfNotExists {
     param([string]$Path)
     if (-not (Test-Path $Path)) {
@@ -47,7 +78,6 @@ function New-DirectoryIfNotExists {
     return $true
 }
 
-# Función para leer herramientas desde JSON
 function Get-ToolsFromJson {
     param([string]$JsonPath)
 
@@ -73,7 +103,6 @@ function Get-ToolsFromJson {
     }
 }
 
-# Función para actualizar variables de Nerd Fonts en scripts
 function Update-NerdFontVariables {
     param([string]$ScriptFile)
 
@@ -83,11 +112,8 @@ function Update-NerdFontVariables {
 
     try {
         $content = Get-Content $ScriptFile -Raw -Encoding UTF8
-
-        # Reemplazar variables de Nerd Fonts
         $content = $content -replace '\$NERD_FONT_NAME = "[^"]*"', "`$NERD_FONT_NAME = `"$NERD_FONT_NAME`""
         $content = $content -replace '\$NERD_FONT_FULL_NAME = "[^"]*"', "`$NERD_FONT_FULL_NAME = `"$NERD_FONT_FULL_NAME`""
-
         Set-Content -Path $ScriptFile -Value $content -Encoding UTF8
         Write-Log "Variables de Nerd Fonts actualizadas en $(Split-Path $ScriptFile -Leaf)"
     }
@@ -96,85 +122,99 @@ function Update-NerdFontVariables {
     }
 }
 
-# Función principal
 function main {
-    Write-Log "Iniciando instalación de herramientas locales..."
-
-    # Asegurar que existe el directorio de binarios
-    if (-not (New-DirectoryIfNotExists $BIN_DIR)) {
-        Write-Log "Error creando directorio de binarios" "ERROR"
+    trap {
+        Write-Log "🛑 Excepción no manejada: $($_.Exception.Message)" "ERROR"
+        Restore-OriginalDirectory
         exit 1
     }
 
-    # Directorio de archivos fuente
-    $filesDir = Join-Path $SETUP_DIR "files\bin"
+    Setup-ScriptInterruptionHandler
 
-    if (-not (Test-Path $filesDir)) {
-        Write-Log "Directorio de archivos no encontrado: $filesDir" "ERROR"
-        exit 1
-    }
+    try {
+        Write-Log "Iniciando instalación de herramientas locales..."
 
-    # Archivo de configuración
-    $localToolsConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\05-localtools-win.json"
+        if (-not (New-DirectoryIfNotExists $BIN_DIR)) {
+            Write-Log "Error creando directorio de binarios" "ERROR"
+            exit 1
+        }
 
-    # Leer herramientas desde JSON
-    $tools = Get-ToolsFromJson $localToolsConfig
+        $filesDir = Join-Path $SETUP_DIR "files\bin"
 
-    if ($tools.Count -eq 0) {
-        Write-Log "No hay herramientas para instalar"
-        return
-    }
+        if (-not (Test-Path $filesDir)) {
+            Write-Log "Directorio de archivos no encontrado: $filesDir" "ERROR"
+            exit 1
+        }
 
-    $toolsInstalled = 0
+        $localToolsConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\05-localtools-win.json"
+        $tools = Get-ToolsFromJson $localToolsConfig
 
-    Write-Log "Instalando herramientas locales..."
-    foreach ($tool in $tools) {
-        $src = Join-Path $filesDir $tool
-        $dst = Join-Path $BIN_DIR $tool
+        if ($tools.Count -eq 0) {
+            Write-Log "No hay herramientas para instalar"
+            return
+        }
 
-        if (Test-Path $src) {
-            try {
-                Copy-Item $src $dst -Force
+        $toolsInstalled = 0
 
-                # Actualizar variables de Nerd Fonts en scripts específicos
-                if ($tool -eq "nerd-setup.ps1" -or $tool -eq "nerd-verify.ps1") {
-                    Update-NerdFontVariables $dst
+        Write-Log "Instalando herramientas locales..."
+        foreach ($tool in $tools) {
+            $src = Join-Path $filesDir $tool
+            $dst = Join-Path $BIN_DIR $tool
+
+            if (Test-Path $src) {
+                try {
+                    Copy-Item $src $dst -Force
+
+                    if ($tool -eq "nerd-setup.ps1" -or $tool -eq "nerd-verify.ps1") {
+                        Update-NerdFontVariables $dst
+                    }
+
+                    Write-Log "Copiado: $tool"
+                    $toolsInstalled++
                 }
+                catch {
+                    Write-Log "Error copiando $tool`: $_" "WARNING"
+                }
+            }
+            else {
+                Write-Log "Herramienta no encontrada: $tool" "WARNING"
+            }
+        }
 
-                Write-Log "Copiado: $tool"
-                $toolsInstalled++
+        if ($toolsInstalled -gt 0) {
+            Write-Log "✅ Herramientas locales instaladas ($toolsInstalled herramientas)" "SUCCESS"
+            Write-Log ""
+            Write-Log "🛠️ Herramientas disponibles en ~/bin:" "SUCCESS"
+            $tools | ForEach-Object {
+                $toolPath = Join-Path $BIN_DIR $_
+                if (Test-Path $toolPath) {
+                    Write-Log "  • $_" "SUCCESS"
+                }
             }
-            catch {
-                Write-Log "Error copiando $tool`: $_" "WARNING"
-            }
+
+            Write-Log ""
+            Write-Log "💡 Para usar las herramientas:"
+            Write-Log "  • nerd-setup.ps1 auto    - Configurar fuente automáticamente"
+            Write-Log "  • nerd-verify.ps1        - Verificar instalación de fuentes"
         }
         else {
-            Write-Log "Herramienta no encontrada: $tool" "WARNING"
-        }
-    }
-
-    # Mostrar resumen final
-    if ($toolsInstalled -gt 0) {
-        Write-Log "✅ Herramientas locales instaladas ($toolsInstalled herramientas)" "SUCCESS"
-
-        Write-Log ""
-        Write-Log "🛠️ Herramientas disponibles en ~/bin:" "SUCCESS"
-        $tools | ForEach-Object {
-            $toolPath = Join-Path $BIN_DIR $_
-            if (Test-Path $toolPath) {
-                Write-Log "  • $_" "SUCCESS"
-            }
+            Write-Log "No se instalaron herramientas locales"
         }
 
-        Write-Log ""
-        Write-Log "💡 Para usar las herramientas:"
-        Write-Log "  • nerd-setup.ps1 auto    - Configurar fuente automáticamente"
-        Write-Log "  • nerd-verify.ps1        - Verificar instalación de fuentes"
+        $script:ShouldRestoreDirectory = $false
     }
-    else {
-        Write-Log "No se instalaron herramientas locales"
+    finally {
+        if ($script:ShouldRestoreDirectory) {
+            Restore-OriginalDirectory
+        }
     }
 }
 
-# Ejecutar función principal
-main
+try {
+    main
+}
+catch {
+    Write-Error "❌ Error crítico en script: $($_.Exception.Message)"
+    Restore-OriginalDirectory
+    exit 1
+}

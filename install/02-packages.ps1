@@ -1,6 +1,6 @@
 #Requires -Version 7.0
 
-Write-Log "WiP packages"
+Write-Host "WiP packages"
 exit 0
 
 # Script de instalación de herramientas de productividad para Windows
@@ -15,6 +15,10 @@ $SETUP_DIR = $env:SETUP_DIR ?? "$env:USERPROFILE\.devcli"
 $CURRENT_USER = $env:CURRENT_USER ?? $env:USERNAME
 $BIN_DIR = "$env:USERPROFILE\bin"
 
+# Manejo de directorio original (heredado del bootstrap)
+$script:OriginalDirectory = $env:ORIGINAL_DIRECTORY ?? $PWD.Path
+$script:ShouldRestoreDirectory = $true
+
 # Función de log
 function Write-Log {
     param([string]$Message, [string]$Level = "INFO")
@@ -25,6 +29,39 @@ function Write-Log {
         default { "Cyan" }
     }
     Write-Host "[02-packages] $Message" -ForegroundColor $color
+}
+
+# Funciones para manejo robusto de directorios
+function Restore-OriginalDirectory {
+    if ($script:ShouldRestoreDirectory -and $script:OriginalDirectory) {
+        try {
+            Set-Location $script:OriginalDirectory -ErrorAction SilentlyContinue
+            Write-Log "Directorio restaurado: $script:OriginalDirectory"
+        }
+        catch {
+            Write-Warning "No se pudo restaurar el directorio original: $script:OriginalDirectory"
+        }
+    }
+}
+
+function Handle-ScriptInterruption {
+    Write-Host "`n❌ Script interrumpido por el usuario" -ForegroundColor Red
+    Restore-OriginalDirectory
+    exit 130
+}
+
+function Setup-ScriptInterruptionHandler {
+    try {
+        # Solo CancelKeyPress - suficiente para scripts hijos
+        [Console]::CancelKeyPress += {
+            param($sender, $e)
+            $e.Cancel = $true
+            Handle-ScriptInterruption
+        }
+    }
+    catch {
+        Write-Warning "No se pudo configurar el manejador de interrupciones: $_"
+    }
 }
 
 # Función para verificar si un comando existe
@@ -74,7 +111,6 @@ function Install-WingetPackage {
     Write-Log "Instalando $displayName..."
 
     try {
-        # Usar operador de llamada mejorado de PowerShell 7
         $process = Start-Process -FilePath "winget" -ArgumentList @("install", $PackageId, "--silent", "--accept-package-agreements", "--accept-source-agreements") -Wait -PassThru -NoNewWindow
 
         if ($process.ExitCode -eq 0) {
@@ -101,7 +137,6 @@ function Get-PackagesFromJson {
     )
 
     try {
-        # PowerShell 7 maneja mejor la lectura directa de JSON
         $config = Get-Content $JsonPath -Raw -Encoding UTF8 | ConvertFrom-Json -AsHashtable
 
         if (-not $config.packages) {
@@ -122,28 +157,23 @@ function Install-NerdFonts {
     Write-Log "Instalando FiraCode Nerd Font..."
 
     try {
-        # Crear directorio de fuentes si no existe
         $fontsDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
         if (-not (Test-Path $fontsDir)) {
             New-Item -Path $fontsDir -ItemType Directory -Force | Out-Null
         }
 
-        # URL de descarga para FiraCode Nerd Font
         $fontUrl = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip"
         $tempZip = "$env:TEMP\FiraCode.zip"
         $tempDir = "$env:TEMP\FiraCode-NerdFont"
 
-        # Descargar fuente
         Write-Log "Descargando FiraCode Nerd Font..."
         Invoke-WebRequest -Uri $fontUrl -OutFile $tempZip -UseBasicParsing
 
-        # Extraer fuente
         if (Test-Path $tempDir) {
             Remove-Item $tempDir -Recurse -Force
         }
         Expand-Archive -Path $tempZip -DestinationPath $tempDir -Force
 
-        # Instalar archivos TTF
         $fontFiles = Get-ChildItem "$tempDir\*.ttf" -ErrorAction SilentlyContinue
         $installedFonts = 0
 
@@ -155,7 +185,6 @@ function Install-NerdFonts {
             }
         }
 
-        # Limpiar archivos temporales
         Remove-Item $tempZip -Force -ErrorAction SilentlyContinue
         Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
 
@@ -177,87 +206,102 @@ function Install-NerdFonts {
 
 # Función principal
 function main {
-    Write-Log "Iniciando instalación de herramientas de productividad..."
-
-    # Verificar que jq esté disponible
-    if (-not (Test-Jq)) {
-        Write-Log "Abortando: jq es requerido para procesar la configuración" "ERROR"
+    trap {
+        Write-Log "🛑 Excepción no manejada: $($_.Exception.Message)" "ERROR"
+        Restore-OriginalDirectory
         exit 1
     }
 
-    # Archivo de configuración
-    $packagesConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\02-packages-win.json"
+    Setup-ScriptInterruptionHandler
 
-    # Leer paquetes desde JSON
-    $packages = Get-PackagesFromJson $packagesConfig
+    try {
+        Write-Log "Iniciando instalación de herramientas de productividad..."
+        Write-Log "Directorio original: $script:OriginalDirectory"
 
-    if ($packages.Count -eq 0) {
-        Write-Log "No hay paquetes para instalar"
-        return
-    }
+        if (-not (Test-Jq)) {
+            Write-Log "Abortando: jq es requerido para procesar la configuración" "ERROR"
+            exit 1
+        }
 
-    $installedCount = 0
-    $failedCount = 0
+        $packagesConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\02-packages-win.json"
+        $packages = Get-PackagesFromJson $packagesConfig
 
-    Write-Log "Instalando herramientas de productividad..."
-    foreach ($package in $packages) {
-        if ($package.id -and $package.name) {
-            if (Install-WingetPackage -PackageId $package.id -Name $package.name -Description $package.description) {
-                $installedCount++
+        if ($packages.Count -eq 0) {
+            Write-Log "No hay paquetes para instalar"
+            return
+        }
+
+        $installedCount = 0
+        $failedCount = 0
+
+        Write-Log "Instalando herramientas de productividad..."
+        foreach ($package in $packages) {
+            if ($package.id -and $package.name) {
+                if (Install-WingetPackage -PackageId $package.id -Name $package.name -Description $package.description) {
+                    $installedCount++
+                }
+                else {
+                    $failedCount++
+                }
             }
             else {
+                Write-Log "Paquete con configuración incompleta omitido" "WARNING"
                 $failedCount++
             }
         }
-        else {
-            Write-Log "Paquete con configuración incompleta omitido" "WARNING"
-            $failedCount++
+
+        $hasLsd = $packages | Where-Object { $_.id -eq "lsd-rs.lsd" }
+        if ($hasLsd) {
+            Install-NerdFonts | Out-Null
         }
-    }
 
-    # Instalar Nerd Fonts si lsd está en la lista
-    $hasLsd = $packages | Where-Object { $_.id -eq "lsd-rs.lsd" }
-    if ($hasLsd) {
-        Install-NerdFonts | Out-Null
-    }
+        $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
 
-    # Refrescar PATH
-    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
+        $aliasesCreated = 0
 
-    # Crear alias para herramientas si es necesario
-    $aliasesCreated = 0
-
-    # Crear alias para btm -> htop si bottom está instalado
-    if ((Test-Command "btm") -and (-not (Test-Command "htop"))) {
-        try {
-            $aliasScript = @"
+        if ((Test-Command "btm") -and (-not (Test-Command "htop"))) {
+            try {
+                $aliasScript = @"
 @echo off
 btm %*
 "@
-            $htopPath = Join-Path $BIN_DIR "htop.cmd"
-            Set-Content -Path $htopPath -Value $aliasScript -Encoding ASCII
-            Write-Log "Alias htop -> btm creado"
-            $aliasesCreated++
+                $htopPath = Join-Path $BIN_DIR "htop.cmd"
+                Set-Content -Path $htopPath -Value $aliasScript -Encoding ASCII
+                Write-Log "Alias htop -> btm creado"
+                $aliasesCreated++
+            }
+            catch {
+                Write-Log "Error creando alias htop: $_" "WARNING"
+            }
         }
-        catch {
-            Write-Log "Error creando alias htop: $_" "WARNING"
-        }
-    }
 
-    # Mostrar resumen final
-    if ($installedCount -gt 0) {
-        Write-Log "✅ Herramientas de productividad instaladas ($installedCount paquetes)" "SUCCESS"
-        if ($failedCount -gt 0) {
-            Write-Log "$failedCount paquetes fallaron en la instalación" "WARNING"
+        if ($installedCount -gt 0) {
+            Write-Log "✅ Herramientas de productividad instaladas ($installedCount paquetes)" "SUCCESS"
+            if ($failedCount -gt 0) {
+                Write-Log "$failedCount paquetes fallaron en la instalación" "WARNING"
+            }
+            if ($aliasesCreated -gt 0) {
+                Write-Log "$aliasesCreated aliases creados"
+            }
         }
-        if ($aliasesCreated -gt 0) {
-            Write-Log "$aliasesCreated aliases creados"
+        else {
+            Write-Log "No se instalaron nuevos paquetes"
         }
+
+        $script:ShouldRestoreDirectory = $false
     }
-    else {
-        Write-Log "No se instalaron nuevos paquetes"
+    finally {
+        if ($script:ShouldRestoreDirectory) {
+            Restore-OriginalDirectory
+        }
     }
 }
 
-# Ejecutar función principal
-main
+try {
+    main
+}
+catch {
+    Write-Error "❌ Error crítico en script: $($_.Exception.Message)"
+    Restore-OriginalDirectory
+    exit 1
+}
