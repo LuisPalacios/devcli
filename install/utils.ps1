@@ -167,9 +167,9 @@ function Test-ScoopPackage {
         return $false
     }
 
-    try {
-        # Ejecutar scoop list directamente
-        $result = & scoop list $PackageName 2>$null
+        try {
+        # Ejecutar scoop list con modo silencioso
+        $result = & scoop list $PackageName --quiet 2>$null
 
         # Verificar si el paquete aparece en la lista
         if ($LASTEXITCODE -eq 0 -and $result) {
@@ -205,9 +205,9 @@ function Install-ScoopPackage {
     $displayName = $Description ? "$PackageName ($Description)" : $PackageName
     Write-Log "Instalando $displayName con scoop..."
 
-    try {
-        # Ejecutar scoop directamente (no usar Start-Process)
-        $result = & scoop install $PackageName 2>&1
+        try {
+        # Ejecutar scoop con opciones silenciosas
+        $result = & scoop install $PackageName --quiet --no-update-scoop 2>&1
 
         if ($LASTEXITCODE -eq 0) {
             Write-Log "$PackageName instalado correctamente con scoop" "SUCCESS"
