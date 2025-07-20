@@ -147,10 +147,10 @@ main() {
       ((installed_count++))
 
       # Personalizar .zshrc si es necesario
-      if [[ "$file" == ".zshrc" ]]; then
-        log "Personalizando .zshrc..."
-        customize_zshrc "$dst"
-      fi
+      # if [[ "$file" == ".zshrc" ]]; then
+      #   log "Personalizando .zshrc..."
+      #   customize_zshrc "$dst"
+      # fi
     else
       warning "Error copiando $file"
       ((failed_count++))
