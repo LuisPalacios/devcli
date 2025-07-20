@@ -141,7 +141,7 @@ main() {
     if cp -f "$src" "$dst" 2>/dev/null; then
       local dst_display="${dst_relative%/}"
       [[ "$dst_display" == "./" || "$dst_display" == "." ]] && dst_display="(home)"
-      success "✅ Copiado: $file → $dst_display"
+      success "Copiado: $file → $dst_display"
       installed_count=$((installed_count + 1))
 
       # Personalizar .zshrc si es necesario
@@ -194,9 +194,9 @@ main() {
   # Mostrar resumen final
   if [[ $installed_count -gt 0 ]]; then
     if [[ "$shell_changed" == "true" ]]; then
-      success "✅ Dotfiles instalados ($installed_count archivos) y shell cambiada a zsh"
+      success "Dotfiles instalados ($installed_count archivos) y shell cambiada a zsh"
     else
-      success "✅ Dotfiles instalados ($installed_count archivos)"
+      success "Dotfiles instalados ($installed_count archivos)"
     fi
 
     if [[ $failed_count -gt 0 ]]; then
