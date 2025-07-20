@@ -10,49 +10,44 @@ param()
 . "$PSScriptRoot\env.ps1"
 . "$PSScriptRoot\utils.ps1"
 
-# Función para instalar Nerd Fonts
+# Función para instalar Nerd Fonts usando Scoop
 function Install-NerdFonts {
-    Write-Log "Instalando FiraCode Nerd Font..."
+    Write-Log "Instalando FiraCode Nerd Font con Scoop..."
 
     try {
-        $fontsDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
-        if (-not (Test-Path $fontsDir)) {
-            New-Item -Path $fontsDir -ItemType Directory -Force | Out-Null
+        # Verificar que Scoop esté disponible
+        if (-not (Test-Scoop)) {
+            Write-Log "Scoop no está disponible para instalar fuentes" "WARNING"
+            return $false
         }
 
-        $fontUrl = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip"
-        $tempZip = "$env:TEMP\FiraCode.zip"
-        $tempDir = "$env:TEMP\FiraCode-NerdFont"
-
-        Write-Log "Descargando FiraCode Nerd Font..."
-        Invoke-WebRequest -Uri $fontUrl -OutFile $tempZip -UseBasicParsing
-
-        if (Test-Path $tempDir) {
-            Remove-Item $tempDir -Recurse -Force
-        }
-        Expand-Archive -Path $tempZip -DestinationPath $tempDir -Force
-
-        $fontFiles = Get-ChildItem "$tempDir\*.ttf" -ErrorAction SilentlyContinue
-        $installedFonts = 0
-
-        foreach ($fontFile in $fontFiles) {
-            $destPath = Join-Path $fontsDir $fontFile.Name
-            if (-not (Test-Path $destPath)) {
-                Copy-Item $fontFile.FullName $destPath -Force
-                $installedFonts++
+        # Añadir bucket de nerd-fonts si no está agregado
+        $bucketsOutput = & scoop bucket list *>$null 2>$null
+        if ($bucketsOutput -notlike "*nerd-fonts*") {
+            Write-Log "Añadiendo bucket nerd-fonts..."
+            & scoop bucket add nerd-fonts https://github.com/matthewjberger/scoop-nerd-fonts *>$null 2>$null
+            if ($LASTEXITCODE -ne 0) {
+                Write-Log "Error añadiendo bucket nerd-fonts" "WARNING"
+                return $false
             }
         }
 
-        Remove-Item $tempZip -Force -ErrorAction SilentlyContinue
-        Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+        # Verificar si FiraCode-NF ya está instalado
+        if (Test-ScoopPackage -PackageName "FiraCode-NF") {
+            Write-Log "FiraCode Nerd Font ya está instalada"
+            return $true
+        }
 
-        if ($installedFonts -gt 0) {
-            Write-Log "✅ FiraCode Nerd Font instalada ($installedFonts archivos)" "SUCCESS"
+        # Instalar FiraCode Nerd Font
+        Write-Log "Instalando FiraCode-NF con scoop..."
+        if (Install-ScoopPackage -PackageName "FiraCode-NF") {
+            Write-Log "✅ FiraCode Nerd Font instalada correctamente" "SUCCESS"
+            Write-Log "⚠️  IMPORTANTE: Reinicia tu terminal/editor para usar las nuevas fuentes" "WARNING"
             return $true
         }
         else {
-            Write-Log "FiraCode Nerd Font ya estaba instalada"
-            return $true
+            Write-Log "Error instalando FiraCode Nerd Font con scoop" "WARNING"
+            return $false
         }
     }
     catch {
