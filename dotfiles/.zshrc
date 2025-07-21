@@ -482,18 +482,15 @@ fi
 
 # Verificar si zoxide está instalado
 if ! command -v zoxide >/dev/null 2>&1; then
-  echo "Necesitas instalar 'zoxide', más info en .zshrc"
+  echo "⚠️  zoxide no está instalado - navegación básica de directorios"
   echo "Instalación:"
   echo "  macOS: brew install zoxide"
   echo "  Linux: sudo apt install zoxide  (o desde https://github.com/ajeetdsouza/zoxide)"
   echo "  WSL2: sudo apt install zoxide"
 else
   # Inicializar zoxide para zsh
+  # Esto crea automáticamente los comandos: z, zi, y reemplaza cd con inteligencia
   eval "$(zoxide init zsh)"
-
-  # Reemplazar 'cd' con zoxide para navegación inteligente
-  # Esto mantiene funcionalidad de cd normal pero añade inteligencia
-  alias cd="__zoxide_z"
 fi
 
 # =============================================================================
