@@ -123,7 +123,7 @@ function main {
         }
 
         # Verificar archivos críticos instalados
-        $criticalFiles = @(".luispa.omp.json")
+        $criticalFiles = @(".oh-my-posh.yaml")
         $missingFiles = @()
 
         foreach ($file in $criticalFiles) {

@@ -182,7 +182,7 @@ main() {
   fi
 
   # Verificar archivos críticos instalados
-  local critical_files=(".zshrc" ".luispa.omp.json")
+  local critical_files=(".zshrc" ".oh-my-posh.yaml")
   local missing_files=()
 
   for file in "${critical_files[@]}"; do
