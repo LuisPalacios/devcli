@@ -23,6 +23,10 @@
     {
       "name": "ripgrep",
       "description": "grep moderno"
+    },
+    {
+      "name": "clink",
+      "description": "complemento para CMD"
     }
   ]
 }
