@@ -210,6 +210,9 @@ function main {
         }
 
         # Instalar paquetes con Scoop
+        # Mostrar paquetes a instalar
+        Write-Log "Paquetes a instalar: $($scoopPackages -join ', ')" "INFO"
+
         if ($scoopPackages.Count -gt 0) {
             Write-Log "Instalando herramientas de productividad con scoop..."
 
