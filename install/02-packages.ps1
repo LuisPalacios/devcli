@@ -96,17 +96,17 @@ function Configure-Clink {
         }
 
         $clinkDir = Split-Path $clinkPath.Source -Parent
-        $clinkBat = Join-Path $clinkDir "clink.bat"
+        $clinkCmd = Join-Path $clinkDir "clink.cmd"
 
         # Verificar que existe clink.bat
-        if (-not (Test-Path $clinkBat)) {
-            Write-Log "No se encontró clink.bat en: $clinkBat" "WARNING"
+        if (-not (Test-Path $clinkCmd)) {
+            Write-Log "No se encontró clink.cmd en: $clinkCmd" "WARNING"
             return $false
         }
 
         # Configurar AutoRun en el registro para inyectar CLINK automáticamente en CMD
         $registryPath = "HKCU:\Software\Microsoft\Command Processor"
-        $autoRunValue = "`"$clinkBat`" inject --autorun"
+        $autoRunValue = "`"$clinkCmd`" inject --autorun"
 
         try {
             # Verificar si ya está configurado
@@ -139,7 +139,7 @@ clink set ohmyposh.theme %USERPROFILE%\.oh-my-posh.yaml >nul 2>&1
 echo CLINK configurado correctamente.
 "@
 
-            $configPath = Join-Path $env:TEMP "configure-clink.bat"
+            $configPath = Join-Path $env:TEMP "configure-clink.cmd"
             Set-Content -Path $configPath -Value $configScript -Encoding ASCII
 
             Write-Log "Script de configuración creado en: $configPath"
