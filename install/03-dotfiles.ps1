@@ -39,11 +39,6 @@ function Configure-WindowsTerminal {
             return $false
         }
 
-        # Hacer backup del settings.json
-        $backupPath = "$settingsPath.backup.$(Get-Date -Format 'yyyyMMdd-HHmmss')"
-        Copy-Item $settingsPath $backupPath -Force
-        Write-Log "Backup creado: $backupPath"
-
         # Leer y parsear el JSON
         $settingsContent = Get-Content $settingsPath -Raw -Encoding UTF8
         $settings = ConvertFrom-Json $settingsContent
