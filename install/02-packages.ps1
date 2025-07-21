@@ -126,7 +126,16 @@ function Configure-Clink {
         # Debug: mostrar el comando exacto que se va a configurar
         Write-Log "Comando AutoRun que se configurará: $autoRunValue" "INFO"
 
-                try {
+        try {
+            # Verificar si existe la clave de registro, crearla si no existe
+            if (-not (Test-Path $registryPath)) {
+                Write-Log "Creando clave de registro: $registryPath" "INFO"
+                New-Item -Path $registryPath -Force | Out-Null
+                Write-Log "✅ Clave de registro creada exitosamente" "SUCCESS"
+            }
+            else {
+                Write-Log "Clave de registro ya existe: $registryPath" "INFO"
+            }
             # Verificar si ya está configurado
             $currentAutoRun = Get-ItemProperty -Path $registryPath -Name "Autorun" -ErrorAction SilentlyContinue
 
