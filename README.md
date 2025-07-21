@@ -2,6 +2,20 @@
 
 Configura el entorno CLI en **Linux**, **macOS**, **WSL2** y **Windows**. Estaba ya cansado de perder un par de horas cuando tengo que configurarme uno de esos sistemas y añadir mis tipicas herramientas CLI, ejecutables, scripts o fuentes.
 
+**⚡ Linux, macOS y WSL2**:
+
+```console
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
+```
+
+**⚡ Windows 10/11**:
+
+```console
+iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
+```
+
+## Introducción
+
 Lo automatizo todo con un solo comando que descarga este repositorio y procede a instalar todo lo que necesito.
 
 > IMPORTANTE: Lee este readme, se modifican archivos muy importantes, asegúrate de que **no rompe nada de tu instalación** y ejecútalo bajo tu responsabilidad. Si no entiendes que hace todo esto, no lo ejecutes.
@@ -25,12 +39,6 @@ Tu usuario debe tener acceso a `sudo` sin contraseña para que la instalación s
 
 En macOS tienes que tener preinstalado **Homebrew** - mira cómo en [brew.sh](https://brew.sh)
 
-**⚡ Ejecución en Linux, macOS y WSL2**:
-
-```console
-bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
-```
-
 Después de la instalación verifica Nerd Fonts: `nerd-verify.sh` y `fc-list | grep "FiraCode Nerd Font"`. Comprueba si los iconos salen bien (i.e. `lsd --version`. Si no funciona, ejecuta lo siguiente: `nerd-setup.sh`
 
 ## Windows
@@ -45,12 +53,6 @@ Requisitos
 - Permisos para instalar aplicaciones con winget
 
 > **Nota sobre PowerShell 7**: Lo prefiero para aprovechar las mejoras en sintaxis moderna, mejor manejo de errores y compatibilidad mejorada con las herramientas CLI actuales.
-
-**⚡ Ejecución en Linux, macOS y WSL2**:
-
-```console
-iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
-```
 
 Después de la instalación **reiniciar el terminal** para aplicar los cambios de PATH. Luego verifica Nerd Fonts: `nerd-verify.ps1` y si no funciona, ejecuta lo siguiente: `nerd-setup.ps1`
 
