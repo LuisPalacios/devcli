@@ -57,20 +57,26 @@ function main {
 
             $src = Join-Path $dotfilesDir $dotfile.file
 
-            # Construir ruta de destino
-            $dstRelative = if ($dotfile.dst -and $dotfile.dst -ne ".\" -and $dotfile.dst -ne ".") {
-                $dotfile.dst.TrimEnd('\')
-            } else {
-                ""
+            # Construir ruta de destino (dst ahora incluye el nombre del archivo)
+            if (-not $dotfile.dst) {
+                Write-Log "Dotfile sin ruta destino especificada: $($dotfile.file)" "WARNING"
+                $failedCount++
+                continue
             }
 
-            $dstDir = if ($dstRelative) {
-                Join-Path $env:USERPROFILE $dstRelative
-            } else {
-                $env:USERPROFILE
+            # Normalizar la ruta destino
+            $dstRelative = $dotfile.dst.Replace('\\', [System.IO.Path]::DirectorySeparatorChar)
+
+            # Si empieza con .\ o ./, quitarlo ya que es relativo al HOME
+            if ($dstRelative.StartsWith(".\") -or $dstRelative.StartsWith("./")) {
+                $dstRelative = $dstRelative.Substring(2)
             }
 
-            $dst = Join-Path $dstDir $dotfile.file
+            # Construir ruta completa al archivo destino
+            $dst = Join-Path $env:USERPROFILE $dstRelative
+
+            # Extraer directorio padre para crear la estructura de directorios
+            $dstDir = Split-Path $dst -Parent
 
             if (-not (Test-Path $src)) {
                 Write-Log "Archivo fuente no encontrado: $src" "WARNING"
@@ -84,14 +90,6 @@ function main {
                     New-Item -Path $dstDir -ItemType Directory -Force | Out-Null
                     Write-Log "Directorio creado: $dstDir"
                 }
-
-                # Crear backup si el archivo ya existe
-                # if (Test-Path $dst) {
-                #     $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-                #     $backupFile = "$dst.backup.$timestamp"
-                #     Copy-Item $dst $backupFile -Force
-                #     Write-Log "Backup creado: $backupFile"
-                # }
 
                 # Copiar archivo
                 Copy-Item $src $dst -Force
