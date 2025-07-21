@@ -74,22 +74,33 @@ function ls {
 }
 
 # =============================================================================
-# REEMPLAZO DE 'cd' CON ZOXIDE (NAVEGACIÓN INTELIGENTE)
+# INICIALIZACIÓN DE ZOXIDE (NAVEGACIÓN INTELIGENTE)
 # =============================================================================
 
-# Cambiar cd por zoxide para navegación inteligente de directorios
+# Inicializar zoxide para navegación inteligente de directorios
 # zoxide recuerda directorios visitados y permite saltos rápidos
-# Ejemplo: z doc (salta a Documents), z pro (salta a Projects)
+# Comandos disponibles después de la inicialización:
+# - z [directorio]  : salto rápido a directorio (ej: z doc, z pro)
+# - cd [directorio] : navegación normal + aprendizaje automático
+# - zi              : búsqueda interactiva de directorios
 # Repositorio: https://github.com/ajeetdsouza/zoxide
 
-# Eliminar el alias nativo de PowerShell si existe
-if (Get-Alias cd -ErrorAction SilentlyContinue) {
-    Remove-Item Alias:cd -Force
-}
+# Verificar si zoxide está instalado antes de inicializar
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    # Inicializar zoxide - esto crea automáticamente los comandos z, zi y reemplaza cd
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+} else {
+    Write-Warning "zoxide no está instalado. Instala con: scoop install zoxide"
 
-# Función cd que usa zoxide para navegación inteligente
-function cd {
-    zoxide @args
+    # Función cd fallback básica si zoxide no está disponible
+    function cd {
+        param([string]$Path = $HOME)
+        if ($Path) {
+            Set-Location $Path
+        } else {
+            Set-Location $HOME
+        }
+    }
 }
 
 # =============================================================================
