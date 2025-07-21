@@ -74,47 +74,6 @@ function ls {
 }
 
 # =============================================================================
-# INICIALIZACIÓN DE ZOXIDE (NAVEGACIÓN INTELIGENTE)
-# =============================================================================
-
-# Inicializar zoxide para navegación inteligente de directorios
-# zoxide recuerda directorios visitados y permite saltos rápidos
-# Comandos disponibles después de la inicialización:
-# - z [directorio]  : salto rápido a directorio (ej: z doc, z pro)
-# - cd [directorio] : navegación normal + aprendizaje automático
-# - zi              : búsqueda interactiva de directorios
-# Repositorio: https://github.com/ajeetdsouza/zoxide
-
-# Verificar si zoxide está instalado antes de inicializar
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    # Inicializar zoxide - esto crea los comandos z y zi
-    Invoke-Expression (& { (zoxide init powershell | Out-String) })
-
-        # Función cd simple que delega todo a zoxide
-    # __zoxide_z maneja automáticamente todos los casos: rutas normales, búsqueda inteligente, etc.
-    # function cd {
-    #     param([string]$Path)
-    #     if ($Path) {
-    #         __zoxide_z $Path
-    #     } else {
-    #         __zoxide_z $env:USERPROFILE
-    #     }
-    # }
-} else {
-    Write-Warning "zoxide no está instalado. Instala con: scoop install zoxide"
-
-    # Función cd fallback básica si zoxide no está disponible
-    function cd {
-        param([string]$Path = $HOME)
-        if ($Path) {
-            Set-Location $Path
-        } else {
-            Set-Location $HOME
-        }
-    }
-}
-
-# =============================================================================
 # ELIMINACIÓN DE ALIASES CONFLICTIVOS
 # =============================================================================
 
@@ -197,6 +156,34 @@ try {
 }
 catch {
     Write-Warning "No se pudo importar posh-git: $_"
+}
+
+# =============================================================================
+# INICIALIZACIÓN DE ZOXIDE (NAVEGACIÓN INTELIGENTE)
+# =============================================================================
+
+# Inicializar zoxide para navegación inteligente de directorios
+# zoxide recuerda directorios visitados y permite saltos rápidos
+# Comandos disponibles después de la inicialización:
+# - z [directorio]  : salto rápido a directorio (ej: z doc, z pro)
+# - cd [directorio] : navegación normal + aprendizaje automático
+# - zi              : búsqueda interactiva de directorios
+# Repositorio: https://github.com/ajeetdsouza/zoxide
+
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    Write-Host "Inicializando zoxide..." -ForegroundColor Green
+
+    # Inicializar zoxide con hook en prompt
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+
+    # Si oh-my-posh sobreescribió el prompt, reinyectar el hook de zoxide
+    if ($global:__zoxide_hooked -eq 1 -and $function:prompt -ne $global:__zoxide_prompt_old) {
+        $ompPrompt = $function:prompt
+        function global:prompt {
+            & $ompPrompt
+            $null = __zoxide_hook
+        }
+    }
 }
 
 # =============================================================================
