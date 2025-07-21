@@ -170,7 +170,7 @@ btm %*
         }
 
         # Verificar herramientas críticas instaladas
-        $criticalTools = @("lsd", "fzf", "fd", "ripgrep")
+        $criticalTools = @("lsd", "fzf", "fd", "ripgrep", "clink")
         $missingTools = @()
 
         foreach ($tool in $criticalTools) {
