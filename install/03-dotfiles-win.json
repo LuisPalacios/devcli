@@ -2,11 +2,15 @@
   "dotfiles": [
     {
       "file": ".luispa.omp.json",
-      "dst": ".\\"
+      "dst": ".\\.luispa.omp.json"
+    },
+    {
+      "file": "win.gitbash.bashrc",
+      "dst": ".\\.bashrc"
     },
     {
       "file": "Microsoft.PowerShell_profile.ps1",
-      "dst": "Documents\\PowerShell\\"
+      "dst": "Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"
     }
   ]
 }
