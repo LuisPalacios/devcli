@@ -6,6 +6,16 @@ Lo automatizo todo con un solo comando que descarga este repositorio y procede a
 
 > IMPORTANTE: Lee este readme, se modifican archivos muy importantes, asegúrate de que **no rompe nada de tu instalación** y ejecútalo bajo tu responsabilidad. Si no entiendes que hace todo esto, no lo ejecutes.
 
+Está diseñado con un enfoque modular, multiplataforma e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`:
+
+- Instala herramientas como: git, curl, wget, nano, htop, tmux, fzf, bat, fd-find, ripgrep, tree, jq, lsd
+- Instala Oh-My-Posh, para cualquier Shell, dicen que es el mejor prompt.
+- Establece la variable LANG (por defecto a `s_ES.UTF-8`) en linux, macOS y WSL2
+- Copia ficheros importanttes de configuración (ver el subdirectorio `dotfiles`)
+- Copia algunas herramientas de Git que tengo en el repositorio git-config-repos.
+- Crea unos cuantos scripts en ~/bin que uso con frecuencia: e, s, confcat
+- Instala automáticamente **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`.
+
 ## Linux, macOS y WSL2
 
 Tu usuario debe tener acceso a `sudo` sin contraseña para que la instalación sea completamente automática.
@@ -21,25 +31,14 @@ sudo visudo
 
 En macOS tienes que tener preinstalado **Homebrew** - mira cómo en [brew.sh](https://brew.sh)
 
-### ⚡ Ejecución en Linux, macOS y WSL2
+**⚡ Ejecución en Linux, macOS y WSL2**:
 
-```console
-bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
-```
+| |
+|--|
+| `bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)` |
+| |
 
-Usa por defecto `es_ES.UTF-8`, puedes cambiarlo: `bash <(curl -fsSL .../bootstrap.sh) -l en_US.UTF-8`
-
-Automatiza la configuración inicial de un entorno personalizado para sistemas Linux, macOS y WSL2. Está diseñado con un enfoque modular, multiplataforma e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
-
-- Herramientas: git, curl, wget, nano, htop, tmux, fzf, bat, fd-find, ripgrep, tree, jq, lsd
-- El mejor prompt, Oh-My-Posh, para cualquier Shell.
-- Establece la variable LANG (por defecto a `s_ES.UTF-8`)
-- Copia mis ficheros ~/.oh-my-posh.json y ~/.zshrc
-- Herramientas de Git que tengo en el repositorio git-config-repos.
-- Crea unos cuantos scripts en ~/bin que uso con frecuencia: e, s, confcat
-- Instala automáticamente **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`.
-
-Post instalación: verifica que te funciona bien la fuente Nerd
+Después de la instalación:
 
 ```bash
 # Verificación completa de Nerd Fonts
@@ -72,19 +71,12 @@ Requisitos
 
 > **Nota sobre PowerShell 7**: Lo prefiero para aprovechar las mejoras en sintaxis moderna, mejor manejo de errores y compatibilidad mejorada con las herramientas CLI actuales.
 
-### ⚡ Ejecución en Windows
+**⚡ Ejecución en Linux, macOS y WSL2**:
 
-```console
-iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
-```
-
-Automatiza la configuración inicial de un entorno personalizado para Windows. Está diseñado con un enfoque modular e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`.
-
-- **Herramientas**: git, oh-my-posh, jq, lsd, zoxide, fd, fzf, ripgrep, bottom (equivalente a htop)
-- **El mejor prompt**: Oh-My-Posh configurado con el tema personalizado
-- **Copia de ficheros**: `~/.oh-my-posh.json` al perfil de usuario
-- **Scripts útiles**: `nerd-setup.ps1`, `nerd-verify.ps1` en `~/bin`
-- **Instala automáticamente**: **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`
+| |
+|--|
+| `iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")` |
+| |
 
 Después de la instalación:
 
@@ -99,9 +91,7 @@ nerd-verify.ps1
 nerd-setup.ps1 auto
 ```
 
-## 🧰 Gestores de paquetes por sistema operativo
-
-Estos son los gestores que uso para hacer las instalaciones.
+## 🧰 Gestores de paquetes utilizados
 
 | Sistema Operativo     | Gestor de Paquetes | Rol Principal                                      | ¿Por qué lo uso?                                                                 |
 |------------------------|--------------------|----------------------------------------------------|------------------------------------------------------------------------------------|
