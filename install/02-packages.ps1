@@ -164,32 +164,6 @@ function Configure-Clink {
             return $false
         }
 
-        # Configurar CLINK para usar Oh-My-Posh
-        # NOTA: Estos comandos requieren que CLINK esté ya inyectado en una sesión de CMD
-        # Se ejecutarán en el siguiente inicio de CMD
-        try {
-            # Crear script de configuración inicial que se ejecutará en CMD
-            $configScript = @"
-@echo off
-echo Configurando CLINK con Oh-My-Posh...
-clink config prompt use oh-my-posh >nul 2>&1
-clink set ohmyposh.theme %USERPROFILE%\.oh-my-posh.yaml >nul 2>&1
-echo CLINK configurado correctamente.
-"@
-
-            $configPath = Join-Path $env:TEMP "configure-clink.cmd"
-            Set-Content -Path $configPath -Value $configScript -Encoding ASCII
-
-            Write-Log "Script de configuración creado en: $configPath"
-            Write-Log "⚠️  IMPORTANTE: Abre CMD y ejecuta: $configPath" "WARNING"
-            Write-Log "   O ejecuta manualmente en CMD:" "WARNING"
-            Write-Log "   clink config prompt use oh-my-posh" "WARNING"
-            Write-Log "   clink set ohmyposh.theme %USERPROFILE%\.oh-my-posh.yaml" "WARNING"
-        }
-        catch {
-            Write-Log "Error creando script de configuración: $($_.Exception.Message)" "WARNING"
-        }
-
         return $true
     }
     catch {
