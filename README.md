@@ -34,7 +34,7 @@ Automatiza la configuración inicial de un entorno personalizado para sistemas L
 - Herramientas: git, curl, wget, nano, htop, tmux, fzf, bat, fd-find, ripgrep, tree, jq, lsd
 - El mejor prompt, Oh-My-Posh, para cualquier Shell.
 - Establece la variable LANG (por defecto a `s_ES.UTF-8`)
-- Copia mis ficheros ~/.oh-my-posh.yaml y ~/.zshrc
+- Copia mis ficheros ~/.oh-my-posh.json y ~/.zshrc
 - Herramientas de Git que tengo en el repositorio git-config-repos.
 - Crea unos cuantos scripts en ~/bin que uso con frecuencia: e, s, confcat
 - Instala automáticamente **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`.
@@ -82,7 +82,7 @@ Automatiza la configuración inicial de un entorno personalizado para Windows. E
 
 - **Herramientas**: git, oh-my-posh, jq, lsd, zoxide, fd, fzf, ripgrep, bottom (equivalente a htop)
 - **El mejor prompt**: Oh-My-Posh configurado con el tema personalizado
-- **Copia de ficheros**: `~/.oh-my-posh.yaml` al perfil de usuario
+- **Copia de ficheros**: `~/.oh-my-posh.json` al perfil de usuario
 - **Scripts útiles**: `nerd-setup.ps1`, `nerd-verify.ps1` en `~/bin`
 - **Instala automáticamente**: **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`
 

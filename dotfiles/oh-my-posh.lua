@@ -9,4 +9,4 @@
 
 -- Cargar Oh-My-Posh para personalizar el prompt de CMD
 -- Este script se ejecuta automáticamente cuando CLINK inicia
-load(io.popen('oh-my-posh init cmd --config %USERPROFILE%\\.oh-my-posh.yaml'):read("*a"))()
+load(io.popen('oh-my-posh init cmd --config %USERPROFILE%\\.oh-my-posh.json'):read("*a"))()

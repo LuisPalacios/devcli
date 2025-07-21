@@ -232,18 +232,18 @@ export OMP_OS_ICON="⚡"
 export OMP_PATH="/c/Users/luis/scoop/shims/oh-my-posh.exe"
 
 # Inicializar Oh My Posh para personalizar el prompt de Git Bash
-# Usa el archivo de configuración personalizado ~/.oh-my-posh.yaml
+# Usa el archivo de configuración personalizado ~/.oh-my-posh.json
 # Solo se ejecuta si el binario de Oh My Posh existe y es ejecutable
 if [ -x "$OMP_PATH" ]; then
-    eval "$("$OMP_PATH" --init --shell bash --config ~/.oh-my-posh.yaml)"
+    eval "$("$OMP_PATH" --init --shell bash --config ~/.oh-my-posh.json)"
 fi
 
 # =============================================================================
 # NOTAS IMPORTANTES PARA EL USUARIO:
 # =============================================================================
 # 1. Este archivo se copia automáticamente a ~/.bashrc durante la instalación
-# 2. Requiere tener instalados: lsd, oh-my-posh, y el tema ~/.oh-my-posh.yaml
-# 3. El archivo ~/.oh-my-posh.yaml debe existir para el prompt personalizado
+# 2. Requiere tener instalados: lsd, oh-my-posh, y el tema ~/.oh-my-posh.json
+# 3. El archivo ~/.oh-my-posh.json debe existir para el prompt personalizado
 # 4. Si Oh My Posh no está instalado, el prompt usará el formato estándar
 # 5. Los aliases de lsd solo funcionan si lsd está instalado via Scoop
 # =============================================================================
