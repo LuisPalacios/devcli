@@ -15,6 +15,10 @@
     {
       "file": "Microsoft.PowerShell_profile.ps1",
       "dst": "Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"
+    },
+    {
+      "file": "cmd_aliases.cmd",
+      "dst": ".\\cmd_aliases.cmd"
     }
   ]
 }
