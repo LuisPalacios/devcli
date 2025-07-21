@@ -1,8 +1,8 @@
 {
   "dotfiles": [
     {
-      "file": ".luispa.omp.json",
-      "dst": ".\\.luispa.omp.json"
+      "file": ".oh-my-posh.yaml",
+      "dst": ".\\.oh-my-posh.yaml"
     },
     {
       "file": "win.gitbash.bashrc",

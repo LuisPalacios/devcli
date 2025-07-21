@@ -5,7 +5,7 @@
       "dst": "./"
     },
     {
-      "file": ".luispa.omp.json",
+      "file": ".oh-my-posh.yaml",
       "dst": "./"
     }
   ]
