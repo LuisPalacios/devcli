@@ -77,6 +77,89 @@ function Install-NerdFonts {
     }
 }
 
+# Función para configurar CLINK automáticamente
+function Configure-Clink {
+    Write-Log "Configurando CLINK para CMD..."
+
+    try {
+        # Verificar si CLINK está instalado
+        if (-not (Test-ScoopPackage -PackageName "clink")) {
+            Write-Log "CLINK no está instalado, omitiendo configuración" "WARNING"
+            return $false
+        }
+
+        # Obtener la ruta de CLINK instalado con Scoop
+        $clinkPath = Get-Command "clink" -ErrorAction SilentlyContinue
+        if (-not $clinkPath) {
+            Write-Log "No se pudo encontrar el ejecutable de CLINK" "WARNING"
+            return $false
+        }
+
+        $clinkDir = Split-Path $clinkPath.Source -Parent
+        $clinkBat = Join-Path $clinkDir "clink.bat"
+
+        # Verificar que existe clink.bat
+        if (-not (Test-Path $clinkBat)) {
+            Write-Log "No se encontró clink.bat en: $clinkBat" "WARNING"
+            return $false
+        }
+
+        # Configurar AutoRun en el registro para inyectar CLINK automáticamente en CMD
+        $registryPath = "HKCU:\Software\Microsoft\Command Processor"
+        $autoRunValue = "`"$clinkBat`" inject --autorun"
+
+        try {
+            # Verificar si ya está configurado
+            $currentAutoRun = Get-ItemProperty -Path $registryPath -Name "AutoRun" -ErrorAction SilentlyContinue
+
+            if ($currentAutoRun -and $currentAutoRun.AutoRun -like "*clink*") {
+                Write-Log "CLINK ya está configurado en AutoRun del CMD"
+            }
+            else {
+                # Configurar AutoRun para inyectar CLINK
+                Set-ItemProperty -Path $registryPath -Name "AutoRun" -Value $autoRunValue -Force
+                Write-Log "✅ CLINK configurado para inyección automática en CMD" "SUCCESS"
+            }
+        }
+        catch {
+            Write-Log "Error configurando AutoRun del registro: $($_.Exception.Message)" "WARNING"
+            return $false
+        }
+
+        # Configurar CLINK para usar Oh-My-Posh
+        # NOTA: Estos comandos requieren que CLINK esté ya inyectado en una sesión de CMD
+        # Se ejecutarán en el siguiente inicio de CMD
+        try {
+            # Crear script de configuración inicial que se ejecutará en CMD
+            $configScript = @"
+@echo off
+echo Configurando CLINK con Oh-My-Posh...
+clink config prompt use oh-my-posh >nul 2>&1
+clink set ohmyposh.theme %USERPROFILE%\.oh-my-posh.yaml >nul 2>&1
+echo CLINK configurado correctamente.
+"@
+
+            $configPath = Join-Path $env:TEMP "configure-clink.bat"
+            Set-Content -Path $configPath -Value $configScript -Encoding ASCII
+
+            Write-Log "Script de configuración creado en: $configPath"
+            Write-Log "⚠️  IMPORTANTE: Abre CMD y ejecuta: $configPath" "WARNING"
+            Write-Log "   O ejecuta manualmente en CMD:" "WARNING"
+            Write-Log "   clink config prompt use oh-my-posh" "WARNING"
+            Write-Log "   clink set ohmyposh.theme %USERPROFILE%\.oh-my-posh.yaml" "WARNING"
+        }
+        catch {
+            Write-Log "Error creando script de configuración: $($_.Exception.Message)" "WARNING"
+        }
+
+        return $true
+    }
+    catch {
+        Write-Log "Error configurando CLINK: $($_.Exception.Message)" "WARNING"
+        return $false
+    }
+}
+
 # Función principal
 function main {
     trap {
@@ -169,6 +252,12 @@ btm %*
             }
         }
 
+        # Configurar CLINK si está instalado
+        $clinkConfigured = $false
+        if ($scoopPackages -contains "clink") {
+            $clinkConfigured = Configure-Clink
+        }
+
         # Verificar herramientas críticas instaladas
         $criticalTools = @("lsd", "fzf", "fd", "ripgrep", "clink")
         $missingTools = @()
@@ -187,6 +276,9 @@ btm %*
             }
             if ($aliasesCreated -gt 0) {
                 Write-Log "$aliasesCreated alias creados" "SUCCESS"
+            }
+            if ($clinkConfigured) {
+                Write-Log "✅ CLINK configurado para CMD" "SUCCESS"
             }
         }
         else {
