@@ -182,10 +182,10 @@ catch {
 # =============================================================================
 
 # Ejecutar oh-my-posh para personalizar el prompt de PowerShell
-# Usa el archivo de configuración personalizado ~/.luispa.omp.json
+# Usa el archivo de configuración personalizado ~/.oh-my-posh.yaml
 # Oh My Posh proporciona un prompt rico con información de Git, directorio,
 # tiempo de ejecución, estado del sistema, etc.
-oh-my-posh init pwsh --config ~/.luispa.omp.json | Invoke-Expression
+oh-my-posh init pwsh --config ~/.oh-my-posh.yaml | Invoke-Expression
 
 # =============================================================================
 # CONFIGURACIÓN AVANZADA DE PSREADLINE - PREDICCIÓN INTELIGENTE
@@ -288,7 +288,7 @@ if ($envVarsToSet.Count -gt 0) {
 #    - oh-my-posh (prompt personalizado)
 # 3. Dependencias adicionales:
 #    - Git for Windows (para nano y posh-git)
-#    - Archivo ~/.luispa.omp.json (tema de Oh My Posh)
+#    - Archivo ~/.oh-my-posh.yaml (tema de Oh My Posh)
 #    - PowerShell 7.2+ (para predicción inteligente)
 # 4. Si faltan herramientas, las funciones muestran mensajes informativos
 # 5. Las variables de entorno se configuran una sola vez automáticamente

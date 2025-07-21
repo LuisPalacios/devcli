@@ -1,3 +1,13 @@
+# =============================================================================
+# Configuración avanzada de Zsh multiplataforma
+# =============================================================================
+# Ubicación final: ~/.zshrc
+# Propósito: Configurar Zsh con herramientas modernas, navegación inteligente,
+#            prompt personalizado y compatibilidad multiplataforma
+# Compatible con: Linux, macOS, WSL2 en Windows 10/11
+# Dependencias: lsd, zoxide, oh-my-posh, git, tmux (opcional)
+# =============================================================================
+
 # Fichero .zshrc de Linux Setup
 # Versión: 6 de Julio de 2025
 # Utilizado en MacOS (brew), Linux (Ubuntu), Windows WSL2
@@ -18,124 +28,181 @@
 # Debug: En caso de necesitarlo, activar la línea siguiente
 #set -x
 
-# Parametrización
-SOY="$(id -un)"
-export LANG="es_ES.UTF-8"
+# =============================================================================
+# CONFIGURACIÓN INICIAL Y DETECCIÓN DE ENTORNO
+# =============================================================================
 
-# -----------------------------------------------------------------------------
-# Detecciones:
-# Estoy dentro de una sesión WSL2?
+# Parametrización básica del usuario actual y localización
+SOY="$(id -un)"                    # Nombre del usuario actual
+export LANG="es_ES.UTF-8"          # Idioma por defecto (español España)
+
+# =============================================================================
+# DETECCIÓN AUTOMÁTICA DE ENTORNOS ESPECIALES
+# =============================================================================
+
+# Detectar si estamos dentro de una sesión WSL2 (Windows Subsystem for Linux)
+# WSL2 establece la variable WSL_DISTRO_NAME automáticamente
 export IS_WSL2=false
 if [[ -n "$WSL_DISTRO_NAME" ]]; then
   export IS_WSL2=true
 fi
 
-# Estoy dentro de una sesión VSCode?
+# Detectar si estamos dentro de una sesión de Visual Studio Code
+# VSCode establece múltiples variables de entorno que empiezan con "VSCODE_"
 export IS_VSCODE=false
 if [[ $(printenv | grep -c "VSCODE_") -gt 0 ]]; then
     export IS_VSCODE=true
 fi
 
-# -----------------------------------------------------------------------------
-# Comunes
-# -----------------------------------------------------------------------------
-#
+# =============================================================================
+# FUNCIONES AUXILIARES PARA DETECCIÓN DE CAPACIDADES
+# =============================================================================
 
-# Función para averiguar la opción de usar colores en el comando ls
+# Función para averiguar si un comando ls soporta ciertos argumentos
+# Útil para detectar si el sistema usa GNU ls (Linux) o BSD ls (macOS)
+# Parámetros: comando y argumentos a probar
+# Retorna: 0 si el comando soporta los argumentos, 1 si no
 function test-ls-args {
-  local cmd="$1"          # ls, gls, colorls, ...
-  local args="${@[2,-1]}" # los argumentos excepto el primero
+  local cmd="$1"          # Comando a probar (ls, gls, colorls, etc.)
+  local args="${@[2,-1]}" # Los argumentos excepto el primero
   command "$cmd" "$args" /dev/null &>/dev/null
 }
 
-# Parametrización de Zsh común
-#
+# =============================================================================
+# FUNCIÓN DE CONFIGURACIÓN COMÚN MULTIPLATAFORMA
+# =============================================================================
+
+# Configuración común de Zsh que se aplica en todos los sistemas operativos
+# Esta función centraliza todas las configuraciones que son independientes del OS
 function parametriza_zsh_comun() {
 
-  # Personalización de los colores del comando 'ls'
-  # LS_COLORS se usan en ls de GNU,
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN DE COLORES PARA COMANDOS DE LISTADO
+  # ---------------------------------------------------------------------------
+
+  # LS_COLORS: Configuración de colores para GNU ls (Linux/WSL2)
+  # Define colores específicos para diferentes tipos de archivos y directorios
+  # Formato: tipo=color donde color usa códigos ANSI
   export LS_COLORS='fi=00:mi=00:mh=00:ln=01;94:or=01;31:di=01;36:ow=04;01;34:st=34:tw=04;34:'
+  # Archivos especiales del sistema (pipes, sockets, dispositivos)
   LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01;35:ex=01;32'
+  # Archivos ejecutables y binarios (.cmd, .exe, .com, .bat, .dll)
   LS_COLORS+=':*.cmd=00;32:*.exe=01;32:*.com=01;32:*.bat=01;32:*.btm=01;32:*.dll=01;32'
+  # Archivos comprimidos (.tar, .zip, .gz, .bz2, etc.)
   LS_COLORS+=':*.tar=00;31:*.tbz=00;31:*.tgz=00;31:*.rpm=00;31:*.deb=00;31:*.arj=00;31'
   LS_COLORS+=':*.taz=00;31:*.lzh=00;31:*.lzma=00;31:*.zip=00;31:*.zoo=00;31:*.z=00;31'
   LS_COLORS+=':*.Z=00;31:*.gz=00;31:*.bz2=00;31:*.tb2=00;31:*.tz2=00;31:*.tbz2=00;31'
+  # Archivos multimedia (imágenes, videos)
   LS_COLORS+=':*.avi=01;35:*.bmp=01;35:*.fli=01;35:*.gif=01;35:*.jpg=01;35:*.jpeg=01;35'
   LS_COLORS+=':*.mng=01;35:*.mov=01;35:*.mpg=01;35:*.pcx=01;35:*.pbm=01;35:*.pgm=01;35'
   LS_COLORS+=':*.png=01;35:*.ppm=01;35:*.tga=01;35:*.tif=01;35:*.xbm=01;35:*.xpm=01;35'
   LS_COLORS+=':*.dl=01;35:*.gl=01;35:*.wmv=01;35'
 
-  # Personalización de los colores del tree de GNU
+  # TREE_COLORS: Colores para el comando tree basados en LS_COLORS
+  # Elimina códigos específicos que tree no entiende
   export TREE_COLORS=${LS_COLORS//04;}
 
-  # mientras que LSCOLORS se usa en el ls de BSD
-  export CLICOLOR=1
+  # LSCOLORS: Configuración de colores para BSD ls (macOS)
+  # Formato diferente más compacto usado por el ls nativo de macOS
+  export CLICOLOR=1                      # Habilitar colores en BSD ls
   export LSCOLORS='GxExDxDxCxDxDxFxFxexEx'
 
-  # Bajo WSL2 se soporta ls --color
-  #alias ls='ls --color=tty'
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN DE ALIAS PARA COMANDOS DE LISTADO
+  # ---------------------------------------------------------------------------
+
+  # Usar LSD (LSDeluxe) como reemplazo moderno de ls
+  # LSD proporciona iconos, colores mejorados y mejor formato
+  # Funciona en todos los sistemas operativos
   alias ls='lsd'
 
-  # Locales
-  export LC_CTYPE=${LANG}
-  export LC_NUMERIC=${LANG}
-  export LC_TIME=${LANG}
-  export LC_COLLATE=${LANG}
-  export LC_MONETARY=${LANG}
-  export LC_MESSAGES=${LANG}
-  export LC_PAPER=${LANG}
-  export LC_NAME=${LANG}
-  export LC_ADDRESS=${LANG}
-  export LC_TELEPHONE=${LANG}
-  export LC_MEASUREMENT=${LANG}
-  export LC_IDENTIFICATION=${LANG}
-  export LC_ALL=${LANG}
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN DE LOCALIZACIÓN (IDIOMA Y REGIÓN)
+  # ---------------------------------------------------------------------------
 
-  # Detecto e inicializo el valor de la variable SHELL
-  #
-  # Si mi $SHELL acaba en */zsh o */zsh-static, no hago nada.
-  # En caso contrario, hago una sustitución compleja de la variable SHELL, poniendo
-  # el PATH absoluto de la shell
+  # Establecer todas las variables de localización al idioma configurado
+  # Esto afecta formato de fechas, números, moneda, ordenamiento, etc.
+  export LC_CTYPE=${LANG}              # Clasificación de caracteres
+  export LC_NUMERIC=${LANG}            # Formato de números
+  export LC_TIME=${LANG}               # Formato de fecha y hora
+  export LC_COLLATE=${LANG}            # Ordenamiento de cadenas
+  export LC_MONETARY=${LANG}           # Formato de moneda
+  export LC_MESSAGES=${LANG}           # Idioma de mensajes del sistema
+  export LC_PAPER=${LANG}              # Tamaño de papel por defecto
+  export LC_NAME=${LANG}               # Formato de nombres de persona
+  export LC_ADDRESS=${LANG}            # Formato de direcciones
+  export LC_TELEPHONE=${LANG}          # Formato de números de teléfono
+  export LC_MEASUREMENT=${LANG}        # Sistema de medidas (métrico/imperial)
+  export LC_IDENTIFICATION=${LANG}     # Identificación de localización
+  export LC_ALL=${LANG}                # Sobrescribe todas las anteriores
+
+  # ---------------------------------------------------------------------------
+  # DETECCIÓN Y CONFIGURACIÓN DE LA SHELL ACTUAL
+  # ---------------------------------------------------------------------------
+
+  # Detectar e inicializar el valor correcto de la variable SHELL
+  # Si $SHELL no termina en */zsh o */zsh-static, actualizar con la ruta absoluta
+  # Esto es importante para scripts que necesiten saber qué shell usar
   [[ -o interactive ]] && \
     case $SHELL in
-        */zsh) ;;
-        */zsh-static) ;;
-        *) SHELL=${${0#-}:c:A}
+        */zsh) ;;                          # Ya es zsh, no hacer nada
+        */zsh-static) ;;                   # Ya es zsh-static, no hacer nada
+        *) SHELL=${${0#-}:c:A}             # Obtener ruta absoluta de zsh actual
     esac
 
-  # Variables de entorno para no enviar telemetría a Microsoft
-  export DOTNET_CLI_TELEMETRY_OPTOUT=1
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN DE PRIVACIDAD Y TELEMETRÍA
+  # ---------------------------------------------------------------------------
 
-  # En bash, escape-delete elimina una sola palabra. Sin embargo, en ZSH hace
-  # falta una variable define qué caracteres especiales se consideran parte de
-  # una palabra. Esta es mi versión modificada, en la que he eliminado '/' para
-  # que sea más conveniente al eliminar componentes de directorio desde la CLI.
+  # Deshabilitar telemetría de herramientas de desarrollo
+  export DOTNET_CLI_TELEMETRY_OPTOUT=1   # Microsoft .NET Core CLI
+
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN DE EDICIÓN Y NAVEGACIÓN EN TERMINAL
+  # ---------------------------------------------------------------------------
+
+  # Personalizar qué caracteres se consideran parte de una palabra para edición
+  # Por defecto, zsh incluye '/' lo que hace tedioso editar rutas de archivos
+  # Esta configuración elimina '/' para facilitar la edición de rutas
   WORDCHARS='*?_.[]~&;!#$%^(){}<>'
 
-  # Elimino el mensaje "Last login" en las sesiones y nuevos tabs.
+  # Eliminar el mensaje "Last login" molesto en nuevas sesiones y pestañas
+  # Crear archivo ~/.hushlogin si no existe para suprimir el mensaje
   [ ! -f ~/.hushlogin ] && touch ~/.hushlogin
 
-  # No poner líneas de comando en la lista de historial si son duplicados
-  setopt HIST_IGNORE_DUPS
-  # Comparte el historial entre todas las instancias
-  setopt SHARE_HISTORY
-  # Que no pida Y/N cuando se hace un rm -fr
-  setopt RM_STAR_SILENT
-  # Habilitar expansión de parñametros en el prompt, necesario para
-  # mostrar información de branches de Git por ejemplo.
-  setopt PROMPT_SUBST
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN AVANZADA DE ZSH
+  # ---------------------------------------------------------------------------
 
-  # Uso los keybindings emacs incluso si el editor está puesto a 'vi'
+  # Opciones de historial y comportamiento
+  setopt HIST_IGNORE_DUPS     # No almacenar comandos duplicados en historial
+  setopt SHARE_HISTORY        # Compartir historial entre todas las instancias de zsh
+  setopt RM_STAR_SILENT       # No pedir confirmación para 'rm *' (más como bash)
+  setopt PROMPT_SUBST         # Habilitar expansión de parámetros en el prompt
+                              # Necesario para mostrar información dinámica como Git
+
+  # Usar keybindings estilo Emacs incluso si $EDITOR está configurado como vi
+  # Esto proporciona navegación familiar (Ctrl+A, Ctrl+E, etc.)
   bindkey -e
 
-  # Mantener 1000 líneas de history
-  HISTSIZE=1000
-  SAVEHIST=1000
-  HISTFILE=~/.zsh_history
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN DEL HISTORIAL DE COMANDOS
+  # ---------------------------------------------------------------------------
 
-  # Usar el sistema de auto completado moderno
+  # Configurar tamaño y ubicación del historial
+  HISTSIZE=1000               # Comandos en memoria durante la sesión
+  SAVEHIST=1000               # Comandos guardados en archivo
+  HISTFILE=~/.zsh_history     # Ubicación del archivo de historial
+
+  # ---------------------------------------------------------------------------
+  # SISTEMA DE AUTOCOMPLETADO MODERNO
+  # ---------------------------------------------------------------------------
+
+  # Cargar e inicializar el sistema de autocompletado avanzado de zsh
   autoload -Uz compinit
   compinit
+
+  # Configuración detallada del sistema de autocompletado
   zstyle ':completion:*' auto-description 'specify: %d'
   zstyle ':completion:*' completer _expand _complete _correct _approximate
   zstyle ':completion:*' format 'Completing %d'
@@ -152,111 +219,135 @@ function parametriza_zsh_comun() {
   zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
   zstyle ':completion:*' list-colors "${(@s.:.)LS_COLORS}"
 
-  # Permitir ganchos en diferentes puntos de la ejecución del shell,
-  # como antes o después de un comando, permitiendo a los usuarios o scripts
-  # añadir comportamientos personalizados en estos puntos.
+  # ---------------------------------------------------------------------------
+  # SISTEMA DE HOOKS Y EXTENSIBILIDAD
+  # ---------------------------------------------------------------------------
+
+  # Habilitar sistema de hooks de zsh para permitir extensiones personalizadas
+  # Los hooks permiten ejecutar código en puntos específicos del ciclo de vida
+  # de la shell (antes/después de comandos, cambios de directorio, etc.)
   autoload -Uz add-zsh-hook
 
 }
 
-# -----------------------------------------------------------------------------
-# Main
-# -----------------------------------------------------------------------------
-#
-# -----------------------------------------------------------------------------
-# Caso: WSL2
-# -----------------------------------------------------------------------------
+# =============================================================================
+# CONFIGURACIÓN ESPECÍFICA POR SISTEMA OPERATIVO
+# =============================================================================
+
+# =============================================================================
+# CONFIGURACIÓN PARA WSL2 (WINDOWS SUBSYSTEM FOR LINUX)
+# =============================================================================
 if [ "$IS_WSL2" = true ] ; then
 
-  # Evitar duplicados en PATH
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN DE PATH PARA WSL2
+  # ---------------------------------------------------------------------------
+
+  # Eliminar duplicados en PATH usando typeset -U (unique)
   typeset -U path PATH
 
-  # Bloque limpio de construcción del PATH para WSL2
+  # Construcción limpia y ordenada del PATH para WSL2
+  # Incluye rutas tanto de Linux como de Windows accesibles desde WSL2
   path=(
-    .                                    # Prioriza . en desarrollo
-    "${HOME}/bin"
-    "/mnt/c/Users/${SOY}/Nextcloud/priv/bin"
-    "/mnt/c/Users/${SOY}/Nextcloud/priv/bin/win"
-    "/mnt/c/Users/${SOY}/dev-tools/kombine.win"
-    "/mnt/c/Program Files/Docker/Docker/resources/bin"
-    "/mnt/c/Users/${SOY}/AppData/Local/Programs/Microsoft VS Code/bin"
-    "/mnt/c/Program Files/Git/mingw64/bin"
-    "/mnt/c/Windows/System32"
-    "/mnt/c/Windows"
-    "/mnt/c/Windows/System32/wbem"
-    "/mnt/c/Windows/System32/WindowsPowerShell/v1.0"
-    "/mnt/c/Program Files/PowerShell/7"
-    "/usr/local/go/bin"
-    "/usr/local/sbin"
-    "/usr/local/bin"
-    "/usr/sbin"
-    "/usr/bin"
-    "/sbin"
-    "/bin"
-    "/usr/games"
-    "/usr/local/games"
-    "/usr/lib/wsl/lib"
-    $path                                # Añadir el PATH heredado al final
+    .                                    # Directorio actual (útil para desarrollo)
+    "${HOME}/bin"                        # Binarios personales del usuario
+    "/mnt/c/Users/${SOY}/Nextcloud/priv/bin"           # Scripts privados en Windows
+    "/mnt/c/Users/${SOY}/Nextcloud/priv/bin/win"       # Scripts específicos de Windows
+    "/mnt/c/Users/${SOY}/dev-tools/kombine.win"        # Herramientas de desarrollo
+    "/mnt/c/Program Files/Docker/Docker/resources/bin" # Docker Desktop para Windows
+    "/mnt/c/Users/${SOY}/AppData/Local/Programs/Microsoft VS Code/bin" # VS Code CLI
+    "/mnt/c/Program Files/Git/mingw64/bin"             # Git for Windows
+    "/mnt/c/Windows/System32"                          # Comandos de sistema Windows
+    "/mnt/c/Windows"                                   # Directorio Windows
+    "/mnt/c/Windows/System32/wbem"                     # WMI y herramientas de gestión
+    "/mnt/c/Windows/System32/WindowsPowerShell/v1.0"  # PowerShell 5.1
+    "/mnt/c/Program Files/PowerShell/7"               # PowerShell 7
+    "/usr/local/go/bin"                               # Go language binaries
+    "/usr/local/sbin"                                 # Binarios de administración local
+    "/usr/local/bin"                                  # Binarios locales
+    "/usr/sbin"                                       # Binarios de administración del sistema
+    "/usr/bin"                                        # Binarios del sistema
+    "/sbin"                                           # Binarios de arranque del sistema
+    "/bin"                                            # Binarios básicos del sistema
+    "/usr/games"                                      # Juegos del sistema
+    "/usr/local/games"                                # Juegos locales
+    "/usr/lib/wsl/lib"                                # Librerías específicas de WSL
+    $path                                             # PATH heredado del entorno
   )
 
-  # Comunes
-  #
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN COMÚN Y ALIASES ESPECÍFICOS DE WSL2
+  # ---------------------------------------------------------------------------
+
+  # Aplicar configuración común multiplataforma
   parametriza_zsh_comun
 
-  # Alias
-  alias c="cd /mnt/c/Users/${SOY}"
-  alias git="git.exe"
+  # Aliases específicos para WSL2
+  alias c="cd /mnt/c/Users/${SOY}"       # Acceso rápido al directorio de usuario Windows
+  alias git="git.exe"                    # Usar Git for Windows desde WSL2 para mejor integración
 
-# --------------------------------------------------------------------------------
-# Caso: MacOS, Linux
-# --------------------------------------------------------------------------------
+# =============================================================================
+# CONFIGURACIÓN PARA MACOS Y LINUX NATIVOS
+# =============================================================================
 else
 
-  # PATH MacOS Y Linux -----------------------------------------------------------
-  #
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN ESPECÍFICA POR TIPO DE UNIX
+  # ---------------------------------------------------------------------------
+
   case "$OSTYPE" in
-    # NetBSD
+    # -------------------------------------------------------------------------
+    # NetBSD - Sistema operativo BSD
+    # -------------------------------------------------------------------------
     netbsd*)
-      # On NetBSD, test if `gls` (GNU ls) is installed (this one supports colors);
-      # otherwise, leave ls as is, because NetBSD's ls doesn't support -G
+      # En NetBSD, probar si `gls` (GNU ls) está instalado (soporta colores)
+      # Si no está disponible, usar ls nativo sin colores
       test-ls-args gls --color && alias ls='gls --color=tty'
       ;;
 
-    # OpenBSD
+    # -------------------------------------------------------------------------
+    # OpenBSD - Sistema operativo BSD
+    # -------------------------------------------------------------------------
     openbsd*)
-      # On OpenBSD, `gls` (ls from GNU coreutils) and `colorls` (ls from base,
-      # with color and multibyte support) are available from ports.
-      # `colorls` will be installed on purpose and can't be pulled in by installing
-      # coreutils (which might be installed for ), so prefer it to `gls`.
+      # En OpenBSD, tanto `gls` (GNU coreutils) como `colorls` están disponibles
+      # `colorls` es preferido porque es específico para OpenBSD
       test-ls-args gls --color && alias ls='gls --color=tty'
       test-ls-args colorls -G && alias ls='colorls -G'
       ;;
 
+    # -------------------------------------------------------------------------
+    # macOS y FreeBSD - Sistemas BSD modernos
+    # -------------------------------------------------------------------------
     (darwin|freebsd)*)
-       # PATH macOS y FreeBSD limpio con eliminación de duplicados
+      # Configuración específica para macOS con Homebrew y herramientas de desarrollo
+
+      # Eliminar duplicados en PATH
       typeset -U path PATH
-      # Homebrew (instala en /opt/homebrew en Apple Silicon)
+
+      # Inicializar entorno de Homebrew (detecta automáticamente Intel vs Apple Silicon)
       eval "$(/opt/homebrew/bin/brew shellenv)"
 
-      # PATH ordenado
+      # PATH ordenado y optimizado para desarrollo en macOS
       path=(
-        .                                        # Prioriza . para scripts locales
-        "${HOME}/bin"
-        "${HOME}/Nextcloud/priv/bin"
-        "/usr/local/bin"
-        "/usr/local/sbin"
-        "/usr/local/go/bin"
-        "${HOME}/dev-tools/kombine.osx"
-        "/opt/homebrew/opt/ruby/bin"
-        "${HOME}/.gems/bin"
-        "/opt/homebrew/opt/llvm@17/bin"
-        $path                                   # Heredado del entorno
+        .                                        # Directorio actual para scripts locales
+        "${HOME}/bin"                            # Binarios personales
+        "${HOME}/Nextcloud/priv/bin"             # Scripts privados sincronizados
+        "/usr/local/bin"                         # Binarios instalados manualmente
+        "/usr/local/sbin"                        # Binarios de administración local
+        "/usr/local/go/bin"                      # Go language binaries
+        "${HOME}/dev-tools/kombine.osx"          # Herramientas de desarrollo específicas
+        "/opt/homebrew/opt/ruby/bin"             # Ruby moderno via Homebrew
+        "${HOME}/.gems/bin"                      # Gemas de Ruby del usuario
+        "/opt/homebrew/opt/llvm@17/bin"          # LLVM/Clang 17 moderno
+        $path                                    # PATH heredado del sistema
       )
 
-      # También reflejar en entorno gráfico
+      # Reflejar PATH en el entorno gráfico para aplicaciones GUI
       launchctl setenv PATH "${(j/:/)path}"
 
-      # LLVM/Clang 17
+      # -----------------------------------------------------------------------
+      # CONFIGURACIÓN DE LLVM/CLANG 17 PARA DESARROLLO C/C++
+      # -----------------------------------------------------------------------
       export CPLUS_INCLUDE_PATH="/opt/homebrew/opt/llvm@17/include"
       export LIBRARY_PATH="/opt/homebrew/opt/llvm@17/lib"
       export CC="/opt/homebrew/opt/llvm@17/bin/clang"
@@ -264,259 +355,267 @@ else
       export LDFLAGS="-L/opt/homebrew/opt/llvm@17/lib"
       export CPPFLAGS="-I/opt/homebrew/opt/llvm@17/include"
 
-      # Path para shfmt
-      export SHFMT_PATH="/opt/homebrew/bin/shfmt"
+      # -----------------------------------------------------------------------
+      # HERRAMIENTAS DE DESARROLLO
+      # -----------------------------------------------------------------------
+      export SHFMT_PATH="/opt/homebrew/bin/shfmt"    # Formateador de shell scripts
 
-      # Colores para ls
-      # test-ls-args ls -G && alias ls='ls -G'
-      # zstyle -t ':omz:lib:theme-and-appearance' gnu-ls \
-      #   && test-ls-args gls --color \
-      #   && alias ls='gls --color=tty'
+      # Configurar LSD como reemplazo de ls (ya definido en función común)
       alias ls='lsd'
 
-      # Terminal sin flow control (evita que Ctrl-S/Ctrl-Q congelen terminal)
+      # -----------------------------------------------------------------------
+      # CONFIGURACIÓN DE TERMINAL Y TECLADO
+      # -----------------------------------------------------------------------
+      # Deshabilitar control de flujo de terminal (evita que Ctrl-S/Ctrl-Q congelen)
       stty -ixon
 
-      # Alias específicos macOS
-      alias grep="/usr/bin/grep" # "-d skip"
-      alias e="/usr/local/bin/code"
-      alias pip="/opt/homebrew/bin/pip3"
+      # -----------------------------------------------------------------------
+      # ALIASES ESPECÍFICOS DE MACOS
+      # -----------------------------------------------------------------------
+      alias grep="/usr/bin/grep"                     # Usar grep nativo de macOS
+      alias e="/usr/local/bin/code"                  # Abrir Visual Studio Code
+      alias pip="/opt/homebrew/bin/pip3"             # Usar Python 3 por defecto
 
-      # Acelerar la navegación en recursos compartidos de red
+      # -----------------------------------------------------------------------
+      # OPTIMIZACIONES DE RENDIMIENTO EN BACKGROUND
+      # -----------------------------------------------------------------------
+      # Acelerar navegación en recursos compartidos de red
       (defaults write com.apple.desktopservices DSDontWriteNetworkStores true &)
 
-      # SSH - Lo arranco en el background porque tarda 1 o 2 segundos
-      # De esta forma consigo el prompt inmediatamente.
+      # Cargar claves SSH del keychain de macOS en background
+      # Esto evita retrasos en el prompt mientras se cargan las claves
       (ssh-add --apple-load-keychain >/dev/null 2>&1 &)
 
-      # GEMS de Ruby se instalan en ~/.gems, relacionado con PATH:
+      # -----------------------------------------------------------------------
+      # CONFIGURACIÓN DE RUBY Y GEMAS
+      # -----------------------------------------------------------------------
+      # Instalar gemas de Ruby en directorio del usuario (no requiere sudo)
       export GEM_HOME=~/.gems
 
       ;;
+
+    # -------------------------------------------------------------------------
+    # Linux - Distribuciones GNU/Linux
+    # -------------------------------------------------------------------------
     *)
-      # Linux
+      # Configuración para sistemas Linux (Ubuntu, Debian, etc.)
+
+      # Eliminar duplicados en PATH
       typeset -U path PATH
 
       if [[ $EUID -eq 0 ]]; then
-        # PATH para root (mantengo PATH heredado, puedes añadir si lo deseas)
+        # -------------------------------------------------------------------
+        # CONFIGURACIÓN PARA USUARIO ROOT
+        # -------------------------------------------------------------------
+        # Prompt simple y claro para root que indica privilegios elevados
         PROMPT='[%B%F{white}root%f%b]@%m:%~%# '
+        # Mantener PATH heredado del sistema para evitar problemas de seguridad
       else
-        # PATH para usuario normal
+        # -------------------------------------------------------------------
+        # CONFIGURACIÓN PARA USUARIO NORMAL
+        # -------------------------------------------------------------------
+        # PATH optimizado para desarrollo en Linux
         path=(
-          .
-          "${HOME}/bin"
-          "${HOME}/Nextcloud/priv/bin"
-          "/usr/local/bin"
-          "/usr/local/sbin"
-          "/usr/local/go/bin"
-          $path
+          .                               # Directorio actual
+          "${HOME}/bin"                   # Binarios personales
+          "${HOME}/Nextcloud/priv/bin"    # Scripts privados sincronizados
+          "/usr/local/bin"                # Binarios instalados manualmente
+          "/usr/local/sbin"               # Binarios de administración local
+          "/usr/local/go/bin"             # Go language binaries
+          $path                           # PATH heredado del sistema
         )
 
-        # Ejecutar agente SSH si no está en ejecución
+        # -------------------------------------------------------------------
+        # CONFIGURACIÓN DE SSH AGENT
+        # -------------------------------------------------------------------
+        # Iniciar agente SSH si no está ejecutándose
+        # Esto permite usar claves SSH sin introducir contraseña repetidamente
         if [[ -z "$SSH_AUTH_SOCK" ]] || ! pgrep -u "$UID" ssh-agent &>/dev/null; then
           eval "$(ssh-agent -s)" &>/dev/null
         fi
       fi
 
-      # Herramienta shfmt (si está instalada desde el sistema)
-      export SHFMT_PATH="/usr/bin/shfmt"
+      # -----------------------------------------------------------------------
+      # HERRAMIENTAS DE DESARROLLO EN LINUX
+      # -----------------------------------------------------------------------
+      export SHFMT_PATH="/usr/bin/shfmt"    # Formateador de shell scripts del sistema
 
-      # Configuración de alias para ls (soporte GNU o BSD)
-      # if test-ls-args ls --color; then
-      #   alias ls='ls --color=tty'
-      # elif test-ls-args ls -G; then
-      #   alias ls='ls -G'
-      # fi
+      # Configurar LSD como reemplazo de ls (ya definido en función común)
       alias ls='lsd'
       ;;
   esac
 
-
-  # Comunes
-  #
+  # ---------------------------------------------------------------------------
+  # APLICAR CONFIGURACIÓN COMÚN MULTIPLATAFORMA
+  # ---------------------------------------------------------------------------
   parametriza_zsh_comun
 
-  # TMUX MacOS Y Linux ----------------------------------------------------------
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN DE TMUX (TERMINAL MULTIPLEXER)
+  # ---------------------------------------------------------------------------
+  # Esta sección proporciona aliases para tmux pero no lo inicia automáticamente
+  # Permite flexibilidad para elegir cuándo usar tmux
+
+  # FILOSOFÍA DE CONFIGURACIÓN DE TMUX:
+  # Se pueden configurar dos comportamientos:
+  # 1) AUTO-INICIO: tmux reemplaza automáticamente a zsh al hacer login
+  # 2) MANUAL: tmux se inicia solo cuando se necesita (OPCIÓN ELEGIDA)
   #
-  # Este código está comentado porque no lo uso.
-  #
-  # Ejecución de `tmux` (si está disponible y además existe ~/.tmux.conf)
-  # Esto podría haberlo configurado de dos formas. Cuando hago login con mi
-  # usuario y arranza zsh. He optado por la opcion (2)
-  #
-  # 1) REEMPLAZA zsh por tmux - Que zsh arranque pero inmediatamente sea
-  #    reemplazada por tmux
-  # 2) MANTENER zsh - Que zsh arranque y me quede en él, para arrancar tmux
-  #    manualmente cuando yo quiera.
-  #
-  # OPCION 1) REEMPLAZAR
-  # [ -t 1 ]: Comprueba si el file descriptor 1 (stdout) está asociado a un terminal.
-  # (( $+commands[tmux] )): Comprueba si el ejecutable tmux está en el PATH
-  # [[ -f ~/.tmux.conf ]]: Compruebo si tengo el fichero  de configuración
-  # $PPID != 1: Me aseguro que mi proceso padre no es 1, que significaría que esta
-  # sesión se está ejecutando desde init/systemd.
-  # $$ != 1: Me aseguro que mi número de proceso no es el 1, que sería un desastre ;-)
-  # $TERM != dumb, linux, screen, xterm. En esos casos arranco sin tmux, por ejemplo
-  # me interesa que gnome-terminal y terminator ejecuten tmux, pero xterm no.
-  # -z $TMUX: Me aseguro de que no esté puesta la variable TMUX, es decir que no este
-  # ya en una sesión encadenada de tmux
-  # if (tmux has-session -t TMUX); Si ya hay una sesión ejecutándose me conecto con ella.
-  # en caso contrario arranco una sesión nueva
-  #
-  # (Copia del script "t" en el PATH)
-  # ------- ------- ------- ------- ------- -------
-  # #!/usr/bin/env zsh
-  # #By LuisPa 2024
-  # #Ejecuto tmux si es que debo/puedo
-  # if [ -t 1 ] && (( $+commands[tmux] )) && \
-  #       [[ -f ~/.tmux.conf && \
-  #                $PPID != 1 && \
-  #                $$ != 1 && \
-  #                $TERM != dumb && \
-  #                $TERM != xterm && \
-  #                $TERM != linux && \
-  #                $TERM != screen* && \
-  #                $IS_VSCODE != true && \
-  #                -z $TMUX ]]; then
-  #     if (tmux has-session -t TMUX >/dev/null 2>&1); then
-  #         exec tmux attach -t TMUX >/dev/null 2>&1
-  #     else
-  #         exec tmux new -s TMUX >/dev/null 2>&1
-  #    fi
-  # fi
-  # ------- ------- ------- ------- ------- -------
-  #
-  # OPCION 2) MANTENER
-  # Como decía, podría haber dejado las líneas anteriores sin comentar que
-  # provocarían que se ejecute tmux reemplazando la shell actual.
-  # He optado por dejarlas comentadas y si necesito tmux lo ejecuto
-  # llamando al alias 't' (con exec) o 'tt' (sin exec).
-  #
-  # Esta opción me da más flexibilidad, puedo elegir cuándo uso
-  # tmux, lo cual es muy útil si me conecto a equipos linux remotos
-  # que tienen zsh y tmux (y copia de este .zshrc, .tmux.conf, etc)
-  alias t="exec ~/Nextcloud/priv/bin/t"
-  alias tt="~/Nextcloud/priv/bin/t"
+  # La opción manual permite mayor flexibilidad, especialmente útil cuando
+  # se conecta a servidores remotos que también tienen zsh y tmux configurados
+
+  # Aliases para iniciar tmux:
+  # - 't': Inicia tmux reemplazando la shell actual (con exec)
+  # - 'tt': Inicia tmux como subproceso (sin exec)
+  alias t="exec ~/Nextcloud/priv/bin/t"     # Reemplazar shell actual con tmux
+  alias tt="~/Nextcloud/priv/bin/t"         # Iniciar tmux como subproceso
 
 fi
 
+# =============================================================================
+# CONFIGURACIÓN DE ZOXIDE - NAVEGACIÓN INTELIGENTE DE DIRECTORIOS
+# =============================================================================
 
-# -----------------------------------------------------------------------------
-# Zoxide un gestor de directorios
-# -----------------------------------------------------------------------------
-#
-# Instrucciones de instalación
-# MacOS, Windows y Linux:
-#   Fuente: https://github.com/ajeetdsouza/zoxide
-#
-# WSL2:
-#   sudo apt install zoxide
-#
-# Primero comprobar si está instalado
+# Zoxide es un reemplazo inteligente para 'cd' que recuerda directorios visitados
+# Permite saltar rápidamente a directorios frecuentes con comandos cortos
+# Ejemplo: 'z doc' puede saltar a ~/Documents, 'z pro' a ~/Projects
+
+# Verificar si zoxide está instalado
 if ! command -v zoxide >/dev/null 2>&1; then
   echo "Necesitas instalar 'zoxide', más info en .zshrc"
+  echo "Instalación:"
+  echo "  macOS: brew install zoxide"
+  echo "  Linux: sudo apt install zoxide  (o desde https://github.com/ajeetdsouza/zoxide)"
+  echo "  WSL2: sudo apt install zoxide"
 else
+  # Inicializar zoxide para zsh
   eval "$(zoxide init zsh)"
+
+  # Reemplazar 'cd' con zoxide para navegación inteligente
+  # Esto mantiene funcionalidad de cd normal pero añade inteligencia
   alias cd="__zoxide_z"
 fi
 
-# -----------------------------------------------------------------------------
-# Oh My Posh
-# -----------------------------------------------------------------------------
-#
-# Instrucciones de instalación
-# MacOS, Windows y Linux:
-#   Fuente: https://ohmyposh.dev/docs/installation/linux
-#
-# WSL2:
-#   sudo su -
-#   apt update && apt upgrade -y && apt full-upgrade -y
-#   apt install unzip
-#   mkdir ~/bin
-#   curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/bin
-#     Instala temas en /home/${SOY}/.cache/oh-my-posh/themes
-#   Revisar el PATH (en mi caso ya tengo /home/${SOY}/bin en este .zshrc)
-#   Salgo y entro de nuevo a WSL2
-#
-#   Instalo la fuente de Meslo:
-#     oh-my-posh font install
-#
-#   La primera vez arranca con el tema por defecto, lo renombro
-#    oh-my-posh config export --output ~/.luispa.omp.json
-#    Solo le quité el naranja del directorio al de por defecto
-#    el de por defecto es jandedobbeleer.omp.json
-#
-# UPGRADES: Se pueden hacer desde el CLI, pero no siempre (major):
-#
-# ❯ oh-my-posh upgrade (si detecta que hay un cambio de major no lo hará)
-# ❯ oh-my-posh upgrade --force (para forzar la actualización)
-#
+# =============================================================================
+# CONFIGURACIÓN DE OH MY POSH - PROMPT PERSONALIZADO AVANZADO
+# =============================================================================
 
-#
-# Primero comprobar si está Oh-My-Posh instalado
+# Oh My Posh proporciona un prompt rico y personalizable con información de:
+# - Estado de Git (branch, cambios, etc.)
+# - Información del sistema (OS, usuario, directorio)
+# - Tiempo de ejecución de comandos
+# - Estado de herramientas de desarrollo
+
+# Verificar si Oh My Posh está instalado
 if ! command -v oh-my-posh >/dev/null 2>&1; then
   echo "Necesitas instalar 'Oh My Posh', más info en .zshrc"
+  echo "Instalación:"
+  echo "  Visita: https://ohmyposh.dev/docs/installation/"
+  echo "  Script universal: curl -s https://ohmyposh.dev/install.sh | bash -s"
+  echo "  macOS: brew install oh-my-posh"
+  echo "  WSL2: curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/bin"
 else
 
-  # Compruebo si tengo mi tema
-  LOCAL_FILE=~/.luispa.omp.json
-  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/devcli/main/dotfiles/.luispa.omp.json"
-  TEMP_REMOTE_FILE="/tmp/.luispa.omp_remote.json"
+  # ---------------------------------------------------------------------------
+  # GESTIÓN AUTOMÁTICA DEL TEMA DE OH MY POSH
+  # ---------------------------------------------------------------------------
 
-  # Detectar el sistema operativo para usar el comando 'date' correcto
+  # Configuración de archivos para el tema personalizado
+  LOCAL_FILE=~/.oh-my-posh.yaml                    # Archivo local del tema
+  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/devcli/main/dotfiles/.oh-my-posh.yaml"
+  TEMP_REMOTE_FILE="/tmp/.oh-my-posh_remote.yaml"  # Archivo temporal para comparación
+
+  # Detectar sistema operativo para usar comando 'date' correcto
   case "$OSTYPE" in
-    # MacOS
+    # macOS usa sintaxis BSD para date
     (darwin|freebsd)*)
       ONE_DAY_AGO=$(date -v -1d +%s)
       ;;
-    # Linux|WSL2
+    # Linux y WSL2 usan sintaxis GNU para date
     *)
       ONE_DAY_AGO=$(date -d '1 day ago' +%s)
       ;;
   esac
 
-  # Comprobar si el archivo local no existe
+  # ---------------------------------------------------------------------------
+  # DESCARGA Y ACTUALIZACIÓN AUTOMÁTICA DEL TEMA
+  # ---------------------------------------------------------------------------
+
+  # Si el archivo local no existe, descargarlo
   if [[ ! -a $LOCAL_FILE ]]; then
     curl --connect-timeout 2 --max-time 3 -LJs -o $LOCAL_FILE $REMOTE_FILE_URL
     touch $LOCAL_FILE
   else
-    # Verificar si se ha descargado en el último día
+    # Si el archivo existe, verificar si necesita actualización (una vez al día)
+
+    # Obtener timestamp de modificación según el sistema operativo
     if [[ "$OSTYPE" == darwin* ]]; then
-      MODTIME=$(stat -f %m "$LOCAL_FILE")
+      MODTIME=$(stat -f %m "$LOCAL_FILE")      # macOS BSD stat
     else
-      MODTIME=$(stat -c %Y "$LOCAL_FILE")
+      MODTIME=$(stat -c %Y "$LOCAL_FILE")      # Linux GNU stat
     fi
+
+    # Si el archivo tiene más de un día, verificar actualizaciones
     if (( MODTIME <= ONE_DAY_AGO )); then
-      # Descargar el archivo remoto temporalmente
+      # Descargar versión remota temporalmente
       curl --connect-timeout 2 --max-time 3 -LJs -o $TEMP_REMOTE_FILE $REMOTE_FILE_URL
-      # Comprobar si el archivo local es diferente del remoto
+
+      # Comparar archivos local y remoto
       if ! cmp -s $LOCAL_FILE $TEMP_REMOTE_FILE; then
-        # El fichero local es diferente del remoto, actualizo copiando el remoto al local
+        # Archivos diferentes: actualizar con versión remota
         mv $TEMP_REMOTE_FILE $LOCAL_FILE
       else
+        # Archivos iguales: eliminar temporal
         rm $TEMP_REMOTE_FILE
       fi
+
+      # Actualizar timestamp para evitar verificaciones frecuentes
       touch $LOCAL_FILE
     fi
   fi
 
-  # Variable que uso en .luispa.omp.json para mostrar entorno en el prompt
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN DE ICONOS POR SISTEMA OPERATIVO
+  # ---------------------------------------------------------------------------
+
+  # Variable usada en el tema .oh-my-posh.yaml para mostrar icono del OS
   if [[ "$OSTYPE" == "darwin"* ]]; then
-    export OMP_OS_ICON="🍎"
+    export OMP_OS_ICON="🍎"                    # macOS
   elif [[ "$(uname -s)" == "Linux" ]]; then
     if [ "$IS_WSL2" = true ] ; then
-        export OMP_OS_ICON="🔳"
+        export OMP_OS_ICON="🔳"                # WSL2
     else
-        export OMP_OS_ICON="🐧"
+        export OMP_OS_ICON="🐧"                # Linux nativo
     fi
   elif grep -qi microsoft /proc/version 2>/dev/null; then
-    export OMP_OS_ICON="🪟"
+    export OMP_OS_ICON="🪟"                    # Windows (detección alternativa)
   else
-    export OMP_OS_ICON="❓"
+    export OMP_OS_ICON="❓"                    # Sistema desconocido
   fi
 
-  # Arranco Oh My Posh
-  eval "$(oh-my-posh init zsh --config ~/.luispa.omp.json)"
+  # ---------------------------------------------------------------------------
+  # INICIALIZACIÓN DE OH MY POSH
+  # ---------------------------------------------------------------------------
+
+  # Inicializar Oh My Posh con el tema personalizado
+  eval "$(oh-my-posh init zsh --config ~/.oh-my-posh.yaml)"
 fi
+
+# =============================================================================
+# NOTAS IMPORTANTES PARA EL USUARIO:
+# =============================================================================
+# 1. Este archivo se ejecuta automáticamente al iniciar Zsh
+# 2. Detecta automáticamente el sistema operativo y se adapta
+# 3. Requiere las siguientes herramientas para funcionalidad completa:
+#    - lsd (listado moderno con iconos)
+#    - zoxide (navegación inteligente de directorios)
+#    - oh-my-posh (prompt personalizado)
+#    - tmux (opcional, para sesiones múltiples)
+# 4. Compatible con WSL2, macOS, y distribuciones Linux
+# 5. Si faltan herramientas, muestra mensajes informativos de instalación
+# 6. El tema de Oh My Posh se actualiza automáticamente desde el repositorio
+# 7. Para personalizar, modifica las funciones y variables en este archivo
+# 8. Debug: Descomenta 'set -x' al principio para ver ejecución detallada
+# =============================================================================
 
 # Linux Setup: -------------------------------------------------------------- END
