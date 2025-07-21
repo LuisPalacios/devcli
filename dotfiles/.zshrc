@@ -518,8 +518,8 @@ else
   # ---------------------------------------------------------------------------
 
   # Configuración de archivos para el tema personalizado
-  LOCAL_FILE=~/.oh-my-posh.yaml                    # Archivo local del tema
-  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/devcli/main/dotfiles/.oh-my-posh.yaml"
+  LOCAL_FILE=~/.oh-my-posh.json                    # Archivo local del tema
+  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/devcli/main/dotfiles/.oh-my-posh.json"
   TEMP_REMOTE_FILE="/tmp/.oh-my-posh_remote.yaml"  # Archivo temporal para comparación
 
   # Detectar sistema operativo para usar comando 'date' correcto
@@ -575,7 +575,7 @@ else
   # CONFIGURACIÓN DE ICONOS POR SISTEMA OPERATIVO
   # ---------------------------------------------------------------------------
 
-  # Variable usada en el tema .oh-my-posh.yaml para mostrar icono del OS
+  # Variable usada en el tema .oh-my-posh.json para mostrar icono del OS
   if [[ "$OSTYPE" == "darwin"* ]]; then
     export OMP_OS_ICON="🍎"                    # macOS
   elif [[ "$(uname -s)" == "Linux" ]]; then
@@ -595,7 +595,7 @@ else
   # ---------------------------------------------------------------------------
 
   # Inicializar Oh My Posh con el tema personalizado
-  eval "$(oh-my-posh init zsh --config ~/.oh-my-posh.yaml)"
+  eval "$(oh-my-posh init zsh --config ~/.oh-my-posh.json)"
 fi
 
 # =============================================================================

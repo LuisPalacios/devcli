@@ -2,7 +2,7 @@
 # Configuración personalizada de Oh My Posh - Tema LuisPa
 # =============================================================================
 # Formato: YAML (permite comentarios y es más legible que JSON)
-# Ubicación final: ~/.oh-my-posh.yaml
+# Ubicación final: ~/.oh-my-posh.json
 # Propósito: Prompt personalizado con información de sistema, Git, estado y colores
 # Compatible con: Oh My Posh v3+ en Linux, macOS, WSL2, Windows
 # Dependencias: Oh My Posh, Nerd Font (FiraCode recomendada), Git
@@ -233,11 +233,11 @@ tooltips:
 # =============================================================================
 # NOTAS IMPORTANTES PARA EL USUARIO:
 # =============================================================================
-# 1. Este archivo debe colocarse en ~/.oh-my-posh.yaml
+# 1. Este archivo debe colocarse en ~/.oh-my-posh.json
 # 2. Para usar este tema, actualiza tu configuración shell:
-#    - Zsh: eval "$(oh-my-posh init zsh --config ~/.oh-my-posh.yaml)"
-#    - PowerShell: oh-my-posh init pwsh --config ~/.oh-my-posh.yaml | Invoke-Expression
-#    - Bash: eval "$(oh-my-posh init bash --config ~/.oh-my-posh.yaml)"
+#    - Zsh: eval "$(oh-my-posh init zsh --config ~/.oh-my-posh.json)"
+#    - PowerShell: oh-my-posh init pwsh --config ~/.oh-my-posh.json | Invoke-Expression
+#    - Bash: eval "$(oh-my-posh init bash --config ~/.oh-my-posh.json)"
 # 3. Requiere una Nerd Font instalada (FiraCode Nerd Font recomendada)
 # 4. La variable OMP_OS_ICON debe estar configurada:
 #    - Se configura automáticamente en .zshrc y Microsoft.PowerShell_profile.ps1
@@ -245,6 +245,6 @@ tooltips:
 # 5. Para personalizar colores, modifica la sección "palette"
 # 6. Para añadir/quitar segmentos, modifica la lista "segments"
 # 7. Los iconos usan Nerd Font symbols: https://www.nerdfonts.com/cheat-sheet
-# 8. Para validar la configuración: oh-my-posh config validate --config ~/.oh-my-posh.yaml
-# 9. Para previsualizar cambios: oh-my-posh print primary --config ~/.oh-my-posh.yaml
+# 8. Para validar la configuración: oh-my-posh config validate --config ~/.oh-my-posh.json
+# 9. Para previsualizar cambios: oh-my-posh print primary --config ~/.oh-my-posh.json
 # =============================================================================

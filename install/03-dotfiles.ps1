@@ -11,7 +11,7 @@ param()
 . "$PSScriptRoot\utils.ps1"
 
 # Función para configurar Windows Terminal con cmd_aliases.cmd
-function Configure-WindowsTerminal {
+function ConfigureWindowsTerminal {
     Write-Log "Configurando Windows Terminal para usar cmd_aliases.cmd..."
 
     try {
@@ -223,7 +223,7 @@ function main {
         $terminalConfigured = $false
         $aliasesFile = Join-Path $env:USERPROFILE "cmd_aliases.cmd"
         if (Test-Path $aliasesFile) {
-            $terminalConfigured = Configure-WindowsTerminal
+            $terminalConfigured = ConfigureWindowsTerminal
         }
         else {
             Write-Log "cmd_aliases.cmd no encontrado, omitiendo configuración de Windows Terminal" "WARNING"
@@ -244,7 +244,7 @@ function main {
         }
 
         # Verificar archivos críticos instalados
-        $criticalFiles = @(".oh-my-posh.yaml", "cmd_aliases.cmd")
+        $criticalFiles = @(".oh-my-posh.json", "cmd_aliases.cmd")
         $missingFiles = @()
 
         foreach ($file in $criticalFiles) {

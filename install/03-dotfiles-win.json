@@ -1,8 +1,8 @@
 {
   "dotfiles": [
     {
-      "file": ".oh-my-posh.yaml",
-      "dst": ".\\.oh-my-posh.yaml"
+      "file": ".oh-my-posh.json",
+      "dst": ".\\.oh-my-posh.json"
     },
     {
       "file": "win.gitbash.bashrc",

@@ -186,12 +186,12 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
 # -----------------------------------------------------------------------------
 # Inicializar Oh My Posh (si está disponible)
 # -----------------------------------------------------------------------------
-# - Personaliza el prompt con configuración avanzada desde ~/.oh-my-posh.yaml
+# - Personaliza el prompt con configuración avanzada desde ~/.oh-my-posh.json
 # - Sobrescribe la función global `prompt`, lo cual rompe el hook de zoxide
 #   si no se corrige a continuación
 if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
     Write-Host "Inicializando oh-my-posh..." -ForegroundColor Cyan
-    oh-my-posh init pwsh --config ~/.oh-my-posh.yaml | Invoke-Expression
+    oh-my-posh init pwsh --config ~/.oh-my-posh.json | Invoke-Expression
 }
 
 # -----------------------------------------------------------------------------
@@ -343,7 +343,7 @@ if ($envVarsToSet.Count -gt 0) {
 #    - oh-my-posh (prompt personalizado)
 # 3. Dependencias adicionales:
 #    - Git for Windows (para nano y posh-git)
-#    - Archivo ~/.oh-my-posh.yaml (tema de Oh My Posh)
+#    - Archivo ~/.oh-my-posh.json (tema de Oh My Posh)
 #    - PowerShell 7.2+ (para predicción inteligente)
 # 4. Si faltan herramientas, las funciones muestran mensajes informativos
 # 5. Las variables de entorno se configuran una sola vez automáticamente

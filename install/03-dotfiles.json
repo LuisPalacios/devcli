@@ -5,7 +5,7 @@
       "dst": "./"
     },
     {
-      "file": ".oh-my-posh.yaml",
+      "file": ".oh-my-posh.json",
       "dst": "./"
     }
   ]
