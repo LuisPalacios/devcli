@@ -20,43 +20,18 @@ Está diseñado con un enfoque modular, multiplataforma e idempotente. La instal
 
 Tu usuario debe tener acceso a `sudo` sin contraseña para que la instalación sea completamente automática.
 
-```bash
-# Añadir tu usuario al grupo sudo (si no está ya)
-sudo usermod -aG sudo $USER
-
-# Configurar sudo sin contraseña (editar /etc/sudoers)
-sudo visudo
-# Añadir línea: $USER ALL=(ALL) NOPASSWD:ALL
-```
+- Añadir tu usuario al grupo sudo: `sudo usermod -aG sudo $USER`
+- Archivo `/etc/sudoers.d/10-usuario` > `<usuario> ALL=(ALL) NOPASSWD:ALL`
 
 En macOS tienes que tener preinstalado **Homebrew** - mira cómo en [brew.sh](https://brew.sh)
 
 **⚡ Ejecución en Linux, macOS y WSL2**:
 
-| |
-|--|
-| `bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)` |
-| |
-
-Después de la instalación:
-
-```bash
-# Verificación completa de Nerd Fonts
-nerd-verify.sh
-
-# Verificar que las fuentes están instaladas
-fc-list | grep "FiraCode Nerd Font"
-
-# Verificar que lsd funciona con iconos
-lsd --version
+```console
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
 ```
 
-Si no funciona, ejecuta lo siguiente:
-
-```bash
-# Configuración automática (detecta tu terminal)
-nerd-setup.sh auto | <nombre del terminal>
-```
+Después de la instalación verifica Nerd Fonts: `nerd-verify.sh` y `fc-list | grep "FiraCode Nerd Font"`. Comprueba si los iconos salen bien (i.e. `lsd --version`. Si no funciona, ejecuta lo siguiente: `nerd-setup.sh`
 
 ## Windows
 
@@ -73,23 +48,11 @@ Requisitos
 
 **⚡ Ejecución en Linux, macOS y WSL2**:
 
-| |
-|--|
-| `iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")` |
-| |
-
-Después de la instalación:
-
-1. **Reiniciar el terminal** para aplicar los cambios de PATH
-2. **Verifica que tienes el Nerd font** en tu terminal:
-
-```powershell
-# Verificación completa de Nerd Fonts
-nerd-verify.ps1
-
-# Instrucciones para configurarlo (detecta tu terminal)
-nerd-setup.ps1 auto
+```console
+iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
 ```
+
+Después de la instalación **reiniciar el terminal** para aplicar los cambios de PATH. Luego verifica Nerd Fonts: `nerd-verify.ps1` y si no funciona, ejecuta lo siguiente: `nerd-setup.ps1`
 
 ## 🧰 Gestores de paquetes utilizados
 
