@@ -92,14 +92,14 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
 
         # Función cd simple que delega todo a zoxide
     # __zoxide_z maneja automáticamente todos los casos: rutas normales, búsqueda inteligente, etc.
-    function cd {
-        param([string]$Path)
-        if ($Path) {
-            __zoxide_z $Path
-        } else {
-            __zoxide_z $env:USERPROFILE
-        }
-    }
+    # function cd {
+    #     param([string]$Path)
+    #     if ($Path) {
+    #         __zoxide_z $Path
+    #     } else {
+    #         __zoxide_z $env:USERPROFILE
+    #     }
+    # }
 } else {
     Write-Warning "zoxide no está instalado. Instala con: scoop install zoxide"
 
