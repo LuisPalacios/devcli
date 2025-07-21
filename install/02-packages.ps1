@@ -95,34 +95,63 @@ function Configure-Clink {
             return $false
         }
 
+        # La ruta de clink desde Get-Command podría ser el shim, necesitamos el .cmd real
         $clinkDir = Split-Path $clinkPath.Source -Parent
         $clinkCmd = Join-Path $clinkDir "clink.cmd"
 
-        # Verificar que existe clink.bat
+        # Debug: mostrar las rutas que se están usando
+        Write-Log "Ruta CLINK detectada: $($clinkPath.Source)" "INFO"
+        Write-Log "Directorio CLINK: $clinkDir" "INFO"
+        Write-Log "Archivo clink.cmd: $clinkCmd" "INFO"
+
+        # Verificar que existe clink.cmd
         if (-not (Test-Path $clinkCmd)) {
             Write-Log "No se encontró clink.cmd en: $clinkCmd" "WARNING"
-            return $false
+            # Intentar con la ruta directa de scoop
+            $scoopClinkCmd = "$env:USERPROFILE\scoop\shims\clink.cmd"
+            if (Test-Path $scoopClinkCmd) {
+                $clinkCmd = $scoopClinkCmd
+                Write-Log "Usando ruta alternativa: $clinkCmd" "INFO"
+            }
+            else {
+                Write-Log "Tampoco se encontró en: $scoopClinkCmd" "WARNING"
+                return $false
+            }
         }
 
-        # Configurar AutoRun en el registro para inyectar CLINK automáticamente en CMD
+        # Configurar Autorun en el registro para inyectar CLINK automáticamente en CMD
         $registryPath = "HKCU:\Software\Microsoft\Command Processor"
         $autoRunValue = "`"$clinkCmd`" inject --autorun"
 
-        try {
-            # Verificar si ya está configurado
-            $currentAutoRun = Get-ItemProperty -Path $registryPath -Name "AutoRun" -ErrorAction SilentlyContinue
+        # Debug: mostrar el comando exacto que se va a configurar
+        Write-Log "Comando AutoRun que se configurará: $autoRunValue" "INFO"
 
-            if ($currentAutoRun -and $currentAutoRun.AutoRun -like "*clink*") {
-                Write-Log "CLINK ya está configurado en AutoRun del CMD"
+                try {
+            # Verificar si ya está configurado
+            $currentAutoRun = Get-ItemProperty -Path $registryPath -Name "Autorun" -ErrorAction SilentlyContinue
+
+            if ($currentAutoRun -and $currentAutoRun.Autorun -like "*clink*") {
+                Write-Log "CLINK ya está configurado en Autorun del CMD"
             }
             else {
-                # Configurar AutoRun para inyectar CLINK
-                Set-ItemProperty -Path $registryPath -Name "AutoRun" -Value $autoRunValue -Force
+                # Configurar Autorun para inyectar CLINK
+                Write-Log "Ejecutando: Set-ItemProperty -Path '$registryPath' -Name 'Autorun' -Value '$autoRunValue' -Force" "INFO"
+                Set-ItemProperty -Path $registryPath -Name "Autorun" -Value $autoRunValue -Force
                 Write-Log "✅ CLINK configurado para inyección automática en CMD" "SUCCESS"
+
+                # Verificar que se configuró correctamente
+                $verifyAutoRun = Get-ItemProperty -Path $registryPath -Name "Autorun" -ErrorAction SilentlyContinue
+                if ($verifyAutoRun) {
+                    Write-Log "Verificación - Autorun configurado como: $($verifyAutoRun.Autorun)" "SUCCESS"
+                }
+                else {
+                    Write-Log "Advertencia: No se pudo verificar la configuración de Autorun" "WARNING"
+                }
             }
         }
         catch {
-            Write-Log "Error configurando AutoRun del registro: $($_.Exception.Message)" "WARNING"
+            Write-Log "Error configurando Autorun del registro: $($_.Exception.Message)" "WARNING"
+            Write-Log "Comando que falló: Set-ItemProperty -Path '$registryPath' -Name 'Autorun' -Value '$autoRunValue' -Force" "WARNING"
             return $false
         }
 
@@ -280,9 +309,9 @@ btm %*
             if ($aliasesCreated -gt 0) {
                 Write-Log "$aliasesCreated alias creados" "SUCCESS"
             }
-            if ($clinkConfigured) {
-                Write-Log "✅ CLINK configurado para CMD" "SUCCESS"
-            }
+                           if ($clinkConfigured) {
+                   Write-Log "✅ CLINK configurado para CMD con Autorun" "SUCCESS"
+               }
         }
         else {
             Write-Log "No se instalaron nuevos paquetes"
