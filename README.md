@@ -14,7 +14,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/boo
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
 ```
 
-## Introducción
+## 📋 Introducción
 
 Lo automatizo todo con un solo comando que descarga este repositorio y procede a instalar todo lo que necesito.
 
@@ -30,7 +30,7 @@ Está diseñado con un enfoque modular, multiplataforma e idempotente. La instal
 - Crea unos cuantos scripts en ~/bin que uso con frecuencia: e, s, confcat
 - Instala automáticamente **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`.
 
-## Linux, macOS y WSL2
+## 🐧 Linux, macOS y WSL2
 
 Tu usuario debe tener acceso a `sudo` sin contraseña para que la instalación sea completamente automática.
 
@@ -41,7 +41,7 @@ En macOS tienes que tener preinstalado **Homebrew** - mira cómo en [brew.sh](ht
 
 Después de la instalación verifica Nerd Fonts: `nerd-verify.sh` y `fc-list | grep "FiraCode Nerd Font"`. Comprueba si los iconos salen bien (i.e. `lsd --version`. Si no funciona, ejecuta lo siguiente: `nerd-setup.sh`
 
-## Windows
+## 🪟 Windows
 
 Configuración automatizada para **Windows 11** (y Windows 10) usando **PowerShell** y **winget**.
 
