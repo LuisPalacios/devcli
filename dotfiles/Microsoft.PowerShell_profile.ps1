@@ -159,42 +159,88 @@ catch {
 }
 
 # =============================================================================
-# INICIALIZACIÓN DE ZOXIDE (NAVEGACIÓN INTELIGENTE)
+# INICIALIZACIÓN DE ZOXIDE Y OH-MY-POSH (COMPATIBILIDAD TOTAL)
 # =============================================================================
-
-# Inicializar zoxide para navegación inteligente de directorios
-# zoxide recuerda directorios visitados y permite saltos rápidos
+# Este bloque configura correctamente zoxide (navegación inteligente) junto
+# a oh-my-posh (prompt personalizado), resolviendo conflictos comunes.
+# Incluye:
+#   - Inicialización del hook de zoxide usando `--hook prompt`
+#   - Protección del hook frente a la sobrescritura del prompt por oh-my-posh
+#   - Redefinición inteligente de `cd` que aprovecha zoxide si la ruta no existe
+# Repositorio: https://github.com/ajeetdsouza/zoxide
+# =============================================================================
+#
 # Comandos disponibles después de la inicialización:
 # - z [directorio]  : salto rápido a directorio (ej: z doc, z pro)
 # - cd [directorio] : navegación normal + aprendizaje automático
 # - zi              : búsqueda interactiva de directorios
-# Repositorio: https://github.com/ajeetdsouza/zoxide
-
+#
+# - El flag '--hook prompt' configura zoxide para registrar los cambios
+#   de directorio en cada render del prompt.
+# - Requiere versión zoxide >= 0.9
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Write-Host "Inicializando zoxide..." -ForegroundColor Green
+    Invoke-Expression (& { (zoxide init powershell --hook prompt | Out-String) })
+}
 
-    # Inicializar zoxide con hook en prompt
-    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+# -----------------------------------------------------------------------------
+# Inicializar Oh My Posh (si está disponible)
+# -----------------------------------------------------------------------------
+# - Personaliza el prompt con configuración avanzada desde ~/.oh-my-posh.yaml
+# - Sobrescribe la función global `prompt`, lo cual rompe el hook de zoxide
+#   si no se corrige a continuación
+if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
+    Write-Host "Inicializando oh-my-posh..." -ForegroundColor Cyan
+    oh-my-posh init pwsh --config ~/.oh-my-posh.yaml | Invoke-Expression
+}
 
-    # Si oh-my-posh sobreescribió el prompt, reinyectar el hook de zoxide
-    if ($global:__zoxide_hooked -eq 1 -and $function:prompt -ne $global:__zoxide_prompt_old) {
-        $ompPrompt = $function:prompt
-        function global:prompt {
-            & $ompPrompt
-            $null = __zoxide_hook
-        }
+# -----------------------------------------------------------------------------
+# Reparar hook de zoxide si fue sobrescrito por oh-my-posh
+# -----------------------------------------------------------------------------
+# - Compara el prompt actual con el original registrado por zoxide
+# - Si es distinto, redefine `prompt` para llamar a ambos:
+#   1. El prompt de oh-my-posh
+#   2. El hook `__zoxide_hook` para registrar el directorio actual
+if ($global:__zoxide_hooked -eq 1 -and $function:prompt -ne $global:__zoxide_prompt_old) {
+    $ompPrompt = $function:prompt
+    function global:prompt {
+        & $ompPrompt
+        $null = __zoxide_hook
     }
 }
 
-# =============================================================================
-# INICIALIZACIÓN DE OH MY POSH - PROMPT PERSONALIZADO
-# =============================================================================
+# -----------------------------------------------------------------------------
+# Redefinición inteligente de 'cd' para soporte integrado con zoxide
+# -----------------------------------------------------------------------------
+# - Elimina el alias predeterminado 'cd' (que apunta a Set-Location)
+# - Redefine 'cd' como función que:
+#     • Si no recibe parámetro: va al home
+#     • Si la ruta existe: usa Set-Location
+#     • Si no existe: intenta saltar usando zoxide (`__zoxide_z`)
+# -----------------------------------------------------------------------------
 
-# Ejecutar oh-my-posh para personalizar el prompt de PowerShell
-# Usa el archivo de configuración personalizado ~/.oh-my-posh.yaml
-# Oh My Posh proporciona un prompt rico con información de Git, directorio,
-# tiempo de ejecución, estado del sistema, etc.
-oh-my-posh init pwsh --config ~/.oh-my-posh.yaml | Invoke-Expression
+# Eliminar alias nativo de PowerShell (evita que interfiera con la redefinición)
+if (Get-Alias cd -ErrorAction SilentlyContinue) {
+    Remove-Item Alias:cd -Force
+}
+
+# Redefinir 'cd' como función híbrida: navegación clásica + fuzzy matching
+function cd {
+    param([string]$Path)
+
+    if (-not $Path) {
+        # Sin argumentos: ir al directorio HOME
+        Set-Location ~
+    }
+    elseif (Test-Path -LiteralPath $Path -PathType Container) {
+        # Ruta válida: cambiar normalmente
+        Set-Location -LiteralPath $Path
+    }
+    else {
+        # Ruta no válida: intentar match parcial con zoxide
+        __zoxide_z $Path
+    }
+}
 
 # =============================================================================
 # CONFIGURACIÓN AVANZADA DE PSREADLINE - PREDICCIÓN INTELIGENTE
