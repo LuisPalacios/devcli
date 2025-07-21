@@ -105,7 +105,7 @@ function Configure-Clink {
         }
 
         # Configurar AutoRun en el registro para inyectar CLINK automáticamente en CMD
-        $registryPath = "HKEY_CURRENT_USER\Software\Microsoft\Command Processor"
+        $registryPath = "HKCU:\Software\Microsoft\Command Processor"
         $autoRunValue = "`"$clinkCmd`" inject --autorun"
 
         try {
