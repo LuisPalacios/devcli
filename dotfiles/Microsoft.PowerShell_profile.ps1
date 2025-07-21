@@ -87,8 +87,49 @@ function ls {
 
 # Verificar si zoxide está instalado antes de inicializar
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    # Inicializar zoxide - esto crea automáticamente los comandos z, zi y reemplaza cd
+    # Inicializar zoxide - esto crea los comandos z y zi
     Invoke-Expression (& { (zoxide init powershell | Out-String) })
+
+    # Función cd personalizada que usa zoxide para aprendizaje automático
+    # Mantiene compatibilidad total con cd normal pero añade inteligencia
+    function cd {
+        param([string]$Path)
+
+        if (-not $Path) {
+            # Sin argumentos, ir al directorio home
+            Set-Location $env:USERPROFILE
+            zoxide add $env:USERPROFILE
+        }
+        elseif ($Path -eq '-') {
+            # cd - para volver al directorio anterior (funcionalidad estándar de zoxide)
+            $result = zoxide query --exclude $pwd.Path
+            if ($result) {
+                Set-Location $result
+                zoxide add $result
+            }
+            else {
+                Write-Warning "No hay directorio anterior registrado en zoxide"
+            }
+        }
+        elseif (Test-Path $Path) {
+            # Ruta existe, navegar normalmente y añadir a zoxide
+            Set-Location $Path
+            zoxide add $PWD.Path
+        }
+        else {
+            # Ruta no existe, intentar búsqueda inteligente con zoxide
+            $result = zoxide query $Path 2>$null
+            if ($result) {
+                Set-Location $result
+                zoxide add $result
+            }
+            else {
+                # Si zoxide no encuentra nada, usar comportamiento estándar de cd
+                # Esto mostrará el error estándar de PowerShell
+                Set-Location $Path
+            }
+        }
+    }
 } else {
     Write-Warning "zoxide no está instalado. Instala con: scoop install zoxide"
 
