@@ -112,6 +112,66 @@ install_lsd() {
   log "lsd v${version} instalado correctamente"
 }
 
+# Función para instalar mkcert usando binarios pre-compilados
+install_mkcert() {
+  # Verificar si mkcert ya está instalado
+  if command_exists mkcert; then
+    #log "mkcert ya está instalado, omitiendo instalación"
+    return 0
+  fi
+
+  local arch
+
+  # Detectar arquitectura
+  case "$(uname -m)" in
+    x86_64) arch="amd64" ;;
+    aarch64|arm64) arch="arm64" ;;
+    *)
+      warning "Arquitectura no soportada para mkcert: $(uname -m)"
+      return 1
+      ;;
+  esac
+
+  local download_url="https://dl.filippo.io/mkcert/latest?for=linux/${arch}"
+  local bin_dir="$HOME/bin"
+  local temp_file="/tmp/mkcert-download"
+
+  # Crear directorio bin si no existe
+  ensure_directory "$bin_dir"
+
+  log "Descargando mkcert para linux/${arch}..."
+
+  # Descargar el binario
+  if ! curl -JLo "$temp_file" "$download_url" >/dev/null 2>&1; then
+    warning "No se pudo descargar mkcert desde dl.filippo.io"
+    return 1
+  fi
+
+  # Hacer el archivo ejecutable
+  if ! chmod +x "$temp_file" >/dev/null 2>&1; then
+    warning "No se pudo hacer ejecutable el binario de mkcert"
+    rm -f "$temp_file"
+    return 1
+  fi
+
+  # Mover al directorio bin
+  if ! mv "$temp_file" "$bin_dir/mkcert" >/dev/null 2>&1; then
+    warning "No se pudo mover mkcert a $bin_dir"
+    rm -f "$temp_file"
+    return 1
+  fi
+
+  # Verificar que se instaló correctamente (agregando $HOME/bin al PATH temporalmente si es necesario)
+  export PATH="$bin_dir:$PATH"
+  if ! command_exists mkcert; then
+    warning "mkcert no se instaló correctamente"
+    return 1
+  fi
+
+  log "mkcert instalado correctamente en $bin_dir/mkcert"
+  log "Asegúrate de que $bin_dir esté en tu PATH"
+}
+
 # Función para instalar Nerd Fonts
 install_nerd_fonts() {
   local font_name="${NERD_FONT_NAME:-FiraCode}"
@@ -222,9 +282,11 @@ install_package() {
         return 0
       fi
 
-      # Caso especial para lsd (no disponible en repositorios estándar)
+      # Casos especiales para paquetes no disponibles en repositorios estándar
       if [[ "$pkg" == "lsd" ]]; then
         install_lsd
+      elif [[ "$pkg" == "mkcert" ]]; then
+        install_mkcert
       else
         # Intentar instalar con manejo de errores usando apt (más moderno)
         if ! sudo apt install -y -qq "$pkg" >/dev/null 2>&1; then
