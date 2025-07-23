@@ -21,6 +21,10 @@
       "description": "fuzzy finder"
     },
     {
+      "name": "mkcert",
+      "description": "make locally-trusted dev certificates"
+    },
+    {
       "name": "ripgrep",
       "description": "grep moderno"
     },

@@ -17,6 +17,14 @@
       "macos": "fzf"
     },
     {
+      "linux": "mkcert",
+      "macos": "mkcert"
+    },
+    {
+      "linux": "libnss3-tools",
+      "macos": "nss"
+    },
+    {
       "linux": "bat",
       "macos": "bat"
     },

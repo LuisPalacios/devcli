@@ -166,10 +166,39 @@ function Test-Prerequisites {
             }
             else {
                 Write-Log "✅ Scoop instalado correctamente" -ForegroundColor Green
+
+                # Agregar bucket extras
+                Write-Log "Agregando bucket extras de scoop..."
+                try {
+                    scoop bucket add extras
+                    Write-Log "✅ Bucket extras agregado correctamente" -ForegroundColor Green
+                }
+                catch {
+                    Write-Warning "⚠️ No se pudo agregar el bucket extras: $_"
+                }
             }
         }
         catch {
             Write-Error "❌ Error instalando scoop: $_" -ErrorAction Stop
+        }
+    }
+
+    # Verificar y agregar bucket extras si scoop ya estaba instalado
+    if (Get-Command scoop -ErrorAction SilentlyContinue) {
+        # Verificar si el bucket extras ya está agregado
+        $bucketsOutput = scoop bucket list 2>$null
+        if ($bucketsOutput -and $bucketsOutput -notmatch "extras") {
+            Write-Log "Agregando bucket extras de scoop..."
+            try {
+                scoop bucket add extras
+                Write-Log "✅ Bucket extras agregado correctamente" -ForegroundColor Green
+            }
+            catch {
+                Write-Warning "⚠️ No se pudo agregar el bucket extras: $_"
+            }
+        }
+        else {
+            Write-Log "✅ Bucket extras ya está disponible" -ForegroundColor Green
         }
     }
 
