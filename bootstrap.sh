@@ -95,6 +95,28 @@ if ! sudo -n true 2>/dev/null; then
   exit 1
 fi
 
+# Instalar curl si es necesario (silencioso)
+if ! command -v curl &>/dev/null; then
+  log "Instalando curl..."
+  case "${OS_TYPE:-}" in
+    linux|wsl2)
+      sudo apt-get update -y -qq >/dev/null 2>&1
+      sudo apt-get install -y -qq curl >/dev/null 2>&1
+      ;;
+    macos)
+      if ! command -v brew &>/dev/null; then
+        echo "[bootstrap] ❌ Homebrew no está instalado. Instálalo primero desde https://brew.sh"
+        exit 1
+      fi
+      brew install curl >/dev/null 2>&1
+      ;;
+    *)
+      log "❌ No se pudo instalar curl automáticamente."
+      exit 1
+      ;;
+  esac
+fi
+
 # Instalar git si es necesario (silencioso)
 if ! command -v git &>/dev/null; then
   log "Instalando git..."
