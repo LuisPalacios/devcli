@@ -57,6 +57,11 @@ SETUP_LOCALE_NAME="$(echo "$SETUP_LANG" | sed 's/UTF-8/utf8/I')"
 if [[ "$OS_TYPE" == "linux" ]]; then
   if ! locale -a | grep -iq "^$SETUP_LOCALE_NAME$"; then
     log "Configurando locale..."
+
+    # Descomentar la línea de locale en /etc/locale.gen
+    sudo sed -i "s|^# *${SETUP_LANG}[[:space:]]\+UTF-8|${SETUP_LANG} UTF-8|" /etc/locale.gen
+
+    # Generar el locale
     sudo locale-gen "$SETUP_LANG" >/dev/null 2>&1
     sudo update-locale LANG="$SETUP_LANG" >/dev/null 2>&1
   fi
