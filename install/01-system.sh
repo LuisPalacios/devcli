@@ -58,7 +58,7 @@ if [[ "$OS_TYPE" == "linux" ]]; then
   if ! locale -a | grep -iq "^$SETUP_LOCALE_NAME$"; then
     log "Configurando locale..."
     sudo locale-gen "$SETUP_LANG" >/dev/null 2>&1
-    sudo update-locale LANG="$SETUP_LANG" LC_ALL="$SETUP_LANG" >/dev/null 2>&1
+    sudo update-locale LANG="$SETUP_LANG" >/dev/null 2>&1
   fi
 fi
 
