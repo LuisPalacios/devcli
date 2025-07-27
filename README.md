@@ -5,7 +5,11 @@ Configura el entorno CLI en **Linux**, **macOS**, **WSL2** y **Windows**. Estaba
 **⚡ Linux, macOS y WSL2**:
 
 ```console
+# Con curl
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
+
+# Con wget
+bash <(wget -qO- https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
 ```
 
 **⚡ Windows 10/11**:
@@ -32,7 +36,7 @@ Está diseñado con un enfoque modular, multiplataforma e idempotente. La instal
 
 ## 🐧 Linux, macOS y WSL2
 
-Tu usuario debe tener acceso a `sudo` sin contraseña para que la instalación sea completamente automática.
+Tu sistema debe tener instalado `curl o wget` y el usuario debe tener acceso a `sudo` sin contraseña para que la instalación sea completamente automática.
 
 - Añadir tu usuario al grupo sudo: `sudo usermod -aG sudo $USER`
 - Archivo `/etc/sudoers.d/10-usuario` > `<usuario> ALL=(ALL) NOPASSWD:ALL`
