@@ -117,6 +117,21 @@ if ! command -v curl &>/dev/null; then
   esac
 fi
 
+# Instalar unzip si es necesario (silencioso)
+if ! command -v unzip &>/dev/null; then
+  log "Instalando unzip..."
+  case "${OS_TYPE:-}" in
+    linux|wsl2)
+      sudo apt-get update -y -qq >/dev/null 2>&1
+      sudo apt-get install -y -qq unzip >/dev/null 2>&1
+      ;;
+    *)
+      log "❌ No se pudo instalar unzip automáticamente."
+      exit 1
+      ;;
+  esac
+fi
+
 # Instalar git si es necesario (silencioso)
 if ! command -v git &>/dev/null; then
   log "Instalando git..."
