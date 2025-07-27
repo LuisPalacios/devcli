@@ -171,7 +171,7 @@ main() {
 
         if [[ "$current_shell" != "$zsh_path" ]]; then
           log "Cambiando shell por defecto a zsh..."
-          if sudo chsh -s "$zsh_path" >/dev/null 2>&1; then
+          if sudo chsh -s "$zsh_path" "$CURRENT_USER" >/dev/null 2>&1; then
             shell_changed=true
           else
             warning "No se pudo cambiar la shell por defecto (puede requerir contraseña)"
