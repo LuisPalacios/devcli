@@ -2,15 +2,13 @@
 
 Configura el entorno CLI en **Linux**, **macOS**, **WSL2** y **Windows**. Estaba ya cansado de perder un par de horas cuando tengo que configurarme uno de esos sistemas y añadir mis tipicas herramientas CLI, ejecutables, scripts o fuentes.
 
-**⚡ Linux, macOS y WSL2**:
+**⚡ Linux, macOS y WSL2** (lee antes la sección Requisitos):
 
 ```console
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
 ```
 
-> Alternativa con *wget*: `bash <(wget -qO- https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)`
-
-**⚡ Windows 10/11**:
+**⚡ Windows 10/11** (lee antes la sección Requisitos):
 
 ```console
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
@@ -18,13 +16,13 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 
 ## 📋 Introducción
 
-Lo automatizo todo con un solo comando que descarga este repositorio y procede a instalar todo lo que necesito.
+Con un solo comando descarga este repositorio e instale scripts, ejecutables y parametriza el CLI.
 
 > IMPORTANTE: Lee este readme, se modifican archivos muy importantes, asegúrate de que **no rompe nada de tu instalación** y ejecútalo bajo tu responsabilidad. Si no entiendes que hace todo esto, no lo ejecutes.
 
-Está diseñado con un enfoque modular, multiplataforma e idempotente. La instalación se realiza por fases, mediante los scripts ubicados en el directorio `install/`:
+Con un enfoque modular, multiplataforma e idempotente.
 
-- Instala herramientas como: git, curl, wget, nano, htop, tmux, fzf, bat, fd-find, ripgrep, tree, jq, lsd
+- Instala herramientas como: git, curl, wget, nano, htop, tmux, fzf, bat, fd-find, ripgrep, tree, jq, lsd, zoxide
 - Instala Oh-My-Posh, para cualquier Shell, dicen que es el mejor prompt.
 - Establece la variable LANG (por defecto a `s_ES.UTF-8`) en linux, macOS y WSL2
 - Copia ficheros importanttes de configuración (ver el subdirectorio `dotfiles`)
@@ -32,7 +30,7 @@ Está diseñado con un enfoque modular, multiplataforma e idempotente. La instal
 - Crea unos cuantos scripts en ~/bin que uso con frecuencia: e, s, confcat
 - Instala automáticamente **FiraCode Nerd Font** para soportar iconos en herramientas como `lsd`.
 
-## 🐧 Linux, macOS y WSL2
+## 🐧 Requisitos Linux, macOS y WSL2
 
 Tu sistema debe tener instalado `curl o wget` y el usuario debe tener acceso a `sudo` sin contraseña para que la instalación sea completamente automática.
 
@@ -41,29 +39,27 @@ Tu sistema debe tener instalado `curl o wget` y el usuario debe tener acceso a `
 
 En macOS tienes que tener preinstalado **Homebrew** - mira cómo en [brew.sh](https://brew.sh)
 
-Después de la instalación verifica Nerd Fonts: `nerd-verify.sh` y `fc-list | grep "FiraCode Nerd Font"`. Comprueba si los iconos salen bien (i.e. `lsd --version`. Si no funciona, ejecuta lo siguiente: `nerd-setup.sh`
+Después de la instalación verifica Nerd Fonts: `nerd-verify.sh` y `fc-list | grep "FiraCode Nerd Font"`. Comprueba si los iconos salen bien (i.e. `lsd --version`. Si no funciona, ejecuta lo siguiente: `nerd-setup.sh`.
 
-## 🪟 Windows
+**Nota:** si no tienes curl en Linux/WSL2/... y quieres usar *wget* el comando sería:
+
+```bash
+bash <(wget -qO- https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
+```
+
+## 🪟 Requisitos Windows
 
 Configuración automatizada para **Windows 11** (y Windows 10) usando **PowerShell** y **winget**.
 
-Requisitos
-
 - Windows 11 (recomendado) o Windows 10 con las últimas actualizaciones
 - PowerShell 7.0 o superior (descargar desde [GitHub](https://github.com/PowerShell/PowerShell/releases) o Microsoft Store)
-- App Installer (winget) instalado desde Microsoft Store
+- Necesitas tener `winget` instalado desde Microsoft Store
 - Permisos para instalar aplicaciones con winget
 
 > **Nota sobre PowerShell 7**: Lo prefiero para aprovechar las mejoras en sintaxis moderna, mejor manejo de errores y compatibilidad mejorada con las herramientas CLI actuales.
 
 Después de la instalación **reiniciar el terminal** para aplicar los cambios de PATH. Luego verifica Nerd Fonts: `nerd-verify.ps1` y si no funciona, ejecuta lo siguiente: `nerd-setup.ps1`
 
-## 🧰 Gestores de paquetes utilizados
+## 🧰 Notas adicionales
 
-| Sistema Operativo     | Gestor de Paquetes | Rol Principal                                      | ¿Por qué lo uso?                                                                 |
-|------------------------|--------------------|----------------------------------------------------|------------------------------------------------------------------------------------|
-| 🐧 Linux (Debian/Ubuntu) | `apt`              | Gestor nativo del sistema                          | Estándar en Debian/Ubuntu, robusto, bien mantenido, con soporte oficial           |
-| 🐧 WSL2 (Ubuntu)        | `apt`              | Paquetes de sistema y herramientas Unix            | Mismo entorno que Linux, total compatibilidad, sin reinventar la rueda            |
-| 🍎 macOS               | `brew`             | CLI tools, apps de usuario, compilación cruzada    | Flexible, no requiere admin, ecosistema maduro para devs                          |
-| 🪟 Windows 11          | `scoop`            | Utilidades CLI portables, estilo Unix              | Limpio, sin UAC, sin registro, scriptable, ideal para herramientas de desarrollo y cualquier "herramientas" del CLI.  |
-| 🪟 Windows 11          | `winget`           | Aplicaciones GUI y binarios estándar               | Mantenido por Microsoft, buena integración con Store y apps Win32. Lo uso para aplicaciones complejas GUI.  |
+Los gestores de paquetes utilizados para realizar las diferentes instalaciones dependen del sistema operativo. En Linux/WSL2 uso `apt`, en macOS `brew`, en Windows uso `scoopt` para herramientas del CLI y `winget` para aplicaciones complejas GUI.
