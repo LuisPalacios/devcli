@@ -5,12 +5,10 @@ Configura el entorno CLI en **Linux**, **macOS**, **WSL2** y **Windows**. Estaba
 **⚡ Linux, macOS y WSL2**:
 
 ```console
-# Con curl
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
-
-# Con wget
-bash <(wget -qO- https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
 ```
+
+> Alternativa con *wget*: `bash <(wget -qO- https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)`
 
 **⚡ Windows 10/11**:
 
