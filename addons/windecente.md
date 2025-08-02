@@ -179,7 +179,10 @@ El script sigue la filosofía del apunte original:
 - Creo una VM con Windows 11
 - Instalo VMWare Tools
 - Abro una sesión de terminal como administrador y ejecuto
+- Opcional:  habilitar System Restore primero en tu VM:
+   Enable-ComputerRestore -Drive "C:\"
+   vssadmin resize shadowstorage /for=C: /on=C: /maxsize=10GB
 
 ```console
-iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/windecente.ps1")
+iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/addons/windecente.ps1")
 ```

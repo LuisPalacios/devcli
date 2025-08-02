@@ -168,11 +168,17 @@ function Initialize-Script {
     # Crear punto de restauración del sistema
     if ($PSCmdlet.ShouldProcess("Sistema", "Crear punto de restauración")) {
         try {
-            Checkpoint-Computer -Description "Windows Decente v$ScriptVersion" -RestorePointType "MODIFY_SETTINGS"
-            Write-Log "Punto de restauración creado" -Level SUCCESS
+            # Verificar si System Restore está habilitado
+            $restoreEnabled = Get-ComputerRestorePoint -ErrorAction SilentlyContinue
+            if ($null -ne $restoreEnabled -or (Get-Service -Name VSS -ErrorAction SilentlyContinue)) {
+                Checkpoint-Computer -Description "Windows Decente v$ScriptVersion" -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
+                Write-Log "Punto de restauración creado" -Level SUCCESS
+            } else {
+                Write-Log "System Restore no está habilitado - saltando creación de punto de restauración" -Level WARNING
+            }
         }
         catch {
-            Write-Log "No se pudo crear punto de restauración: $_" -Level WARNING
+            Write-Log "No se pudo crear punto de restauración: $($_.Exception.Message)" -Level WARNING
         }
     }
 
