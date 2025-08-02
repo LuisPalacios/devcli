@@ -163,7 +163,16 @@ function Initialize-Script {
 
     Write-Log "Iniciando Windows Decente v$ScriptVersion" -Level INFO
     Write-Log "Log guardado en: $LogPath" -Level INFO
-    Write-Log "Sistema: $((Get-CimInstance Win32_OperatingSystem).Caption)" -Level INFO
+
+    # Obtener información del sistema de forma segura
+    try {
+        $osInfo = Get-CimInstance Win32_OperatingSystem -ErrorAction Stop
+        $osName = if ($osInfo -and $osInfo.Caption) { $osInfo.Caption } else { "Windows (versión no detectada)" }
+    }
+    catch {
+        $osName = "Windows (información no disponible)"
+    }
+    Write-Log "Sistema: $osName" -Level INFO
 
     # Crear punto de restauración del sistema
     if ($PSCmdlet.ShouldProcess("Sistema", "Crear punto de restauración")) {
@@ -375,13 +384,20 @@ function Set-NetworkAndFirewall {
     Write-Log "Configurando red y firewall..." -Level INFO
 
     try {
-        # Cambiar perfil de red a privado si es posible
+        # Cambiar perfil de red a privado si es posible (manejo multi-idioma)
         $networkProfiles = Get-NetConnectionProfile
         foreach ($profile in $networkProfiles) {
-            if ($profile.NetworkCategory -eq "Public") {
+            # Usar comparación numérica en lugar de texto para evitar problemas de idioma
+            # Public = 0, Private = 1, Domain = 2
+            if ($profile.NetworkCategory -eq 0 -or $profile.NetworkCategory -eq "Public") {
                 if ($PSCmdlet.ShouldProcess($profile.Name, "Change to Private Network")) {
-                    Set-NetConnectionProfile -InterfaceIndex $profile.InterfaceIndex -NetworkCategory Private
-                    Write-Log "Perfil de red cambiado a privado: $($profile.Name)" -Level SUCCESS
+                    try {
+                        Set-NetConnectionProfile -InterfaceIndex $profile.InterfaceIndex -NetworkCategory Private
+                        Write-Log "Perfil de red cambiado a privado: $($profile.Name)" -Level SUCCESS
+                    }
+                    catch {
+                        Write-Log "No se pudo cambiar perfil de red $($profile.Name): $_" -Level WARNING
+                    }
                 }
             }
         }
@@ -390,9 +406,31 @@ function Set-NetworkAndFirewall {
         Set-NetFirewallProfile -Profile Domain,Public,Private -NotifyOnListen False
         Write-Log "Notificaciones del firewall deshabilitadas" -Level SUCCESS
 
-        # Habilitar File and Printer Sharing
-        Set-NetFirewallRule -DisplayGroup "File And Printer Sharing" -Enabled True
-        Write-Log "File and Printer Sharing habilitado" -Level SUCCESS
+        # Habilitar File and Printer Sharing (manejo multi-idioma)
+        try {
+            # Intentar por nombre en inglés primero
+            $firewallRules = Get-NetFirewallRule -DisplayGroup "File And Printer Sharing" -ErrorAction SilentlyContinue
+            if (-not $firewallRules) {
+                # Intentar nombres alternativos en español
+                $firewallRules = Get-NetFirewallRule -DisplayGroup "Compartir archivos e impresoras" -ErrorAction SilentlyContinue
+            }
+            if (-not $firewallRules) {
+                # Buscar por patrón más amplio
+                $firewallRules = Get-NetFirewallRule | Where-Object { $_.DisplayGroup -like "*File*Print*" -or $_.DisplayGroup -like "*Archivo*Impres*" }
+            }
+
+            if ($firewallRules) {
+                foreach ($rule in $firewallRules) {
+                    Set-NetFirewallRule -DisplayName $rule.DisplayName -Enabled True -ErrorAction SilentlyContinue
+                }
+                Write-Log "File and Printer Sharing habilitado" -Level SUCCESS
+            } else {
+                Write-Log "No se encontraron reglas de File and Printer Sharing" -Level WARNING
+            }
+        }
+        catch {
+            Write-Log "Error habilitando File and Printer Sharing: $_" -Level WARNING
+        }
 
     }
     catch {
@@ -508,10 +546,25 @@ function Enable-SMBFileSharing {
     Write-Log "Habilitando SMB File Sharing..." -Level INFO
 
     try {
-        # Habilitar SMB1 si no está habilitado
+        # Habilitar SMB1 si no está habilitado (manejo multi-idioma)
         if ($PSCmdlet.ShouldProcess("SMB1.0", "Enable Feature")) {
-            Enable-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol" -All -NoRestart
-            Write-Log "SMB 1.0 habilitado" -Level SUCCESS
+            try {
+                # Verificar si la característica existe primero
+                $smb1Feature = Get-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol" -ErrorAction SilentlyContinue
+                if ($smb1Feature) {
+                    if ($smb1Feature.State -ne "Enabled") {
+                        Enable-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol" -All -NoRestart -ErrorAction Stop
+                        Write-Log "SMB 1.0 habilitado" -Level SUCCESS
+                    } else {
+                        Write-Log "SMB 1.0 ya estaba habilitado" -Level INFO
+                    }
+                } else {
+                    Write-Log "Característica SMB1Protocol no encontrada en este sistema" -Level WARNING
+                }
+            }
+            catch {
+                Write-Log "Error habilitando SMB1: $_" -Level WARNING
+            }
         }
 
         # Configurar file sharing
