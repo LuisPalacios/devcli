@@ -29,9 +29,7 @@
 #>
 
 [CmdletBinding(SupportsShouldProcess)]
-param(
-    [switch]$WhatIf
-)
+param()
 
 # Configuración del script
 $ErrorActionPreference = "Continue"
