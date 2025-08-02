@@ -182,6 +182,8 @@ El script sigue la filosofía del apunte original:
 - Opcional:  habilitar System Restore primero en tu VM:
    Enable-ComputerRestore -Drive "C:\"
    vssadmin resize shadowstorage /for=C: /on=C: /maxsize=10GB
+- Opcional: Eliminar bloqueo
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ```console
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/addons/windecente.ps1")
