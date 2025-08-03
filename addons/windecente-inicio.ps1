@@ -1,67 +1,80 @@
 <#
 .SYNOPSIS
-    Instala automáticamente software esencial en Windows 11 usando winget.
-    Se relanza automáticamente como administrador si no lo está (una sola vez).
+    Software installer via winget with automatic elevation.
+    Compatible with PowerShell 5.1 (default in Windows 10/11).
 #>
 
-# --- Re-elevación automática ---
-if (-not ($args -contains "-elevated")) {
-    if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('Administrator')) {
-        Write-Host "🔁 Reiniciando PowerShell como administrador..." -ForegroundColor Yellow
-        $scriptUrl = 'https://raw.githubusercontent.com/LuisPalacios/devcli/main/addons/windecente-inicio.ps1'
-        $command = "-NoExit -Command `"iex ((New-Object Net.WebClient).DownloadString('$scriptUrl')) -elevated`""
-        Start-Process -FilePath "powershell.exe" -ArgumentList $command -Verb RunAs
-        exit
-    }
+# Check if running as administrator
+function Is-Administrator {
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal $identity
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-# --- Verificar winget disponible ---
+# Auto-elevate using the script file itself
+if (-not (Is-Administrator)) {
+    Write-Host "Restarting PowerShell as administrator..." -ForegroundColor Yellow
+    $myPath = $MyInvocation.MyCommand.Path
+    Start-Process powershell -Verb RunAs -ArgumentList "-ExecutionPolicy Bypass -File `"$myPath`""
+    exit
+}
+
+# Handle Ctrl-C gracefully
+$global:ShouldStop = $false
+$null = Register-EngineEvent PowerShell.Exiting -Action {
+    $global:ShouldStop = $true
+}
+
+# Verify winget is available
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Error "❌ 'winget' no está disponible. Abre Microsoft Store, instala App Installer, y vuelve a intentarlo."
+    Write-Error "'winget' is not available. Install App Installer from Microsoft Store and try again."
     exit 2
 }
 
-# --- Función: comprobar si la app ya está instalada ---
+# Check if app is already installed
 function Is-AppInstalled {
     param ([string] $AppId)
-    $result = winget list --id $AppId 2>$null
-    return ($result -match $AppId)
+    $output = winget list --id $AppId 2>$null
+    return ($output -match $AppId)
 }
 
-# --- Función: instalar app si falta ---
+# Install app if not present
 function Install-App {
     param (
-        [Parameter(Mandatory)][string] $AppId,
-        [Parameter(Mandatory)][string] $AppName
+        [string] $AppId,
+        [string] $AppName
     )
 
     if (Is-AppInstalled -AppId $AppId) {
-        Write-Host "✔️  $AppName ya está instalado. Omitiendo." -ForegroundColor DarkGray
+        Write-Host "$AppName is already installed. Skipping." -ForegroundColor DarkGray
         return
     }
 
-    Write-Host "`n--> Instalando $AppName..." -ForegroundColor Cyan
+    Write-Host "`n--> Installing $AppName..." -ForegroundColor Cyan
 
-    $args = @(
-        'install', '--id', $AppId,
+    $installArgs = @(
+        'install',
+        '--id', $AppId,
         '--source', 'winget',
-        '--accept-package-agreements', '--accept-source-agreements',
-        '--silent', '--disable-interactivity'
+        '--accept-package-agreements',
+        '--accept-source-agreements',
+        '--silent',
+        '--disable-interactivity'
     )
 
     try {
-        $p = Start-Process -FilePath 'winget' -ArgumentList $args -Wait -PassThru -NoNewWindow
+        $p = Start-Process -FilePath 'winget' -ArgumentList $installArgs -Wait -PassThru -NoNewWindow
         if ($p.ExitCode -eq 0) {
-            Write-Host "✅ $AppName instalado correctamente." -ForegroundColor Green
+            Write-Host "$AppName installed successfully." -ForegroundColor Green
         } else {
-            Write-Warning "⚠️  $AppName terminó con código $($p.ExitCode)"
+            Write-Warning "$AppName finished with exit code $($p.ExitCode)"
         }
     } catch {
-        Write-Error ("❌ Error al instalar {0}: {1}" -f $AppName, $_)
+        Write-Error "Error installing $AppName: $_"
     }
 }
 
-# --- Lista de apps ---
+# List of apps to install
 $apps = @(
     @{ id = 'Google.Chrome';              name = 'Google Chrome' },
     @{ id = '7zip.7zip';                  name = '7-Zip' },
@@ -70,14 +83,18 @@ $apps = @(
     @{ id = 'Microsoft.PowerToys';        name = 'PowerToys' }
 )
 
-# --- Encabezado ---
+# Header
 Write-Host "`n=========================================" -ForegroundColor Gray
-Write-Host "   Instalador automático via winget        " -ForegroundColor Yellow
+Write-Host "  Automatic installer via winget          " -ForegroundColor Yellow
 Write-Host "=========================================" -ForegroundColor Gray
 
-# --- Instalación secuencial ---
+# Main loop
 foreach ($app in $apps) {
+    if ($global:ShouldStop) {
+        Write-Warning "`nScript interrupted by user. Exiting..."
+        break
+    }
     Install-App -AppId $app.id -AppName $app.name
 }
 
-Write-Host "`n🎉 Todos los programas han sido procesados." -ForegroundColor Green
+Write-Host "`nAll programs have been processed." -ForegroundColor Green
