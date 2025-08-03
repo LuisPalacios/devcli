@@ -3,6 +3,18 @@
     Software installer via winget with automatic elevation.
     Also downloads Win11Debloat from GitHub releases.
     Compatible with PowerShell 5.1 (default in Windows 10/11).
+
+.EXAMPLE
+    # Execute directly from GitHub (recommended - avoids cache issues):
+    iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/LuisPalacios/devcli/main/addons/windecente-inicio.ps1" -UseBasicParsing).Content
+
+.EXAMPLE
+    # Alternative execution methods:
+    iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/addons/windecente-inicio.ps1")
+
+.EXAMPLE
+    # Local execution:
+    powershell -ExecutionPolicy Bypass -File "windecente-inicio.ps1"
 #>
 
 # Check if running as administrator
