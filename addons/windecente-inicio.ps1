@@ -1,15 +1,18 @@
 <#
 .SYNOPSIS
     Instala automáticamente software esencial en Windows 11 usando winget.
-    Se relanza automáticamente como administrador si no lo está.
+    Se relanza automáticamente como administrador si no lo está (solo una vez).
 #>
 
 # --- Re-elevación automática ---
-if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('Administrator')) {
-    Write-Host "🔁 Reiniciando PowerShell como administrador..." -ForegroundColor Yellow
-    $scriptUrl = 'https://raw.githubusercontent.com/LuisPalacios/devcli/main/addons/windecente-inicio.ps1'
-    Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command `"iex (irm '$scriptUrl')`"" -Verb RunAs
-    exit
+if (-not ([Environment]::GetEnvironmentVariable("WINDECENTE_ELEVATED"))) {
+    if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('Administrator')) {
+        Write-Host "🔁 Reiniciando PowerShell como administrador..." -ForegroundColor Yellow
+        $env:WINDECENTE_ELEVATED = "1"
+        $scriptUrl = 'https://raw.githubusercontent.com/LuisPalacios/devcli/main/addons/windecente-inicio.ps1'
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command `"`$env:WINDECENTE_ELEVATED='1'; iex (irm '$scriptUrl')`"" -Verb RunAs
+        exit
+    }
 }
 
 # --- Verificar winget disponible ---
