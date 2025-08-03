@@ -13,7 +13,7 @@ if (-not $Elevated) {
     if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('Administrator')) {
         Write-Host "🔁 Reiniciando PowerShell como administrador..." -ForegroundColor Yellow
         $scriptUrl = 'https://raw.githubusercontent.com/LuisPalacios/devcli/main/addons/windecente-inicio.ps1'
-        $command = "-NoExit -Command `"param([switch]`$Elevated); `$Elevated = \$true; iex (irm '$scriptUrl')`""
+        $command = "-NoExit -Command `"param([switch]`$Elevated); `$Elevated = `$true; iex (irm '$scriptUrl')`""
         Start-Process -FilePath "powershell.exe" -ArgumentList $command -Verb RunAs
         exit
     }
@@ -25,31 +25,34 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     exit 2
 }
 
-# --- Función para verificar si ya está instalado ---
+# --- Función: comprobar si la app ya está instalada ---
 function Is-AppInstalled {
     param ([string] $AppId)
     $result = winget list --id $AppId 2>$null
     return ($result -match $AppId)
 }
 
-# --- Función para instalar apps si faltan ---
+# --- Función: instalar app si falta ---
 function Install-App {
     param (
         [Parameter(Mandatory)][string] $AppId,
         [Parameter(Mandatory)][string] $AppName
     )
+
     if (Is-AppInstalled -AppId $AppId) {
         Write-Host "✔️  $AppName ya está instalado. Omitiendo." -ForegroundColor DarkGray
         return
     }
 
     Write-Host "`n--> Instalando $AppName..." -ForegroundColor Cyan
+
     $args = @(
         'install', '--id', $AppId,
         '--source', 'winget',
         '--accept-package-agreements', '--accept-source-agreements',
         '--silent', '--disable-interactivity'
     )
+
     try {
         $p = Start-Process -FilePath 'winget' -ArgumentList $args -Wait -PassThru -NoNewWindow
         if ($p.ExitCode -eq 0) {
@@ -62,7 +65,7 @@ function Install-App {
     }
 }
 
-# --- Lista de apps a instalar ---
+# --- Lista de apps ---
 $apps = @(
     @{ id = 'Google.Chrome';              name = 'Google Chrome' },
     @{ id = '7zip.7zip';                  name = '7-Zip' },
@@ -71,12 +74,12 @@ $apps = @(
     @{ id = 'Microsoft.PowerToys';        name = 'PowerToys' }
 )
 
-# --- Título ---
+# --- Encabezado ---
 Write-Host "`n=========================================" -ForegroundColor Gray
 Write-Host "   Instalador automático via winget        " -ForegroundColor Yellow
 Write-Host "=========================================" -ForegroundColor Gray
 
-# --- Ejecutar instalaciones ---
+# --- Instalación secuencial ---
 foreach ($app in $apps) {
     Install-App -AppId $app.id -AppName $app.name
 }
