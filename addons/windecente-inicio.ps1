@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Instala automáticamente software esencial en Windows 11 usando winget.
-    Se relanza automáticamente como administrador si no lo está (solo una vez).
+    Se relanza como administrador si no lo está. Solo instala lo que falte.
 #>
 
 # --- Re-elevación automática ---
@@ -21,12 +21,24 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     exit 2
 }
 
-# --- Función para instalar apps ---
+# --- Función para verificar si ya está instalado ---
+function Is-AppInstalled {
+    param ([string] $AppId)
+    $result = winget list --id $AppId 2>$null
+    return ($result -match $AppId)
+}
+
+# --- Función para instalar apps si faltan ---
 function Install-App {
     param (
         [Parameter(Mandatory)][string] $AppId,
         [Parameter(Mandatory)][string] $AppName
     )
+    if (Is-AppInstalled -AppId $AppId) {
+        Write-Host "✔️  $AppName ya está instalado. Omitiendo." -ForegroundColor DarkGray
+        return
+    }
+
     Write-Host "`n--> Instalando $AppName..." -ForegroundColor Cyan
     $args = @(
         'install', '--id', $AppId,
@@ -37,7 +49,7 @@ function Install-App {
     try {
         $p = Start-Process -FilePath 'winget' -ArgumentList $args -Wait -PassThru -NoNewWindow
         if ($p.ExitCode -eq 0) {
-            Write-Host "✔️  $AppName instalado correctamente." -ForegroundColor Green
+            Write-Host "✅ $AppName instalado correctamente." -ForegroundColor Green
         } else {
             Write-Warning "⚠️  $AppName terminó con código $($p.ExitCode)"
         }
@@ -65,4 +77,5 @@ foreach ($app in $apps) {
     Install-App -AppId $app.id -AppName $app.name
 }
 
-Write-Host "`nTodos los programas han sido procesados correctamente." -ForegroundColor Green
+Write-Host "`n🎉 Todos los programas han sido procesados." -ForegroundColor Green
+
