@@ -74,7 +74,7 @@ function Install-App {
             Write-Warning "⚠️ Instalación de $AppName finalizó con código de salida $($process.ExitCode)."
         }
     } catch {
-        Write-Error "❌ Error al instalar $AppName: $_"
+        Write-Error ("❌ Error al instalar {0}: {1}" -f $AppName, $_)
     }
 }
 
