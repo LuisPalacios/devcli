@@ -1,5 +1,3 @@
-#Requires -RunAsAdministrator
-
 <#
 .SYNOPSIS
     Instala automáticamente software esencial en Windows 11 usando winget.
