@@ -71,7 +71,7 @@ function Install-App {
             Write-Warning "$AppName finished with exit code $($p.ExitCode)"
         }
     } catch {
-        Write-Error "Error installing $AppName: $_"
+        Write-Error "Error installing ${AppName}: $_"
     }
 }
 
