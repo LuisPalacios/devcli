@@ -9,7 +9,7 @@ if (-not ($args -contains "-elevated")) {
     if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('Administrator')) {
         Write-Host "🔁 Reiniciando PowerShell como administrador..." -ForegroundColor Yellow
         $scriptUrl = 'https://raw.githubusercontent.com/LuisPalacios/devcli/main/addons/windecente-inicio.ps1'
-        $command = "-NoExit -Command `"iex (irm '$scriptUrl') -elevated`""
+        $command = "-NoExit -Command `"iex ((New-Object Net.WebClient).DownloadString('$scriptUrl')) -elevated`""
         Start-Process -FilePath "powershell.exe" -ArgumentList $command -Verb RunAs
         exit
     }
