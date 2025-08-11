@@ -5,6 +5,10 @@
       "dst": "./"
     },
     {
+      "file": ".tmux.conf",
+      "dst": "./"
+    },
+    {
       "file": ".oh-my-posh.json",
       "dst": "./"
     }
