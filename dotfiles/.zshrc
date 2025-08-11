@@ -228,6 +228,72 @@ function parametriza_zsh_comun() {
   # de la shell (antes/después de comandos, cambios de directorio, etc.)
   autoload -Uz add-zsh-hook
 
+  # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN DE TMUX (TERMINAL MULTIPLEXER)
+  # ---------------------------------------------------------------------------
+  # Esta sección proporciona aliases para tmux pero no lo inicia automáticamente
+  # Permite flexibilidad para elegir cuándo usar tmux
+
+  # FILOSOFÍA DE CONFIGURACIÓN DE TMUX:
+  # Se pueden configurar dos comportamientos:
+  # 1) AUTO-INICIO: tmux reemplaza automáticamente a zsh al hacer login
+  # 2) MANUAL: tmux se inicia solo cuando se necesita (OPCIÓN ELEGIDA)
+  #
+  # La opción manual permite mayor flexibilidad, especialmente útil cuando
+  # se conecta a servidores remotos que también tienen zsh y tmux configurados
+  t_function() {
+    local use_exec=false
+    # Si el primer argumento es "-e", activamos el uso de exec.
+    if [[ "$1" == "-e" ]]; then
+      use_exec=true
+    fi
+
+    # 1. Comprobación de tmux
+    if ! command -v tmux &> /dev/null; then
+      echo "Error: 'tmux' no se encuentra en tu PATH."
+      echo "Por favor, instala tmux para usar esta función."
+      return 1
+    fi
+
+    # 2. Comprobación del archivo de configuración
+    if [[ ! -f ~/.tmux.conf ]]; then
+      echo "Error: No se encontró el archivo de configuración '~/.tmux.conf'."
+      echo "Esta función requiere una configuración de tmux."
+      return 1
+    fi
+
+    # 3. Comprobaciones de entorno
+    if [[ -t 1 && -z "$TMUX" && \
+            $PPID != 1 && \
+            $$ != 1 && \
+            $TERM != dumb && \
+            $TERM != xterm && \
+            $TERM != linux && \
+            $TERM != screen* && \
+            $IS_VSCODE != true ]]; then
+
+      # 4. Lógica para adjuntar o crear la sesión
+      if tmux has-session -t TMUX &> /dev/null; then
+        if $use_exec; then
+          exec tmux attach-session -t TMUX
+        else
+          tmux attach-session -t TMUX
+        fi
+      else
+        if $use_exec; then
+          exec tmux new-session -s TMUX
+        else
+          tmux new-session -s TMUX
+        fi
+      fi
+    fi
+  }
+  # Inicia tmux como un subproceso (alias seguro)
+  alias tt="t_function"
+
+  # Inicia tmux reemplazando el shell actual (alias con exec)
+  alias t="t_function -e"
+
 }
 
 # =============================================================================
@@ -449,26 +515,6 @@ else
   # APLICAR CONFIGURACIÓN COMÚN MULTIPLATAFORMA
   # ---------------------------------------------------------------------------
   parametriza_zsh_comun
-
-  # ---------------------------------------------------------------------------
-  # CONFIGURACIÓN DE TMUX (TERMINAL MULTIPLEXER)
-  # ---------------------------------------------------------------------------
-  # Esta sección proporciona aliases para tmux pero no lo inicia automáticamente
-  # Permite flexibilidad para elegir cuándo usar tmux
-
-  # FILOSOFÍA DE CONFIGURACIÓN DE TMUX:
-  # Se pueden configurar dos comportamientos:
-  # 1) AUTO-INICIO: tmux reemplaza automáticamente a zsh al hacer login
-  # 2) MANUAL: tmux se inicia solo cuando se necesita (OPCIÓN ELEGIDA)
-  #
-  # La opción manual permite mayor flexibilidad, especialmente útil cuando
-  # se conecta a servidores remotos que también tienen zsh y tmux configurados
-
-  # Aliases para iniciar tmux:
-  # - 't': Inicia tmux reemplazando la shell actual (con exec)
-  # - 'tt': Inicia tmux como subproceso (sin exec)
-  alias t="exec ~/Nextcloud/priv/bin/t"     # Reemplazar shell actual con tmux
-  alias tt="~/Nextcloud/priv/bin/t"         # Iniciar tmux como subproceso
 
 fi
 
