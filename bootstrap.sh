@@ -102,7 +102,6 @@ if [[ $IS_ROOT == true ]]; then
 else
   log "Preparando entorno en $OS_TYPE (idioma: $SETUP_LANG) para usuario $CURRENT_USER..."
 fi
-exit 0
 
 # Verificar permisos sudo
 if ! sudo -n true 2>/dev/null; then
