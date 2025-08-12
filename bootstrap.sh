@@ -94,7 +94,7 @@ detect_root_user() {
 
 # Ejecutar detección
 detect_os_type
-detext_root_user
+detect_root_user
 
 # Preparación del entorno
 if [[ $IS_ROOT == true ]]; then
