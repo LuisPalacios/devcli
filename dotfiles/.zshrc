@@ -475,7 +475,13 @@ else
         # -------------------------------------------------------------------
         # Prompt simple y claro para root que indica privilegios elevados
         PROMPT='[%B%F{white}root%f%b]@%m:%~%# '
-        # Mantener PATH heredado del sistema para evitar problemas de seguridad
+        # Mantener PATH heredado y añadir . y bin de root
+        path=(
+          .                               # Directorio actual
+          "${HOME}/bin"                   # Binarios personales
+          $path                           # PATH heredado del sistema
+        )
+
       else
         # -------------------------------------------------------------------
         # CONFIGURACIÓN PARA USUARIO NORMAL
