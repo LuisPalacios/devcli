@@ -20,7 +20,7 @@
       "background": "transparent"
     },
     "transient_prompt": {
-      "template": "{{ if or .SSHSession (eq .Env.OMP_SSH `1`) }}\\ueba9 {{ end }}{{ if and (eq .Env.TERM_PROGRAM \"vscode\") (eq .Env.OS \"Windows_NT\") }}[💻] {{ else }}[{{ .Env.OMP_OS_ICON }}] {{ end }}{{ if .Root }}<p:red><b>{{ .UserName }}</b></>{{ else }}<p:white><b>{{ .UserName }}</b></>{{ end }} <p:cyan>{{ .Folder }}</> <foreground>❯</> ",
+      "template": "{{ if or .SSHSession (eq .Env.OMP_SSH \"1\") }}\uEBA9 {{ end }}{{ if and (eq .Env.TERM_PROGRAM \"vscode\") (eq .Env.OS \"Windows_NT\") }}[💻] {{ else }}[{{ .Env.OMP_OS_ICON }}] {{ end }}{{ if .Root }}<p:red><b>{{ .UserName }}</b></>{{ else }}<p:white><b>{{ .UserName }}</b></>{{ end }} <p:cyan>{{ .Folder }}</> <foreground>\u276F</> ",
       "foreground": "p:whitesoft",
       "background": "transparent"
     },
