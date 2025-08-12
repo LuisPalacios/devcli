@@ -260,8 +260,8 @@ install_nerd_fonts() {
 
   # Verificar que la instalación fue exitosa
   if command_exists fc-list; then
-    if ! fc-list | grep -q "'${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'" 2>/dev/null; then
-      warning "'${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}' no se detecta después de la instalación"
+    if ! fc-list | grep -q "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" 2>/dev/null; then
+      warning "No se detectan las fuentes "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" recién instaladas"
       return 1
     fi
   fi
