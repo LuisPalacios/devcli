@@ -167,15 +167,22 @@ function Test-Prerequisites {
             else {
                 Write-Log "✅ Scoop instalado correctamente" -ForegroundColor Green
 
-                # Agregar bucket extras
-                Write-Log "Agregando bucket extras de scoop..."
+                # Agregar bucket extras solo si no está instalado
+                Write-Log "Verificando bucket extras de Scoop..."
                 try {
-                    scoop bucket add extras
-                    Write-Log "✅ Bucket extras agregado correctamente" -ForegroundColor Green
+                    $buckets = scoop bucket list | ForEach-Object { $_.Split()[0] }  # first column only
+                    if ('extras' -in $buckets) {
+                        Write-Log "ℹ️ El bucket extras ya está agregado" -ForegroundColor Yellow
+                    }
+                    else {
+                        scoop bucket add extras
+                        Write-Log "✅ Bucket extras agregado correctamente" -ForegroundColor Green
+                    }
                 }
                 catch {
-                    Write-Warning "⚠️ No se pudo agregar el bucket extras: $_"
+                    Write-Warning "⚠️ Error al verificar o agregar el bucket extras: $_"
                 }
+
             }
         }
         catch {
