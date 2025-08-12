@@ -569,6 +569,20 @@ else
   # GESTIÓN AUTOMÁTICA DEL TEMA DE OH MY POSH
   # ---------------------------------------------------------------------------
 
+  # Detecta si la sesión proviene de sshd (subiendo por la cadena PPid)
+  _is_ssh_ancestor() {
+    local pid ppid comm
+    pid=$$
+    for _ in {1..16}; do
+      ppid=$(awk '/^PPid:/{print $2}' /proc/$pid/status 2>/dev/null) || return 1
+      [[ -z "$ppid" || "$ppid" -le 1 ]] && return 1
+      comm=$(< /proc/$ppid/comm 2>/dev/null)
+      [[ "$comm" == "sshd" || "$comm" == sshd:* ]] && return 0
+      pid=$ppid
+    done
+    return 1
+  }
+
   # Configuración de archivos para el tema personalizado
   LOCAL_FILE=~/.oh-my-posh.json                    # Archivo local del tema
   REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/devcli/main/dotfiles/.oh-my-posh.json"
@@ -643,7 +657,7 @@ else
   fi
 
   # Variable usada para que OMP sepa que estamos en una sesioni SSH
-  if [ -n "$SSH_TTY" ] || [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ]; then
+  if _is_ssh_ancestor; then
     export OMP_SSH=1
   fi
 
