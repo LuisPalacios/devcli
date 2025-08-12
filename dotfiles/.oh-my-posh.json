@@ -19,14 +19,6 @@
       "foreground": "p:white",
       "background": "transparent"
     },
-    "transient_prompt": {
-      "template": "{{ if and (eq .Env.TERM_PROGRAM \"vscode\") (eq .Env.OS \"Windows_NT\") }}[💻] {{ else }}[{{ .Env.OMP_OS_ICON }}] {{ end }}{{ .Folder }}</> <p:whitesoft>\u276f</> ",
-      "foreground": "p:cyan",
-      "foreground_templates": [
-        "{{ if .Root }}p:red{{ end }}"
-      ],
-      "background": "transparent"
-    },
     "console_title_template": "{{ .Shell }} in {{ .Folder }}",
     "upgrade": {
       "notice": true,
