@@ -128,15 +128,6 @@ main() {
       fi
     fi
 
-    # Crear backup si el archivo ya existe
-    # if [[ -f "$dst" ]]; then
-    #   local timestamp=$(date +%Y%m%d_%H%M%S)
-    #   local backup_file="${dst}.backup.${timestamp}"
-    #   if cp "$dst" "$backup_file" 2>/dev/null; then
-    #     log "Backup creado: $backup_file"
-    #   fi
-    # fi
-
     # Copiar archivo
     if cp -f "$src" "$dst" 2>/dev/null; then
       local dst_display="${dst_relative%/}"
