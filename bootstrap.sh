@@ -105,7 +105,7 @@ fi
 
 # Verificar permisos sudo
 if ! sudo -n true 2>/dev/null; then
-  echo "[ERROR] El usuario '$CURRENT_USER' no tiene acceso a sudo sin contraseña. Aborta."
+  echo "sudo no está instalado o el usuario '$CURRENT_USER' no tiene acceso sin contraseña."
   exit 1
 fi
 
