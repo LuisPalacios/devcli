@@ -13,6 +13,11 @@ log() {
   log_simple "$*"
 }
 
+# Verificar permisos sudo
+if [[ $IS_ROOT == false ]]; then
+  check_sudo_access
+fi
+
 # Directorio de archivos
 FILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../files" && pwd)"
 

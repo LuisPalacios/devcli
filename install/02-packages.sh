@@ -14,7 +14,9 @@ log() {
 }
 
 # Verificar permisos sudo
-check_sudo_access
+if [[ $IS_ROOT == false ]]; then
+  check_sudo_access
+fi
 
 # Archivo de configuración
 PACKAGES_CONFIG="$(dirname "${BASH_SOURCE[0]}")/02-packages.json"

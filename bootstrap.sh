@@ -83,11 +83,26 @@ detect_os_type() {
   fi
 }
 
+# Detección de usuario root
+detect_root_user() {
+  if [[ $EUID -eq 0 ]]; then
+    IS_ROOT=true
+  else
+    IS_ROOT=false
+  fi
+}
+
 # Ejecutar detección
 detect_os_type
+detext_root_user
 
 # Preparación del entorno
-log "Preparando entorno en $OS_TYPE (idioma: $SETUP_LANG)..."
+if [[ $IS_ROOT == true ]]; then
+  log "Preparando entorno en $OS_TYPE (idioma: $SETUP_LANG) para usuario root !!!"
+else
+  log "Preparando entorno en $OS_TYPE (idioma: $SETUP_LANG) para usuario $CURRENT_USER..."
+fi
+exit 0
 
 # Verificar permisos sudo
 if ! sudo -n true 2>/dev/null; then

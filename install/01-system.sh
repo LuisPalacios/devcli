@@ -14,7 +14,9 @@ log() {
 }
 
 # Verificar permisos sudo
-check_sudo_access
+if [[ $IS_ROOT == false ]]; then
+  check_sudo_access
+fi
 
 # Asegurar que existe el directorio de binarios
 ensure_directory "$BIN_DIR"
@@ -70,4 +72,3 @@ fi
 # Mostrar resumen final
 PACKAGES_COUNT=$(count_installed_packages "${COMMON_PACKAGES[@]}")
 success "Configuración base completada ($PACKAGES_COUNT paquetes verificados)"
-

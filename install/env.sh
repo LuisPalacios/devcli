@@ -54,6 +54,15 @@ detect_os_type() {
   fi
 }
 
+# Detección de usuario root
+detect_root_user() {
+  if [[ $EUID -eq 0 ]]; then
+    IS_ROOT=true
+  else
+    IS_ROOT=false
+  fi
+}
+
 # Función para validar entorno mínimo
 validate_environment() {
   # Verificar que estamos en un entorno interactivo
@@ -72,4 +81,5 @@ validate_environment() {
 # Ejecutar detecciones al cargar
 detect_current_user
 detect_os_type
+detect_root_user
 validate_environment
