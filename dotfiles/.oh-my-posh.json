@@ -54,6 +54,11 @@
             "template": "<p:cyan>{{ .Path }}</>"
           },
           {
+            "type": "python",
+            "style": "plain",
+            "template": " ( {{ .Venv }})"
+          },
+          {
             "type": "git",
             "style": "powerline",
             "properties": {
