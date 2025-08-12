@@ -44,7 +44,11 @@
           {
             "type": "session",
             "style": "plain",
-            "template": "<p:white><b>{{ if .SSHSession }}\ueba9 {{ end }}{{ .UserName }}</b><p:whitesoft>@{{ .HostName }}:"
+            "template": "<b>{{ if .SSHSession }}\ueba9 {{ end }}{{ .UserName }}</b><p:whitesoft>@{{ .HostName }}:</>",
+            "foreground": "p:white",
+            "foreground_templates": [
+              "{{ if .Root }}p:red{{ end }}"
+            ]
           },
           {
             "type": "path",
