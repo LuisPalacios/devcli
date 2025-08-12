@@ -642,6 +642,11 @@ else
     export OMP_OS_ICON="❓"                    # Sistema desconocido
   fi
 
+  # Variable usada para que OMP sepa que estamos en una sesioni SSH
+  if [ -n "$SSH_TTY" ] || [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ]; then
+    export OMP_SSH=1
+  fi
+
   # ---------------------------------------------------------------------------
   # INICIALIZACIÓN DE OH MY POSH
   # ---------------------------------------------------------------------------
