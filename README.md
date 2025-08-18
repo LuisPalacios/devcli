@@ -16,6 +16,18 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/boo
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
 ```
 
+*Post instalación*:
+
+- Verifica Nerd Fonts: `nerd-verify.sh` y `fc-list | grep "FiraCode Nerd Font"`.
+- Comprueba si los iconos salen bien (i.e. `lsd --version`.
+- Si no funciona, ejecuta `nerd-setup.sh`.
+
+*Post instalación*:
+
+- Reinicia el terminal para aplicar los cambios de PATH.
+- Verifica Nerd Fonts: `nerd-verify.ps1`
+- Si no funciona, ejecuta: `nerd-setup.ps1`
+
 ## 📋 Introducción
 
 Con un solo comando descarga este repositorio e instale scripts, ejecutables y parametriza el CLI.
@@ -50,26 +62,30 @@ Con un enfoque modular, multiplataforma e idempotente.
 
 - Puedes ejecutar el script como `root` para parametrizarlo igual, útil para entornos headless.
 
-*Post instalación*:
-
-- Verifica Nerd Fonts: `nerd-verify.sh` y `fc-list | grep "FiraCode Nerd Font"`.
-- Comprueba si los iconos salen bien (i.e. `lsd --version`.
-- Si no funciona, ejecuta `nerd-setup.sh`.
-
 ## 🪟 Requisitos Windows
 
-Para **Windows 10/11** usando **PowerShell** y **winget**.
+Necesitarás tener **PowerShell 7** y **winget**.
 
-- Windows 11 (recomendado) o Windows 10 con las últimas actualizaciones
 - Instala y ejecuta `winget list` para aceptar la licencia.
-- Uso `winget` para instalar aplicaciones complejas GUI, pero instalo y uso [`Scoop`](https://scoop.sh) para instalar herramientas del CLI
-- PowerShell 7.0 o superior en modo Administrador (descargar desde [GitHub](https://github.com/PowerShell/PowerShell/releases) o Microsoft Store)
 
-*Post instalación*:
+```PowerShell
+winget list
+```
 
-- Reinicia el terminal para aplicar los cambios de PATH.
-- Verifica Nerd Fonts: `nerd-verify.ps1`
-- Si no funciona, ejecuta: `nerd-setup.ps1`
+- PowerShell 7.0 o superior en modo Administrador. Descargar desde [GitHub](https://github.com/PowerShell/PowerShell/releases) o Microsoft Store
+
+- Recomendado preinstalar **Windows Terminal** (si no lo tienes) y **scoop**:
+
+```PowerShell
+# Instalar Windows Terminal (si no lo tienes ya)
+winget install Microsoft.WindowsTerminal
+
+# Instalar Scoop
+irm get.scoop.sh | iex
+
+# Instalar Scoop en modo Administrador (si lo necesitases)
+iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
+```
 
 ## ToDo
 
