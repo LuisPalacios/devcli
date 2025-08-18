@@ -10,17 +10,17 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/boo
 
 > Alternativa wget: `bash <(wget -qO- https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)`
 
-**⚡ Windows 10/11** (lee los "Requisitos"):
-
-```console
-iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
-```
-
 *Post instalación*:
 
 - Verifica Nerd Fonts: `nerd-verify.sh` y `fc-list | grep "FiraCode Nerd Font"`.
 - Comprueba si los iconos salen bien (i.e. `lsd --version`.
 - Si no funciona, ejecuta `nerd-setup.sh`.
+
+**⚡ Windows 10/11** (lee los "Requisitos"):
+
+```console
+iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
+```
 
 *Post instalación*:
 
