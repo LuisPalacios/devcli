@@ -1,6 +1,6 @@
 # CLI Setup
 
-Configura el entorno CLI en **Linux**, **macOS**, **WSL2** y **Windows**. Estaba ya cansado de perder un par de horas cuando tengo que configurarme uno de esos sistemas y añadir mis tipicas herramientas CLI, ejecutables, scripts o fuentes.
+Configura el entorno CLI en **Linux**, **macOS**, **WSL2** y **Windows**. Estaba ya cansado de perder un par de horas cuando tengo que configurarme uno de esos sistemas y añadir mis tipicas herramientas CLI, ejecutables, scripts y fonts.
 
 **⚡ Linux, macOS y WSL2** (lee los "Requisitos"):
 
@@ -30,11 +30,11 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 
 ## 📋 Introducción
 
-Con un solo comando descarga este repositorio e instale scripts, ejecutables y parametriza el CLI.
+Un solo comando descarga este repositorio, instala scripts, ejecutables y parametriza el CLI.
 
-> IMPORTANTE: Lee este readme, se modifican archivos muy importantes, asegúrate de que **no rompe nada de tu instalación** y ejecútalo bajo tu responsabilidad. Si no entiendes que hace todo esto, no lo ejecutes.
+> IMPORTANTE, se modifican archivos importantes, asegúrate de que **no rompe nada de tu instalación** y ejecútalo bajo tu responsabilidad. Si no entiendes que hace, no lo ejecutes.
 
-Con un enfoque modular, multiplataforma e idempotente.
+Enfoque modular, multiplataforma e idempotente.
 
 - Instala herramientas como: git, curl, wget, nano, htop, tmux, fzf, bat, fd-find, ripgrep, tree, jq, lsd, zoxide
 - Instala Oh-My-Posh, para cualquier Shell, dicen que es el mejor prompt.
@@ -66,18 +66,14 @@ Con un enfoque modular, multiplataforma e idempotente.
 
 Necesitarás tener **PowerShell 7** y **winget**.
 
-- Instala y ejecuta `winget list` para aceptar la licencia.
-
-```PowerShell
-winget list
-```
+- Instala y ejecuta `winget list` para aceptar.
 
 - PowerShell 7.0 o superior en modo Administrador. Descargar desde [GitHub](https://github.com/PowerShell/PowerShell/releases) o Microsoft Store
 
-- Recomendado preinstalar **Windows Terminal** (si no lo tienes) y **scoop**:
+- Recomendado preinstalar **Windows Terminal** y **scoop**:
 
 ```PowerShell
-# Instalar Windows Terminal (si no lo tienes ya)
+# Instalar Windows Terminal
 winget install Microsoft.WindowsTerminal
 
 # Instalar Scoop
