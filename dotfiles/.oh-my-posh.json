@@ -23,7 +23,7 @@
     "upgrade": {
       "notice": true,
       "interval": "168h",
-      "auto": false,
+      "auto": true,
       "source": "cdn"
     },
     "blocks": [
