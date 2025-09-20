@@ -88,12 +88,3 @@ iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
 Añadir soporte a otras distribuciones y métodos de instalación en Linux.
 
 ---
-
-## Screenshots
-
-![CMD en Windows](./assets/cli-cmd-00.png)
-![CLI en Windows](./assets/cli-linux-00.png)
-![CLI en Mac](./assets/cli-mac-00.png)
-![Varios en Windows](./assets/cli-win-00.png)
-![CLI en WSL](./assets/cli-wsl-00.png)
-![Htop en Windows](./assets/htop-win-00.png)

@@ -1,1 +1,237 @@
-* text eol=lf
+#
+# gitattributes file - Defining attributes per path
+#
+
+# If the extension is not present below in the file then
+# handle line endings automatically for files detected as text
+# and leave all files detected as binary untouched.
+* text=auto
+
+# From here below we specify what will occur.
+
+# These files are text and should be normalized (Convert crlf => lf)
+*.gitattributes text eol=lf
+.gitignore      text eol=lf
+
+# Docker
+Dockerfile      text eol=lf
+
+# Enable syntax highlighting for files with `.gitattributes` extensions.
+*.gitattributes linguist-language=gitattributes
+*.gitattributes linguist-detectable=true
+*.gitattributes linguist-documentation=false
+
+# Visual studio
+*.csproj     text merge=union eol=crlf
+*.sln        text merge=union eol=crlf
+*.SLN        text merge=union eol=crlf
+*.manifest   text eol=crlf
+*.vcxproj    text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.user       text eol=crlf
+*.natvis     text eol=crlf
+*.rsp        text eol=crlf
+*.vcproj     text eol=crlf
+*.user.props text eol=crlf
+*.dsp        text eol=crlf
+*.dsw        text eol=crlf
+
+# Microsoft
+*.docx   binary diff=astextplain
+*.DOCX   binary diff=astextplain
+*.pptx   binary diff=astextplain
+*.PPTX   binary diff=astextplain
+*.xls    binary diff=astextplain
+*.XLS    binary diff=astextplain
+
+# absolute paths are ok, as are globs
+# /**/postinst* text eol=lf
+
+# paths that don't start with / are treated relative to the .gitattributes folder
+# relative/path/*.txt text eol=lf
+
+# Sources
+*.c     text diff=cpp eol=lf
+*.cc    text diff=cpp eol=lf
+*.cxx   text diff=cpp eol=lf
+*.cpp   text diff=cpp eol=lf
+*.cpi   text diff=cpp eol=lf
+*.c++   text diff=cpp eol=lf
+*.hpp   text diff=cpp eol=lf
+*.h     text diff=cpp eol=lf
+*.h++   text diff=cpp eol=lf
+*.hh    text diff=cpp eol=lf
+*.cs    text diff=csharp eol=lf
+*.java  text diff=java eol=lf
+*.js    text eol=lf
+*.csx   text eol=lf
+*.m     text eol=lf
+*.mm    text eol=lf
+*.frag  text eol=lf
+*.vert  text eol=lf
+*.mkb   text eol=lf
+*.icf   text eol=lf
+
+# HTML
+*.html   text diff=html eol=lf
+*.css    text eol=lf
+
+# DB files
+*.sql    text eol=lf
+
+# Object files
+*.slo   binary
+*.lo    binary
+*.o     binary
+*.obj   binary
+
+# Preconfigured headers
+*.gch   binary
+*.pch   binary
+
+# Dyn libs
+*.so    binary
+*.dylib binary
+*.dll   binary
+
+# Static libs
+*.lai   binary
+*.la    binary
+*.a     binary
+*.lib   binary
+
+# Executables
+*.exe   binary
+*.out   binary
+*.app   binary
+
+# Documents
+*.md       text diff=markdown eol=lf
+*.mdx      text diff=markdown eol=lf
+*.tex      text diff=tex eol=lf
+*.adoc     text eol=lf
+*.textile  text eol=lf
+*.mustache text eol=lf
+*.csv      text eol=lf
+*.tab      text eol=lf
+*.tsv      text eol=lf
+*.txt      text eol=lf
+
+# rc?
+*.rc       text eol=lf
+
+# Graphics
+*.svg      text eol=lf
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.tif      binary
+*.tiff     binary
+*.ico      binary
+*.eps      binary
+*.ttf      binary
+
+Makefile     text eol=lf
+*.pbxproj    text eol=lf
+*.storyboard text eol=lf
+*.plist      text eol=lf
+
+# Scripts
+*.bash     text eol=lf
+*.fish     text eol=lf
+*.ksh      text eol=lf
+*.sh       text eol=lf
+*.zsh      text eol=lf
+# Windows
+*.bat      text eol=crlf
+*.cmd      text eol=crlf
+*.ps1      text eol=crlf
+*.BAT      text eol=crlf
+*.CMD      text eol=crlf
+*.PS1      text eol=crlf
+
+# Config
+*.conf     text eol=lf
+
+# Serialization
+*.json     text eol=lf linguist-language=JavaScript
+*.json.example text eol=lf linguist-language=JavaScript
+*.toml     text eol=lf
+*.xml      text eol=lf
+*.yaml     text eol=lf
+*.yml      text eol=lf
+
+# Archive
+*.7z       binary
+*.bz       binary
+*.bz2      binary
+*.bzip2    binary
+*.gz       binary
+*.lz       binary
+*.lzma     binary
+*.rar      binary
+*.tar      binary
+*.taz      binary
+*.tbz      binary
+*.tbz2     binary
+*.tgz      binary
+*.tlz      binary
+*.txz      binary
+*.xz       binary
+*.Z        binary
+*.zip      binary
+*.zst      binary
+*.bin      binary
+*.jar      binary
+
+# Preserv EOL
+*.patch    -text
+
+# Go
+# ============
+*.go        text diff=golang eol=lf
+
+# Python
+# ============
+*.pxd    text diff=python eol=lf
+*.py     text diff=python eol=lf
+*.py3    text diff=python eol=lf
+*.pyw    text diff=python eol=lf
+*.pyx    text diff=python eol=lf
+*.pyz    text diff=python eol=lf
+*.pyi    text diff=python eol=lf
+
+# Binaries
+# ============
+*.db     binary
+*.p      binary
+*.pkl    binary
+*.pickle binary
+*.pyc    binary export-ignore
+*.pyo    binary export-ignore
+*.pyd    binary
+
+# Jupyter notebook
+*.ipynb  text eol=lf
+
+# Common document formats
+*.bibtex   text diff=bibtex
+*.doc      binary
+*.DOC      binary
+*.docx     binary
+*.DOCX     binary
+*.dot      binary
+*.DOT      binary
+*.pdf      binary
+*.PDF      binary
+*.rtf      binary
+*.RTF      binary
+*.epub     binary
+
+# Certificates
+.der       binary
+.crt    text eol=lf
+.csr    text eol=lf
+.key    text eol=lf
+.pem    text eol=lf
