@@ -1,14 +1,14 @@
 # CLI Setup
 
-Configura el entorno CLI en **Linux**, **macOS**, **WSL2** y **Windows**. Estaba ya cansado de perder un par de horas cuando tengo que configurarme uno de esos sistemas y añadir mis tipicas herramientas CLI, ejecutables, scripts y fonts.
+Configura el entorno de línea de comandos (CLI) en **Linux**, **macOS**, **WSL2** o **Windows**. En vez de perder una hora configurando tu sistema (sobre todo en sistemas que tienes que instalar nuevos). Este script añade las herramientas CLI, ejecutables, scripts y fonts, que utilizo en mi día a día.
 
-**⚡ Linux, macOS y WSL2** (lee los "Requisitos"):
+**⚡ Linux, macOS y WSL2** (lee los "[requisitos](#-requisitos-linux-macos-y-wsl2)"):
 
 ```console
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
 ```
 
-> Alternativa wget: `bash <(wget -qO- https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)`
+> *wget*: `bash <(wget -qO- https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)`
 
 *Post instalación*:
 
@@ -16,7 +16,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/boo
 - Comprueba si los iconos salen bien (i.e. `lsd --version`.
 - Si no funciona, ejecuta `nerd-setup.sh`.
 
-**⚡ Windows 10/11** (lee los "Requisitos"):
+**⚡ Windows 10/11** (lee los "[requisitos para windows](#-requisitos-linux-macos-y-wsl2)"):
 
 ```console
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
@@ -38,7 +38,7 @@ Enfoque modular, multiplataforma e idempotente.
 
 - Instala herramientas como: git, curl, wget, nano, htop, tmux, fzf, bat, fd-find, ripgrep, tree, jq, lsd, zoxide
 - Instala Oh-My-Posh, para cualquier Shell, dicen que es el mejor prompt.
-- Establece la variable LANG (por defecto a `s_ES.UTF-8`) en linux, macOS y WSL2
+- Establece la variable LANG (por defecto a `es_ES.UTF-8`) en linux, macOS y WSL2
 - Copia `.zshrc`, `.tmux.conf`, `.oh-my-posh`, ... ver el subdirectorio `dotfiles`.
 - Copia algunas herramientas de Git que tengo en el repositorio git-config-repos.
 - Crea unos cuantos scripts en ~/bin que uso con frecuencia: e, s, confcat
@@ -86,3 +86,14 @@ iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
 ## ToDo
 
 Añadir soporte a otras distribuciones y métodos de instalación en Linux.
+
+---
+
+## Screenshots
+
+![CMD en Windows](./assets/cli-cmd-00.png)
+![CLI en Windows](./assets/cli-linux-00.png)
+![CLI en Mac](./assets/cli-mac-00.png)
+![Varios en Windows](./assets/cli-win-00.png)
+![CLI en WSL](./assets/cli-wsl-00.png)
+![Htop en Windows](./assets/htop-win-00.png)
