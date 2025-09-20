@@ -14,15 +14,6 @@
 #
 
 # =============================================================================
-# CONFIGURACIÓN DE TECLAS Y COMPORTAMIENTO ESTILO UNIX
-# =============================================================================
-
-# Añadir Ctrl-D para emular el funcionamiento de Linux
-# Permite salir de PowerShell usando Ctrl+D como en terminales Unix/Linux
-# Esto mejora la experiencia para usuarios acostumbrados a sistemas Unix
-Set-PSReadlineKeyHandler -Key ctrl+d -Function ViExit
-
-# =============================================================================
 # PERSONALIZACIÓN DEL COMANDO 'rm' CON SOPORTE PARA OPCIONES UNIX
 # =============================================================================
 
@@ -332,6 +323,16 @@ if ($envVarsToSet.Count -gt 0) {
     Write-Host ""
 }
 
+
+# =============================================================================
+# CONFIGURACIÓN DE TECLAS Y COMPORTAMIENTO ESTILO UNIX
+# =============================================================================
+
+# Añadir Ctrl-D para emular el funcionamiento de Linux
+# Permite salir de PowerShell usando Ctrl+D como en terminales Unix/Linux
+# Esto mejora la experiencia para usuarios acostumbrados a sistemas Unix
+Set-PSReadlineKeyHandler -Key ctrl+d -Function ViExit
+
 # =============================================================================
 # NOTAS IMPORTANTES PARA EL USUARIO:
 # =============================================================================
@@ -349,4 +350,3 @@ if ($envVarsToSet.Count -gt 0) {
 # 5. Las variables de entorno se configuran una sola vez automáticamente
 # 6. Para personalizar aliases, modifica las funciones en este archivo
 # =============================================================================
-
