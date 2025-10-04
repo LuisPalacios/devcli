@@ -47,6 +47,10 @@
     {
       "linux": "lsd",
       "macos": "lsd"
+    },
+    {
+      "linux": "gping",
+      "macos": "gping"
     }
   ]
 }

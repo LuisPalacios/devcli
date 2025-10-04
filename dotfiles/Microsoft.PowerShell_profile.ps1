@@ -14,6 +14,32 @@
 #
 
 # =============================================================================
+# PERSONALIZACIÓN DEL COMANDO 'ping' PARA QUE SE PAREZCA AL DE LINUX
+# =============================================================================
+
+# Cambiar el alias interno de ping para que se comporte como el de Linux
+
+function ping {
+    # Verificar si el primer argumento es un parámetro (comienza con '-')
+    # Si se proporciona un parámetro (por ejemplo, 'ping -n 5'), asumimos que el usuario no quiere -t y llama al ping original.
+    if ($args[0] -notlike '-*') {
+        # La parte 'ip' es el objetivo (x.x.x.x)
+        $ip = $args[0]
+
+        # Obtener todos los demás argumentos (por ejemplo, si se añadió '-n 5')
+        $otrosArgumentos = $args | Select-Object -Skip 1
+
+        # Ejecutar el comando original de Windows ping.exe con -t, la IP y cualquier otro argumento
+        & ping.exe -t $ip $otrosArgumentos
+    }
+    else {
+        # Si el primer argumento es un parámetro, o si no se proporcionan argumentos,
+        # simplemente ejecutar el ping.exe original con todos los argumentos.
+        & ping.exe $args
+    }
+}
+
+# =============================================================================
 # PERSONALIZACIÓN DEL COMANDO 'rm' CON SOPORTE PARA OPCIONES UNIX
 # =============================================================================
 

@@ -18,6 +18,16 @@ if [[ $IS_ROOT == false ]]; then
   check_sudo_access
 fi
 
+# Preparar Ubuntu/Debian (Azlux's repo) para gping
+case "${OS_TYPE:-}" in
+  linux|wsl2)
+    echo 'deb [signed-by=/usr/share/keyrings/azlux.gpg] https://packages.azlux.fr/debian/ bookworm main' | sudo tee /etc/apt/sources.list.d/azlux.list
+    sudo apt install gpg
+    curl -s https://azlux.fr/repo.gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/azlux.gpg > /dev/null
+    sudo apt update
+    ;;
+esac
+
 # Archivo de configuración
 PACKAGES_CONFIG="$(dirname "${BASH_SOURCE[0]}")/02-packages.json"
 

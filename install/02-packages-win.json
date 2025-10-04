@@ -31,6 +31,10 @@
     {
       "name": "clink",
       "description": "complemento para CMD"
+    },
+    {
+      "name": "gping",
+      "description": "ping con graficas"
     }
   ]
 }
