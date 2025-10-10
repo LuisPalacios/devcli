@@ -13,6 +13,27 @@
 # C:\Users\<usuario>\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
 #
 
+# Para poder detectar si estoy en un terminal normal
+# ---------------------------------------------------------------
+function Test-IsInteractiveTerminal {
+    try {
+        # Real console host?
+        if ($Host.Name -ne 'ConsoleHost') { return $false }
+
+        # Not redirected?
+        if ([Console]::IsOutputRedirected -or [Console]::IsInputRedirected -or [Console]::IsErrorRedirected) {
+            return $false
+        }
+
+        # VT/ANSI supported? (PowerShell 7+ exposes $PSStyle)
+        # If rendering is forced to PlainText, assume no VT.
+        if ($PSStyle -and $PSStyle.OutputRendering -eq 'PlainText') { return $false }
+
+        return $true
+    } catch { return $false }
+}
+$IsTTY = Test-IsInteractiveTerminal
+
 # =============================================================================
 # PERSONALIZACIÓN DEL COMANDO 'ping' PARA QUE SE PAREZCA AL DE LINUX
 # =============================================================================
@@ -196,8 +217,10 @@ catch {
 #   de directorio en cada render del prompt.
 # - Requiere versión zoxide >= 0.9
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Write-Host "Inicializando zoxide..." -ForegroundColor Green
-    Invoke-Expression (& { (zoxide init powershell --hook prompt | Out-String) })
+    if ($IsTTY) {
+        Write-Host "Inicializando zoxide..." -ForegroundColor Green
+        Invoke-Expression (& { (zoxide init powershell --hook prompt | Out-String) })
+    }
 }
 
 # -----------------------------------------------------------------------------
@@ -207,8 +230,10 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
 # - Sobrescribe la función global `prompt`, lo cual rompe el hook de zoxide
 #   si no se corrige a continuación
 if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
+    if ($IsTTY) {
     Write-Host "Inicializando oh-my-posh..." -ForegroundColor Cyan
     oh-my-posh init pwsh --config ~/.oh-my-posh.json | Invoke-Expression
+    }
 }
 
 # -----------------------------------------------------------------------------
@@ -218,7 +243,7 @@ if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
 # - Si es distinto, redefine `prompt` para llamar a ambos:
 #   1. El prompt de oh-my-posh
 #   2. El hook `__zoxide_hook` para registrar el directorio actual
-if ($global:__zoxide_hooked -eq 1 -and $function:prompt -ne $global:__zoxide_prompt_old) {
+if ($IsTTY -and $global:__zoxide_hooked -eq 1 -and $function:prompt -ne $global:__zoxide_prompt_old) {
     $ompPrompt = $function:prompt
     function global:prompt {
         & $ompPrompt
@@ -268,14 +293,29 @@ function cd {
 # ListView: muestra sugerencias en lista desplegable
 # Windows: modo de edición compatible con Windows (vs Emacs/Vi)
 
+# Configurar las predictions solo si tengo consola VT-capable y no redirigida
 # Habilitar predicción basada en historial y plugins
-Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-
 # Mostrar predicciones en vista de lista (más fácil de navegar)
-Set-PSReadLineOption -PredictionViewStyle ListView
-
 # Usar modo de edición Windows (familiar para usuarios de Windows)
-Set-PSReadLineOption -EditMode Windows
+if ($IsTTY -and (Get-Module -ListAvailable -Name PSReadLine)) {
+    try {
+        # La mejor UX en un terminal adecuado
+        Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+        Set-PSReadLineOption -PredictionViewStyle ListView
+        Set-PSReadLineOption -EditMode Windows
+    } catch {
+        # Fallback (raro): mantener la shell utilizable incluso si algo se escapa
+        Set-PSReadLineOption -PredictionSource History
+        Set-PSReadLineOption -PredictionViewStyle InlineView
+    }
+} else {
+    # No-TTY / redirigido: evitar errores — configuraciones mínimas y seguras
+    if (Get-Module -ListAvailable -Name PSReadLine) {
+        Set-PSReadLineOption -PredictionSource History
+        Set-PSReadLineOption -PredictionViewStyle InlineView
+        Set-PSReadLineOption -EditMode Windows
+    }
+}
 
 # =============================================================================
 # CONFIGURACIÓN AUTOMÁTICA DE VARIABLES DE ENTORNO CRÍTICAS
