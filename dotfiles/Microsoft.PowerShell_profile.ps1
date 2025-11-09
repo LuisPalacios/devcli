@@ -197,6 +197,11 @@ catch {
 }
 
 # =============================================================================
+# Kubernetes
+# =============================================================================
+$env:KUBECONFIG = Join-Path $HOME "kubeconfig"
+
+# =============================================================================
 # INICIALIZACIÓN DE ZOXIDE Y OH-MY-POSH (COMPATIBILIDAD TOTAL)
 # =============================================================================
 # Este bloque configura correctamente zoxide (navegación inteligente) junto
