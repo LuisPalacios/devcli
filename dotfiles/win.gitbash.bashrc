@@ -239,6 +239,13 @@ if [ -x "$OMP_PATH" ]; then
 fi
 
 # =============================================================================
+# CONFIGURACIÓN PARA KUBERNETES
+# =============================================================================
+
+# Establecer la variable de entorno KUBECONFIG para Kubernetes
+export KUBECONFIG="${HOME}/kubeconfig"
+
+# =============================================================================
 # NOTAS IMPORTANTES PARA EL USUARIO:
 # =============================================================================
 # 1. Este archivo se copia automáticamente a ~/.bashrc durante la instalación
