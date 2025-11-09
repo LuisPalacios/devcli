@@ -394,18 +394,18 @@ else
       eval "$(/opt/homebrew/bin/brew shellenv)"
 
       # PATH ordenado y optimizado para desarrollo en macOS
+      #  "/usr/local/bin"                         # Binarios instalados manualmente
+      #  "/usr/local/go/bin"                      # Go language binaries
+      #  "/opt/homebrew/opt/ruby/bin"             # Ruby moderno via Homebrew
+      #  "${HOME}/.gems/bin"                      # Gemas de Ruby del usuario
       path=(
+        $path                                    # PATH heredado del sistema
         .                                        # Directorio actual para scripts locales
         "${HOME}/bin"                            # Binarios personales
         "${HOME}/Nextcloud/priv/bin"             # Scripts privados sincronizados
-        "/usr/local/bin"                         # Binarios instalados manualmente
         "/usr/local/sbin"                        # Binarios de administración local
-        "/usr/local/go/bin"                      # Go language binaries
         "${HOME}/dev-tools/kombine.osx"          # Herramientas de desarrollo específicas
-        "/opt/homebrew/opt/ruby/bin"             # Ruby moderno via Homebrew
-        "${HOME}/.gems/bin"                      # Gemas de Ruby del usuario
         "/opt/homebrew/opt/llvm@17/bin"          # LLVM/Clang 17 moderno
-        $path                                    # PATH heredado del sistema
       )
 
       # Reflejar PATH en el entorno gráfico para aplicaciones GUI
