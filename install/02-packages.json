@@ -51,6 +51,10 @@
     {
       "linux": "gping",
       "macos": "gping"
+    },
+    {
+      "linux": "kubectl",
+      "macos": "kubectl"
     }
   ]
 }

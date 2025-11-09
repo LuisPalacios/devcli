@@ -35,6 +35,10 @@
     {
       "name": "gping",
       "description": "ping con graficas"
+    },
+    {
+      "name": "kubectl",
+      "description": "kubectl"
     }
   ]
 }
