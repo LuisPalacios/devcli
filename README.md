@@ -1,6 +1,12 @@
 # CLI Setup
 
-Configura el entorno de línea de comandos (CLI) en **Linux**, **macOS**, **WSL2** o **Windows**. En vez de perder una hora configurando tu sistema (sobre todo en sistemas que tienes que instalar nuevos). Este script añade las herramientas CLI, ejecutables, scripts y fonts, que utilizo en mi día a día.
+Me he pasado años instalando sistemas operativos, una y otra vez. Cada vez acabo echando un par de horas para sacarles brillo y dejar el entorno que me gusta. Un mismo CLI (Command Line Interface), herramientas y todo bien configurado.
+
+El proposito de este proyecto es automatizar al máximo ese segundo paso, reducir tiempo y poder tener la misma UX en **PowerShell, CMD** o las Shell de **WSL2, macOS y Linux**, perfiles perfectamente unificados, mismo prompt, casi los mismos comandos disponibles. Que funcione igual si usas PowerShell, Terminal, Alacritty, VSCode o cualquier entorno moderno. A medida que descubra nuevas utilidades CLI que cumplan con este enfoque multiplataforma y sin dependencias pesadas, las iré incorporando.
+
+Contiene las herramientas que yo uso, siempre puedes hacerte un fork y adaptarlo a lo que te guste.
+
+El repositorio configura el entorno de línea de comandos (CLI) en **Linux**, **macOS**, **WSL2** o **Windows**. En vez de perder una hora configurando, este script añade las herramientas CLI, algunos ejecutables, scripts y fonts, que utilizo en mi día a día.
 
 **⚡ Linux, macOS y WSL2** (lee los "[requisitos](#-requisitos-linux-macos-y-wsl2)"):
 
@@ -28,7 +34,7 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 - Verifica Nerd Fonts: `nerd-verify.ps1`
 - Si no funciona, ejecuta: `nerd-setup.ps1`
 
-## 📋 Introducción
+## 📋 TLDR
 
 Un solo comando descarga este repositorio, instala scripts, ejecutables y parametriza el CLI.
 
