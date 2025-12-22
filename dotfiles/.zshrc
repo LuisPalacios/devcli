@@ -329,6 +329,7 @@ if [ "$IS_WSL2" = true ] ; then
     "/mnt/c/Windows/System32/WindowsPowerShell/v1.0"  # PowerShell 5.1
     "/mnt/c/Program Files/PowerShell/7"               # PowerShell 7
     "/usr/local/go/bin"                               # Go language binaries
+    "/mnt/c/Users/${SOY}/go/bin"                      # Go language binaries del usuario
     "/usr/local/sbin"                                 # Binarios de administración local
     "/usr/local/bin"                                  # Binarios locales
     "/usr/sbin"                                       # Binarios de administración del sistema
@@ -494,6 +495,7 @@ else
           "/usr/local/bin"                # Binarios instalados manualmente
           "/usr/local/sbin"               # Binarios de administración local
           "/usr/local/go/bin"             # Go language binaries
+          "${HOME}/go/bin"                # Go language binaries del usuario
           $path                           # PATH heredado del sistema
         )
 
