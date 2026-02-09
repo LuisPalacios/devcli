@@ -49,6 +49,10 @@
       "macos": "lsd"
     },
     {
+      "linux": "pnpm",
+      "macos": "pnpm"
+    },
+    {
       "linux": "uv",
       "macos": "uv"
     },

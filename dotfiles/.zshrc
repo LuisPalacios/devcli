@@ -496,6 +496,7 @@ else
           .                               # Directorio actual
           "${HOME}/bin"                   # Binarios personales
           "${HOME}/.local/bin"            # Otros binarios personales
+          "${HOME}/.local/share/pnpm"     # PNPM
           "${HOME}/Nextcloud/priv/bin"    # Scripts privados sincronizados
           "/usr/local/bin"                # Binarios instalados manualmente
           "/usr/local/sbin"               # Binarios de administración local

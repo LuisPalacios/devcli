@@ -59,6 +59,32 @@ package_installed_brew() {
   brew list --formula "$1" &>/dev/null
 }
 
+
+# Función para instalar pnpm
+# fuente: https://pnpm.io/installation
+install_pnpm() {
+
+  # Verificar si está instalado
+  if command_exists pnpm; then
+    return 0
+  fi
+
+  local bin_dir="${HOME}/.local/share/pnpm"
+
+  # Ejecutar la instalación
+  curl -fsSL https://get.pnpm.io/install.sh | sh - >/dev/null 2>&1
+
+  # Verificar
+  export PATH="$bin_dir:$PATH"
+  if ! command_exists pnpm; then
+    warning "pnpm no se instaló correctamente"
+    return 1
+  fi
+
+  log "pnpm instalado correctamente en $bin_dir"
+  log "Asegúrate de que $bin_dir esté en tu PATH"
+}
+
 # Función para instalar uv 
 # fuente: https://docs.astral.sh/uv/getting-started/installation
 install_uv() {
@@ -76,7 +102,7 @@ install_uv() {
   # Verificar
   export PATH="$bin_dir:$PATH"
   if ! command_exists uv; then
-    warning "mkcert no se instaló correctamente"
+    warning "uv no se instaló correctamente"
     return 1
   fi
 
@@ -307,7 +333,9 @@ install_package() {
       fi
 
       # Casos especiales para paquetes no disponibles en repositorios estándar
-      if [[ "$pkg" == "uv" ]]; then
+      if [[ "$pkg" == "pnpm" ]]; then
+        install_pnpm
+      elif [[ "$pkg" == "uv" ]]; then
         install_uv
       elif [[ "$pkg" == "lsd" ]]; then
         install_lsd
