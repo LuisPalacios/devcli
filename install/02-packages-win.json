@@ -5,6 +5,10 @@
       "description": "htop equivalente"
     },
     {
+      "name": "main/uv",
+      "description": "Gestor de paquetes y proyectos Python"
+    },
+    {
       "name": "lsd",
       "description": "ls con iconos y colores"
     },
