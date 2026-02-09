@@ -71,7 +71,7 @@ install_uv() {
   local bin_dir="$HOME/.local/bin"
 
   # Ejecutar la instalación
-  curl -LsSf https://astral.sh/uv/install.sh | sh
+  curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1
 
   # Verificar
   export PATH="$bin_dir:$PATH"
@@ -80,7 +80,7 @@ install_uv() {
     return 1
   fi
 
-  log "uv instalado correctamente en "
+  log "uv instalado correctamente en $bin_dir"
   log "Asegúrate de que $bin_dir esté en tu PATH"
 }
 
