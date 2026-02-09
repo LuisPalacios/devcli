@@ -59,6 +59,30 @@ package_installed_brew() {
   brew list --formula "$1" &>/dev/null
 }
 
+# Función para instalar uv 
+# fuente: https://docs.astral.sh/uv/getting-started/installation
+install_uv() {
+  # Verificar si está instalado
+  if command_exists uv; then
+    #log "uv ya está instalado, omitiendo instalación"
+    return 0
+  fi
+
+  local bin_dir="$HOME/.local/bin"
+
+  # Ejecutar la instalación
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+
+  # Verificar
+  export PATH="$bin_dir:$PATH"
+  if ! command_exists uv; then
+    warning "mkcert no se instaló correctamente"
+    return 1
+  fi
+
+  log "uv instalado correctamente en "
+  log "Asegúrate de que $bin_dir esté en tu PATH"
+}
 
 # Función para instalar lsd desde GitHub releases
 install_lsd() {
@@ -283,6 +307,8 @@ install_package() {
       fi
 
       # Casos especiales para paquetes no disponibles en repositorios estándar
+      if [[ "$pkg" == "uv" ]]; then
+        install_uv
       if [[ "$pkg" == "lsd" ]]; then
         install_lsd
       elif [[ "$pkg" == "mkcert" ]]; then
