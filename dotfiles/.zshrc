@@ -395,15 +395,14 @@ else
       eval "$(/opt/homebrew/bin/brew shellenv)"
 
       # PATH ordenado y optimizado para desarrollo en macOS
-      #  "/usr/local/bin"                         # Binarios instalados manualmente
-      #  "/usr/local/go/bin"                      # Go language binaries
-      #  "/opt/homebrew/opt/ruby/bin"             # Ruby moderno via Homebrew
-      #  "${HOME}/.gems/bin"                      # Gemas de Ruby del usuario
       path=(
         $path                                    # PATH heredado del sistema
         .                                        # Directorio actual para scripts locales
         "${HOME}/bin"                            # Binarios personales
+        "${HOME}/.local/bin"                     # Otros binarios personales
         "${HOME}/Nextcloud/priv/bin"             # Scripts privados sincronizados
+        "${HOME}/.lmstudio/bin"                  # Si instalo LM Studio CLI
+        "${HOME}/.antigravity/antigravity/bin"   # Si instalo Antigravity
         "/usr/local/sbin"                        # Binarios de administración local
         "${HOME}/dev-tools/kombine.osx"          # Herramientas de desarrollo específicas
         "/opt/homebrew/opt/llvm@17/bin"          # LLVM/Clang 17 moderno
@@ -458,6 +457,11 @@ else
       # -----------------------------------------------------------------------
       # Instalar gemas de Ruby en directorio del usuario (no requiere sudo)
       export GEM_HOME=~/.gems
+
+      # Si jugamos con ollama y claude
+      #export ANTHROPIC_AUTH_TOKEN=ollama
+      #export ANTHROPIC_API_KEY=""
+      #export ANTHROPIC_BASE_URL=http://localhost:11434
 
       ;;
 

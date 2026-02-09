@@ -49,6 +49,10 @@
       "macos": "lsd"
     },
     {
+      "linux": "uv",
+      "macos": "uv"
+    },
+    {
       "linux": "gping",
       "macos": "gping"
     },
