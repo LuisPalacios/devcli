@@ -229,6 +229,27 @@ function Test-Prerequisites {
             Write-Error "❌ Error instalando git: $_" -ErrorAction Stop
         }
     }
+
+    # Verificar e instalar pnpm - gestor de paquetes NodeJS.
+    if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
+        Write-Log "Instalando pnpm con winget..."
+        try {
+            winget install pnpm.pnpm --silent --accept-package-agreements --accept-source-agreements
+            # Refrescar PATH para que pnpm esté disponible
+            $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+
+            # Verificar instalación
+            if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
+                Write-Error "❌ No se pudo instalar pnpm automáticamente" -ErrorAction Stop
+            }
+            else {
+                Write-Log "✅ pnpm instalado correctamente" -ForegroundColor Green
+            }
+        }
+        catch {
+            Write-Error "❌ Error instalando pnpm: $_" -ErrorAction Stop
+        }
+    }
 }
 
 # Función principal
