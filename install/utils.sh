@@ -62,9 +62,9 @@ package_installed_brew() {
 # Función para instalar uv 
 # fuente: https://docs.astral.sh/uv/getting-started/installation
 install_uv() {
+
   # Verificar si está instalado
   if command_exists uv; then
-    #log "uv ya está instalado, omitiendo instalación"
     return 0
   fi
 
@@ -309,7 +309,7 @@ install_package() {
       # Casos especiales para paquetes no disponibles en repositorios estándar
       if [[ "$pkg" == "uv" ]]; then
         install_uv
-      if [[ "$pkg" == "lsd" ]]; then
+      elif [[ "$pkg" == "lsd" ]]; then
         install_lsd
       elif [[ "$pkg" == "mkcert" ]]; then
         install_mkcert
