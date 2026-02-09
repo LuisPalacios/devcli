@@ -484,6 +484,7 @@ else
         path=(
           .                               # Directorio actual
           "${HOME}/bin"                   # Binarios personales
+          "${HOME}/.local/bin"            # Otros binarios personales
           $path                           # PATH heredado del sistema
         )
 
