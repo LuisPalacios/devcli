@@ -405,7 +405,7 @@ else
         "${HOME}/.antigravity/antigravity/bin"   # Si instalo Antigravity
         "/usr/local/sbin"                        # Binarios de administración local
         "${HOME}/dev-tools/kombine.osx"          # Herramientas de desarrollo específicas
-        "/opt/homebrew/opt/llvm@17/bin"          # LLVM/Clang 17 moderno
+        "/opt/homebrew/opt/llvm/bin"             # LLVM/Clang moderno
       )
 
       # Reflejar PATH en el entorno gráfico para aplicaciones GUI
@@ -414,12 +414,12 @@ else
       # -----------------------------------------------------------------------
       # CONFIGURACIÓN DE LLVM/CLANG 17 PARA DESARROLLO C/C++
       # -----------------------------------------------------------------------
-      export CPLUS_INCLUDE_PATH="/opt/homebrew/opt/llvm@17/include"
-      export LIBRARY_PATH="/opt/homebrew/opt/llvm@17/lib"
-      export CC="/opt/homebrew/opt/llvm@17/bin/clang"
-      export CXX="/opt/homebrew/opt/llvm@17/bin/clang++"
-      export LDFLAGS="-L/opt/homebrew/opt/llvm@17/lib"
-      export CPPFLAGS="-I/opt/homebrew/opt/llvm@17/include"
+      export CPLUS_INCLUDE_PATH="/opt/homebrew/opt/llvm/include"
+      export LIBRARY_PATH="/opt/homebrew/opt/llvm/lib"
+      export CC="/opt/homebrew/opt/llvm/bin/clang"
+      export CXX="/opt/homebrew/opt/llvm/bin/clang++"
+      export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
+      export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
 
       # -----------------------------------------------------------------------
       # HERRAMIENTAS DE DESARROLLO
