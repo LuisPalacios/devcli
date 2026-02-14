@@ -502,6 +502,7 @@ else
           "/usr/local/sbin"               # Binarios de administración local
           "/usr/local/go/bin"             # Go language binaries
           "${HOME}/go/bin"                # Go language binaries del usuario
+          "/opt/llvm/bin"                 # clang llvm
           $path                           # PATH heredado del sistema
         )
 
