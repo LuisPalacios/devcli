@@ -396,6 +396,7 @@ else
 
       # PATH ordenado y optimizado para desarrollo en macOS
       path=(
+        "/opt/homebrew/opt/llvm/bin"             # LLVM/Clang moderno
         $path                                    # PATH heredado del sistema
         .                                        # Directorio actual para scripts locales
         "${HOME}/bin"                            # Binarios personales
@@ -405,7 +406,6 @@ else
         "${HOME}/.antigravity/antigravity/bin"   # Si instalo Antigravity
         "/usr/local/sbin"                        # Binarios de administración local
         "${HOME}/dev-tools/kombine.osx"          # Herramientas de desarrollo específicas
-        "/opt/homebrew/opt/llvm/bin"             # LLVM/Clang moderno
       )
 
       # Reflejar PATH en el entorno gráfico para aplicaciones GUI
