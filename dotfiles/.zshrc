@@ -317,6 +317,7 @@ if [ "$IS_WSL2" = true ] ; then
   path=(
     .                                    # Directorio actual (útil para desarrollo)
     "${HOME}/bin"                        # Binarios personales del usuario
+    "/mnt/c/Users/${SOY}/bin"                         # Binarios personales del usuario
     "/mnt/c/Users/${SOY}/Nextcloud/priv/bin"           # Scripts privados en Windows
     "/mnt/c/Users/${SOY}/Nextcloud/priv/bin/win"       # Scripts específicos de Windows
     "/mnt/c/Users/${SOY}/dev-tools/kombine.win"        # Herramientas de desarrollo
