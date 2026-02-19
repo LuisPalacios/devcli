@@ -112,6 +112,20 @@ function ls {
 }
 
 # =============================================================================
+# AÑADO 'gst' para hacer "git status"
+# =============================================================================
+
+# Eliminar el alias si existe
+if (Get-Alias gst -ErrorAction SilentlyContinue) {
+    Remove-Item Alias:gst -Force
+}
+
+# Función ls que usa lsd con directorios agrupados al principio
+function gst {
+    gst status @args
+}
+
+# =============================================================================
 # ELIMINACIÓN DE ALIASES CONFLICTIVOS
 # =============================================================================
 

@@ -24,4 +24,7 @@ doskey cat=bat $*
 doskey find=fd $*
 doskey grep=rg $*
 
+REM Alias para git status
+doskey gst=git --status
+
 echo Aliases CMD cargados correctamente.
