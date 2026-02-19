@@ -43,6 +43,10 @@
     {
       "name": "kubectl",
       "description": "kubectl"
+    },
+    {
+      "name": "quicklook",
+      "description": "Instant File Previews, Just Press Space"
     }
   ]
 }
