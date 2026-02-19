@@ -122,7 +122,7 @@ if (Get-Alias gst -ErrorAction SilentlyContinue) {
 
 # Función ls que usa lsd con directorios agrupados al principio
 function gst {
-    gst status @args
+    git status @args
 }
 
 # =============================================================================
