@@ -108,13 +108,15 @@ function parametriza_zsh_comun() {
   export LSCOLORS='GxExDxDxCxDxDxFxFxexEx'
 
   # ---------------------------------------------------------------------------
-  # CONFIGURACIÓN DE ALIAS PARA COMANDOS DE LISTADO
+  # CONFIGURACIÓN DE ALIAS COMUNES
   # ---------------------------------------------------------------------------
 
   # Usar LSD (LSDeluxe) como reemplazo moderno de ls
   # LSD proporciona iconos, colores mejorados y mejor formato
   # Funciona en todos los sistemas operativos
   alias ls='lsd'
+  # Git status (nota: en WSL se sobreescribe)
+  alias gst='git status'
 
   # ---------------------------------------------------------------------------
   # CONFIGURACIÓN DE LOCALIZACIÓN (IDIOMA Y REGIÓN)
@@ -353,6 +355,7 @@ if [ "$IS_WSL2" = true ] ; then
   # Aliases específicos para WSL2
   alias c="cd /mnt/c/Users/${SOY}"       # Acceso rápido al directorio de usuario Windows
   alias git="git.exe"                    # Usar Git for Windows desde WSL2 para mejor integración
+  alias gst="git.exe status"             # Mostrar git status
 
 # =============================================================================
 # CONFIGURACIÓN PARA MACOS Y LINUX NATIVOS
