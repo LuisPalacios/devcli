@@ -159,7 +159,7 @@ winget install Microsoft.WindowsTerminal
 # Scoop (modo normal)
 irm get.scoop.sh | iex
 
-# Scoop (modo administrador, si fuera necesario)
+# Scoop (modo administrador, si el comando anterior te falló)
 iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
 ```
 
