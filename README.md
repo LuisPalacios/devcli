@@ -8,8 +8,6 @@ El propósito de este proyecto es automatizarlo al máximo, reducir tiempo y pod
 
 A medida que descubra nuevas utilidades que cumplan con este enfoque multiplataforma y sin dependencias pesadas, las iré incorporando.
 
-> Importante: Este repo lo hice para todos pero contiene las herramientas que yo uso. Te recomiendo que si quieres adaptarlo te hagas un fork.
-
 **Linux, macOS y WSL2** (lee los [requisitos](#-requisitos-linux-macos-y-wsl2)):
 
 ```console
