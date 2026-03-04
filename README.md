@@ -24,6 +24,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/boo
 
 **⚡ Windows 10/11** (lee los "[requisitos para windows](#-requisitos-linux-macos-y-wsl2)"):
 
+Abre un Terminal con **PowerShell 7** y ejecuta:
+
 ```console
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
 ```
