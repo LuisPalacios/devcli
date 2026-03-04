@@ -4,7 +4,9 @@
 
 Me he pasado años instalando sistemas operativos, una y otra vez. Cada vez acabo echando un par de horas para sacarles brillo y dejar el entorno que me gusta. Un mismo CLI (Command Line Interface), herramientas y todo bien configurado.
 
-El propósito de este proyecto es automatizar al máximo ese segundo paso, reducir tiempo y poder tener la misma UX en **PowerShell, CMD** o las Shell de **WSL2, macOS y Linux**, perfiles perfectamente unificados, mismo prompt, casi los mismos comandos disponibles. Que funcione igual si usas PowerShell, Terminal, Alacritty, VSCode o cualquier entorno moderno. A medida que descubra nuevas utilidades CLI que cumplan con este enfoque multiplataforma y sin dependencias pesadas, las iré incorporando.
+El propósito de este proyecto es automatizarlo al máximo, reducir tiempo y poder tener casi el mismo interfaz y comandos en **PowerShell, CMD** y las shells **WSL2, macOS y Linux**.
+
+Que de igual si estoy en PowerShell, Alacritty, VSCode, iTerm, SSH. A medida que descubra nuevas utilidades que cumplan con este enfoque multiplataforma y sin dependencias pesadas, las iré incorporando.
 
 Contiene las herramientas que yo uso, siempre puedes hacerte un fork y adaptarlo a lo que te guste.
 
@@ -31,7 +33,9 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 > & "$env:TEMP\devcli-bootstrap.ps1"
 > ```
 
-### Perfiles de instalación
+<br/>
+
+## Perfiles de instalación
 
 Puedes elegir qué instalar con `--profile` (bash) o `-Profile` (PowerShell):
 
@@ -57,6 +61,8 @@ iex "& {$(irm https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstr
 - Verifica Nerd Fonts: `nerd-verify.sh` (Linux/macOS/WSL2) o `nerd-verify.ps1` (Windows).
 - Si los iconos no salen bien (prueba con `lsd`), ejecuta `nerd-setup.sh` o `nerd-setup.ps1`.
 
+<br/>
+
 ## Antes de ejecutar nada, lee esto
 
 Este proyecto instala software, modifica archivos de configuración en tu HOME y cambia la shell por defecto. **Úsalo bajo tu propia responsabilidad.** Yo lo uso a diario en mis máquinas, pero tu entorno es diferente al mío.
@@ -76,17 +82,52 @@ Las herramientas que se instalan y sus métodos están declarados en [`install/t
 
 > Si algo no te conviene, haz un fork y quita lo que no quieras. Es la gracia de que sea modular.
 
+<br/>
+
 ## 📋 Qué hace
 
 Enfoque modular, multiplataforma e idempotente. Un solo comando descarga el repositorio, instala las herramientas y configura el entorno.
 
-- Instala herramientas CLI: git, curl, wget, nano, htop, tmux, fzf, bat, fd-find, ripgrep, tree, jq, lsd, zoxide.
-- Instala Oh-My-Posh para cualquier shell.
-- Establece la variable LANG (por defecto `es_ES.UTF-8`) en Linux, macOS y WSL2.
-- Copia `.zshrc`, `.tmux.conf`, `.oh-my-posh`, etc. (ver subdirectorio `dotfiles`).
-- Copia herramientas de Git desde el repositorio git-config-repos.
-- Crea scripts en `~/bin`: e, s, confcat.
-- Instala automáticamente **FiraCode Nerd Font** para soportar iconos en `lsd`.
+### Herramientas base (siempre se instalan)
+
+`git`, `curl`, `wget`, `nano`, `zsh`, `jq`, `oh-my-posh`
+
+### Herramientas CLI (según perfil)
+
+| Herramienta | Perfil | Descripción |
+|-------------|--------|-------------|
+| `htop` | core | Monitor de procesos (`bottom` en Windows) |
+| `tmux` | core | Multiplexor de terminal |
+| `fzf` | core | Búsqueda difusa |
+| `bat` | core | `cat` con resaltado de sintaxis |
+| `fd` | core | `find` moderno y rápido |
+| `ripgrep` | core | `grep` ultrarrápido |
+| `lsd` | core | `ls` con iconos y colores |
+| `tree` | core | Árbol de directorios |
+| `zoxide` | core | `cd` inteligente con historial |
+| `gping` | core | `ping` con gráfico en terminal |
+| `mkcert` | dev | Certificados SSL locales de desarrollo |
+| `nss` | dev | Soporte NSS para mkcert |
+| `pnpm` | dev | Gestor de paquetes Node.js |
+| `uv` | dev | Gestor de paquetes Python (Astral) |
+| `kubectl` | k8s | Cliente de Kubernetes |
+| `clink` | win | Autocompletado para CMD |
+| `quicklook` | win | Previsualización rápida de archivos |
+
+### Configuración
+
+- **Prompt**: [Oh My Posh](https://ohmyposh.dev/) con tema personalizado (`.oh-my-posh.json`), funciona en zsh, PowerShell, CMD y Git Bash.
+- **Shell zsh**: `.zshrc` con aliases, fzf, zoxide y autocompletado.
+- **tmux**: `.tmux.conf` con configuración personalizada.
+- **PowerShell**: perfil con aliases y oh-my-posh (`Microsoft.PowerShell_profile.ps1`).
+- **CMD**: aliases via clink (`cmd_aliases.cmd`, `oh-my-posh.lua`, `clink_settings`).
+- **Git Bash**: `.bashrc` con oh-my-posh para Windows.
+- **Git**: scripts de gestión de repos (`git-config-repos.sh`, `git-status-pull.sh/.ps1`).
+- **Locale**: establece LANG (por defecto `es_ES.UTF-8`) en Linux, macOS y WSL2.
+- **Fuentes**: instala automáticamente **FiraCode Nerd Font** para iconos en `lsd`.
+- **Scripts auxiliares** en `~/bin`: `e` (editor rápido), `s` (ssh wrapper), `confcat` (muestra config sin comentarios), `nerd-setup`/`nerd-verify` (gestión de Nerd Fonts).
+
+<br/>
 
 ## 🐧 Requisitos Linux, macOS y WSL2
 
@@ -105,6 +146,8 @@ Enfoque modular, multiplataforma e idempotente. Un solo comando descarga el repo
     ```
 
 - Puedes ejecutar el script como `root`, útil para entornos headless.
+
+<br/>
 
 ## 🪟 Requisitos Windows
 
