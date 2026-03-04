@@ -37,9 +37,7 @@ customize_zshrc() {
 
 # Función principal
 main() {
-  log "Iniciando instalación de dotfiles..."
-  log "Usuario: $CURRENT_USER | Idioma: $SETUP_LANG"
-  log "Sistema: $OS_TYPE"
+  log "Instalando dotfiles..."
 
   # Directorio de dotfiles
   local dotfiles_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../dotfiles" && pwd)"
@@ -78,8 +76,6 @@ main() {
 
   local installed_count=0
   local failed_count=0
-
-  log "Copiando dotfiles según configuración..."
 
   # Procesar cada dotfile del JSON
   while IFS= read -r line; do
@@ -133,7 +129,6 @@ main() {
 
       # Personalizar .zshrc si es necesario
       if [[ "$file" == ".zshrc" ]]; then
-        log "Personalizando .zshrc..."
         customize_zshrc "$dst"
       fi
     else

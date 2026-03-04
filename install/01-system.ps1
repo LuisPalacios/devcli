@@ -11,8 +11,7 @@ param()
 . "$PSScriptRoot\utils.ps1"
 
 Run-Phase {
-    Write-Log "Iniciando configuración base del sistema..."
-    Write-Log "Usuario: $Global:CURRENT_USER | Idioma: $Global:SETUP_LANG"
+    Write-Log "Instalando paquetes base del sistema..."
 
     # Crear directorio de binarios del usuario
     if (-not (New-DirectoryIfNotExists $Global:BIN_DIR)) {
@@ -39,7 +38,6 @@ Run-Phase {
     $installedCount = 0
     $failedCount = 0
 
-    Write-Log "Instalando paquetes base..."
     foreach ($tool in $systemTools) {
         if (Install-Tool -ToolName $tool.name -ToolsRegistry $allTools) {
             $installedCount++
@@ -69,8 +67,5 @@ Run-Phase {
     Write-Log "Configuración base completada ($installedCount herramientas del sistema)" "SUCCESS"
     if ($failedCount -gt 0) {
         Write-Log "$failedCount paquetes fallaron en la instalación" "WARNING"
-    }
-    if ($missingCritical.Count -eq 0) {
-        Write-Log "Todas las herramientas críticas están disponibles" "SUCCESS"
     }
 }

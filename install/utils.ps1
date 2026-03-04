@@ -523,6 +523,11 @@ function Invoke-Hook {
 
     $action = $Hook["action"]
 
+    # Skip hooks that declare platforms and don't include windows
+    if ($Hook["platforms"] -and $Hook["platforms"] -notcontains "windows") {
+        return
+    }
+
     switch ($action) {
         "alias" {
             $cmdName = $Hook["cmd_name"]
@@ -646,7 +651,6 @@ function Test-Dependencies {
 # Función para refrescar PATH de la sesión actual
 function Update-SessionPath {
     $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
-    Write-Log "PATH de sesión actualizado"
 }
 
 # Función para actualizar PATH del usuario
@@ -673,7 +677,7 @@ function Update-UserPath {
             $env:PATH += ";$NewPath"
         }
         else {
-            Write-Log "Directorio ya está en PATH: $NewPath"
+            # Already in PATH, nothing to do
         }
     }
     catch {

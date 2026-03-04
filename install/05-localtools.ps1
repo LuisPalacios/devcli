@@ -34,7 +34,7 @@ function Update-NerdFontVariables {
 }
 
 Run-Phase {
-    Write-Log "Iniciando instalación de herramientas locales..."
+    Write-Log "Instalando herramientas locales..."
 
     # Asegurar que existe el directorio de binarios
     if (-not (New-DirectoryIfNotExists $Global:BIN_DIR)) {
@@ -85,15 +85,8 @@ Run-Phase {
 
                 # Actualizar variables de Nerd Fonts en scripts específicos
                 if ($toolName -eq "nerd-setup.ps1" -or $toolName -eq "nerd-verify.ps1") {
-                    $updateResult = Update-NerdFontVariables $dst
-                    if ($updateResult) {
-                        Write-Log "Variables de Nerd Fonts actualizadas en $toolName"
-                    } else {
-                        Write-Log "Error actualizando variables de Nerd Fonts en $toolName" "WARNING"
-                    }
+                    Update-NerdFontVariables $dst | Out-Null
                 }
-
-                Write-Log "Copiado: $toolName"
                 $toolsInstalled++
             }
             catch {

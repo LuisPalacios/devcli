@@ -281,14 +281,10 @@ function main {
     Setup-InterruptionHandler
 
     try {
-        Write-Log "Iniciando configuración CLI para Windows..."
-        Write-Log "Directorio actual: $script:OriginalDirectory"
+        Write-Log "Iniciando configuración CLI para Windows (perfil: $Profile)..."
 
         $windowsInfo = Test-WindowsVersion
         $isAdmin = Test-Administrator
-
-        Write-Log "Windows 11: $($windowsInfo.IsWindows11) | Admin: $isAdmin | Usuario: $CURRENT_USER"
-        Write-Log "Idioma: $Lang | Perfil: $Profile"
 
         # Verificar prerequisitos
         Test-Prerequisites

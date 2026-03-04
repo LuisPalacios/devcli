@@ -12,8 +12,6 @@ param()
 
 # Función para configurar Windows Terminal con cmd_aliases.cmd
 function ConfigureWindowsTerminal {
-    Write-Log "Configurando Windows Terminal para usar cmd_aliases.cmd..."
-
     try {
         # Rutas posibles del settings.json de Windows Terminal
         $possiblePaths = @(
@@ -103,9 +101,7 @@ function ConfigureWindowsTerminal {
         $updatedJson = ConvertTo-Json $settings -Depth 20 -Compress:$false
         Set-Content $settingsPath -Value $updatedJson -Encoding UTF8 -Force
 
-        Write-Log "✅ Windows Terminal configurado para usar cmd_aliases.cmd" "SUCCESS"
-        Write-Log "   Perfil CMD actualizado: $($cmdProfile.name)" "SUCCESS"
-        Write-Log "   Nueva línea de comandos: $newCommandLine" "SUCCESS"
+        Write-Log "Windows Terminal configurado (CMD → cmd_aliases.cmd)" "SUCCESS"
         return $true
     }
     catch {
@@ -119,9 +115,7 @@ function ConfigureWindowsTerminal {
 }
 
 Run-Phase {
-    Write-Log "Iniciando instalación de dotfiles..."
-    Write-Log "Usuario: $env:USERNAME | Idioma: $Global:LOCALE"
-    Write-Log "Directorio original: $Global:OriginalDirectory"
+    Write-Log "Instalando dotfiles..."
 
     # Directorio de dotfiles
     $dotfilesDir = Join-Path $Global:SETUP_DIR "dotfiles"
@@ -155,7 +149,6 @@ Run-Phase {
     $installedCount = 0
     $failedCount = 0
 
-    Write-Log "Copiando dotfiles según configuración..."
     foreach ($dotfile in $dotfiles) {
         if (-not $dotfile.file) {
             Write-Log "Dotfile con configuración incompleta omitido" "WARNING"
@@ -208,10 +201,9 @@ Run-Phase {
     # Configurar variables de entorno específicas para Windows Terminal
     try {
         [Environment]::SetEnvironmentVariable("OMP_OS_ICON", "🪟", "User")
-        Write-Log "Variable de entorno OMP_OS_ICON configurada"
     }
     catch {
-        Write-Log "Error configurando variables de entorno: $($_.Exception.Message)" "WARNING"
+        Write-Log "Error configurando OMP_OS_ICON: $($_.Exception.Message)" "WARNING"
     }
 
     # Configurar Windows Terminal para usar cmd_aliases.cmd
@@ -226,30 +218,12 @@ Run-Phase {
 
     # Mostrar resumen final
     if ($installedCount -gt 0) {
-        Write-Log "✅ Dotfiles instalados ($installedCount archivos)" "SUCCESS"
+        Write-Log "Dotfiles instalados ($installedCount archivos)" "SUCCESS"
         if ($failedCount -gt 0) {
             Write-Log "$failedCount archivos fallaron en la copia" "WARNING"
-        }
-        if ($terminalConfigured) {
-            Write-Log "✅ Windows Terminal configurado para usar cmd_aliases.cmd" "SUCCESS"
         }
     }
     else {
         Write-Log "No se instalaron dotfiles nuevos"
-    }
-
-    # Verificar archivos críticos instalados
-    $criticalFiles = @(".oh-my-posh.json", "cmd_aliases.cmd")
-    $missingFiles = @()
-
-    foreach ($file in $criticalFiles) {
-        $filePath = Join-Path $env:USERPROFILE $file
-        if (-not (Test-Path $filePath)) {
-            $missingFiles += $file
-        }
-    }
-
-    if ($missingFiles.Count -gt 0) {
-        Write-Log "❌ Archivos críticos no disponibles: $($missingFiles -join ', ')" "WARNING"
     }
 }
