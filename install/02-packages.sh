@@ -18,8 +18,7 @@ if [[ $IS_ROOT == false ]]; then
   check_sudo_access
 fi
 
-# Actualizar repositorios
-log "Actualizando repositorios..."
+# Actualizar repositorios (silencioso)
 update_package_manager
 
 # Instalar herramientas de productividad desde tools.json (filtradas por perfil)

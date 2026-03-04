@@ -50,7 +50,6 @@ function Get-TempRepository {
         $result = git clone --depth 1 --quiet $RepoUrl $TempDir 2>&1
 
         if ($LASTEXITCODE -eq 0) {
-            Write-Log "Repositorio clonado: $RepoUrl"
             return $true
         }
         else {
@@ -94,7 +93,6 @@ function Invoke-ProcessRepository {
         [array]$FilesList
     )
 
-    Write-Log "Procesando repositorio: $RepoUrl"
     $tempDirName = "gitfiles-$(Get-Date -Format 'yyyyMMddHHmmss')-$PID"
     $tempDir = Join-Path $env:TEMP $tempDirName
 
@@ -113,7 +111,6 @@ function Invoke-ProcessRepository {
 
             if (Test-Path $srcFile) {
                 if (Copy-FileWithPermissions -SourceFile $srcFile -DestFile $destFile) {
-                    Write-Log "Copiado: $fileName"
                     $filesCopied++
                 }
             }
@@ -137,7 +134,7 @@ function Invoke-ProcessRepository {
 }
 
 Run-Phase {
-    Write-Log "Iniciando instalación de archivos desde repositorios Git..."
+    Write-Log "Instalando archivos desde repositorios Git..."
 
     # Verificar dependencias
     if (-not (Test-Dependencies @("jq", "git"))) {

@@ -43,16 +43,18 @@ Each phase has paired `.sh` (Unix) and `.ps1` (Windows) implementations. Phase s
 
 ### Configuration-Driven
 
-Phases 02–05 read JSON config files that declare *what* to install; the scripts implement *how*:
+Phases 01–05 read JSON config files that declare *what* to install; the scripts implement *how*:
 
 | Config | Purpose |
 |--------|---------|
-| `02-packages.json` / `02-packages-win.json` | Packages per platform |
-| `03-dotfiles.json` / `03-dotfiles-win.json` | Dotfile → destination mappings |
-| `04-gitfiles.json` | External Git repos to clone |
-| `05-localtools.json` | Local helper scripts to install |
+| `install/tools.json` | **Single source of truth** for all installable tools (tags, methods, platforms, profiles) |
+| `install/03-dotfiles.json` | Dotfile → destination mappings (platform-filtered) |
+| `install/04-gitfiles.json` | External Git repos to clone |
+| `install/05-localtools.json` | Local helper scripts to install (platform-filtered) |
 
-To add a new tool: add an entry to the relevant JSON file. The phase script handles the rest.
+`tools.json` has a `"profiles"` section (`minimal`, `dev`, `full`) mapping to tag arrays. Each tool declares tags (`system`, `core`, `dev`, `k8s`, `win`, `fonts`) and per-platform install methods. Profiles only filter `02-packages`; `01-system` always installs all `system`-tagged tools.
+
+To add a new tool: add an entry to `tools.json`. The phase scripts handle the rest.
 
 ### Dotfiles
 
@@ -67,6 +69,11 @@ To add a new tool: add an entry to the relevant JSON file. The phase script hand
 ### Addons
 
 `addons/windecente.ps1` — Windows 11 debloat/privacy/dev setup script (standalone).
+
+## Git Commits
+
+- **Never author commits as Claude.** The commit author must always be `LuisPalacios`. Do not add `Co-Authored-By` trailers or modify `user.name`/`user.email` in git config.
+- Comments and commit messages in **Spanish**.
 
 ## Conventions
 

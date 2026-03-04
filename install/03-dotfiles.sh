@@ -32,7 +32,7 @@ customize_zshrc() {
     sed -i "s/export LANG=es_ES.UTF-8/export LANG=$SETUP_LANG/g" "$zshrc_file"
   fi
 
-  success "Personalización de .zshrc completada (backup: $backup_file)"
+  # backup silencioso
 }
 
 # Función principal
@@ -114,7 +114,7 @@ main() {
     # Crear directorio de destino si no existe
     if [[ ! -d "$dst_dir" ]]; then
       if mkdir -p "$dst_dir" 2>/dev/null; then
-        log "Directorio creado: $dst_dir"
+        : # silencioso
       else
         warning "No se pudo crear directorio: $dst_dir"
         failed_count=$((failed_count + 1))
@@ -124,7 +124,6 @@ main() {
 
     # Copiar archivo
     if cp -f "$src" "$dst" 2>/dev/null; then
-      success "Copiado: $file → $dst_relative"
       installed_count=$((installed_count + 1))
 
       # Personalizar .zshrc si es necesario
@@ -152,7 +151,6 @@ main() {
         current_shell="$(getent passwd "$CURRENT_USER" | cut -d: -f7)"
 
         if [[ "$current_shell" != "$zsh_path" ]]; then
-          log "Cambiando shell por defecto a zsh..."
           if sudo chsh -s "$zsh_path" "$CURRENT_USER" >/dev/null 2>&1; then
             shell_changed=true
           else
@@ -162,16 +160,6 @@ main() {
         ;;
     esac
   fi
-
-  # Verificar archivos críticos instalados
-  local critical_files=(".zshrc" ".oh-my-posh.json")
-  local missing_files=()
-
-  for file in "${critical_files[@]}"; do
-    if [[ ! -f "$target_home/$file" ]]; then
-      missing_files+=("$file")
-    fi
-  done
 
   # Mostrar resumen final
   if [[ $installed_count -gt 0 ]]; then
@@ -188,9 +176,6 @@ main() {
     log "No se instalaron dotfiles nuevos"
   fi
 
-  if [[ ${#missing_files[@]} -gt 0 ]]; then
-    warning "❌ Archivos críticos no disponibles: ${missing_files[*]}"
-  fi
 }
 
 # Ejecutar función principal

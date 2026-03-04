@@ -108,11 +108,7 @@ detect_os_type
 detect_root_user
 
 # Preparación del entorno
-if [[ $IS_ROOT == true ]]; then
-  log "Preparando entorno en $OS_TYPE (idioma: $SETUP_LANG) para usuario root !!!"
-else
-  log "Preparando entorno en $OS_TYPE (idioma: $SETUP_LANG) para usuario $CURRENT_USER..."
-fi
+log "Iniciando configuración CLI en $OS_TYPE (perfil: $DEVCLI_PROFILE)..."
 
 # Verificar permisos sudo
 if ! sudo -n true 2>/dev/null; then
@@ -122,7 +118,6 @@ fi
 
 # Instalar curl si es necesario (silencioso)
 if ! command -v curl &>/dev/null; then
-  log "Instalando curl..."
   case "${OS_TYPE:-}" in
     linux|wsl2)
       sudo apt-get update -y -qq >/dev/null 2>&1
@@ -144,7 +139,6 @@ fi
 
 # Instalar unzip si es necesario (silencioso)
 if ! command -v unzip &>/dev/null; then
-  log "Instalando unzip..."
   case "${OS_TYPE:-}" in
     linux|wsl2)
       sudo apt-get update -y -qq >/dev/null 2>&1
@@ -159,7 +153,6 @@ fi
 
 # Instalar jq si es necesario (silencioso)
 if ! command -v jq &>/dev/null; then
-  log "Instalando jq..."
   case "${OS_TYPE:-}" in
     linux|wsl2)
       sudo apt-get update -y -qq >/dev/null 2>&1
@@ -181,7 +174,6 @@ fi
 
 # Instalar git si es necesario (silencioso)
 if ! command -v git &>/dev/null; then
-  log "Instalando git..."
   case "${OS_TYPE:-}" in
     linux|wsl2)
       sudo apt-get update -y -qq >/dev/null 2>&1
@@ -216,10 +208,6 @@ cd "$SETUP_DIR/install"
 # Exportar variables para que los scripts las usen
 export SETUP_LANG
 export DEVCLI_PROFILE
-log "Perfil: $DEVCLI_PROFILE"
-
-# Ejecuta la instalación por fases (silenciosa)
-log "Ejecutando scripts de instalación:"
 for f in [0-9][0-9]-*.sh; do
   if [[ -f "$f" ]]; then
     log "▶ Ejecutando $f"

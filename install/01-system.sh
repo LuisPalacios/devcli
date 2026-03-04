@@ -27,14 +27,13 @@ if ! command_exists git; then
   sudo apt install -y -qq git >/dev/null 2>&1 || brew install git >/dev/null 2>&1
 fi
 
-# Actualizar repositorios
-log "Actualizando repositorios..."
+# Actualizar repositorios (silencioso)
 update_package_manager
 
 # Instalar herramientas del sistema desde tools.json (tag: system)
 TOOLS_JSON="$(dirname "${BASH_SOURCE[0]}")/tools.json"
 
-log "Instalando paquetes base..."
+log "Instalando paquetes base del sistema..."
 SYSTEM_INSTALLED=0
 while IFS= read -r tool_name; do
   if [[ -n "$tool_name" ]] && install_tool "$tool_name" "$TOOLS_JSON"; then

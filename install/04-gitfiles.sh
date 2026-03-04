@@ -120,23 +120,15 @@ copy_file_with_permissions() {
   # Aplicar permisos según extensión
   local filename=$(basename "$src_file")
   if [[ "$filename" != *.ps1 ]]; then
-    # Aplicar permisos 755 para archivos ejecutables
     chmod 755 "$dst_file" >/dev/null 2>&1
-#     log "Copiado: $filename (755)"
-#   else
-#     # Mantener permisos originales para archivos .ps1
-#     log "Copiado: $filename (original)"
   fi
   return 0
-
 }
 
 # Función para procesar un repositorio
 process_repository() {
   local repo_url="$1"
   local files_array="$2"
-
-  log "Procesando repositorio: $repo_url"
 
   # Crear directorio temporal único
   local temp_dir="/tmp/gitfiles-$(date +%s)-$$"
@@ -166,13 +158,11 @@ process_repository() {
 
   # Limpiar directorio temporal
   rm -rf "$temp_dir" >/dev/null 2>&1 || true
-
-  log "Repositorio procesado: $repo_files_copied archivos copiados"
 }
 
 # Función principal
 main() {
-  log "Iniciando instalación de archivos desde repositorios Git..."
+  log "Instalando archivos desde repositorios Git..."
 
   # Verificar dependencias
   if ! check_jq; then

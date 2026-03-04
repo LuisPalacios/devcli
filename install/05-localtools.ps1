@@ -71,7 +71,6 @@ Run-Phase {
 
     $toolsInstalled = 0
 
-    Write-Log "Instalando herramientas locales..."
     foreach ($tool in $tools) {
         $toolName = $tool.name
         if (-not $toolName) { continue }
