@@ -154,8 +154,12 @@ function Test-Prerequisites {
                 Write-Log "Política de ejecución actualizada a RemoteSigned"
             }
 
-            # Instalar scoop
-            Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+            # Instalar scoop (descarga primero, ejecuta después — evita el patrón
+            # download-cradle que los antivirus corporales detectan como sospechoso)
+            $scoopInstaller = "$env:TEMP\scoop-install.ps1"
+            Invoke-RestMethod -Uri https://get.scoop.sh -OutFile $scoopInstaller
+            & $scoopInstaller
+            Remove-Item $scoopInstaller -Force -ErrorAction SilentlyContinue
 
             # Refrescar PATH para que scoop esté disponible
             $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)

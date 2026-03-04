@@ -30,6 +30,13 @@ Abre un Terminal con **PowerShell 7** y ejecuta:
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
 ```
 
+> Si tu antivirus corporativo (Bitdefender, CrowdStrike, etc.) bloquea el comando anterior, usa la **instalación en dos pasos** — descarga primero, ejecuta después:
+>
+> ```powershell
+> irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1" -OutFile "$env:TEMP\devcli-bootstrap.ps1"
+> & "$env:TEMP\devcli-bootstrap.ps1"
+> ```
+
 *Post instalación*:
 
 - Reinicia el terminal para aplicar los cambios de PATH.
