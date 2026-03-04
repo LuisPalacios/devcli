@@ -229,7 +229,7 @@ export OMP_OS_ICON="⚡"
 
 # Ruta al ejecutable de Oh My Posh instalado con Scoop
 # Scoop instala los ejecutables en ~/scoop/shims/
-export OMP_PATH="/c/Users/luis/scoop/shims/oh-my-posh.exe"
+export OMP_PATH="$HOME/scoop/shims/oh-my-posh.exe"
 
 # Inicializar Oh My Posh para personalizar el prompt de Git Bash
 # Usa el archivo de configuración personalizado ~/.oh-my-posh.json
