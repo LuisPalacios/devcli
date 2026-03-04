@@ -59,6 +59,7 @@ To add a new tool: add an entry to `tools.json`. The phase scripts handle the re
 ### Dotfiles
 
 `dotfiles/` contains shell configurations copied to `$HOME`:
+
 - `.zshrc` — Zsh config (aliases, completions, plugin-like setup)
 - `.tmux.conf` — Tmux configuration
 - `.oh-my-posh.json` — Oh-My-Posh prompt theme
@@ -73,6 +74,7 @@ To add a new tool: add an entry to `tools.json`. The phase scripts handle the re
 ## Git Commits
 
 - **Never author commits as Claude.** The commit author must always be `LuisPalacios`. Do not add `Co-Authored-By` trailers or modify `user.name`/`user.email` in git config.
+- **Never co-author commits as Claude.**
 - Comments and commit messages in **Spanish**.
 
 ## Conventions
