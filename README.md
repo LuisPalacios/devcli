@@ -10,8 +10,6 @@ A medida que descubra nuevas utilidades que cumplan con este enfoque multiplataf
 
 > Importante: Este repo lo hice para todos pero contiene las herramientas que yo uso. Te recomiendo que si quieres adaptarlo te hagas un fork.
 
-El repositorio configura el entorno de línea de comandos (CLI) en **Linux**, **macOS**, **WSL2** o **Windows**. En vez de perder una hora configurando, este script añade las herramientas CLI, algunos ejecutables, scripts y fonts, que utilizo en mi día a día.
-
 **Linux, macOS y WSL2** (lee los [requisitos](#-requisitos-linux-macos-y-wsl2)):
 
 ```console
@@ -26,7 +24,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/boo
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
 ```
 
-> Si tu antivirus corporativo (Bitdefender, CrowdStrike, etc.) bloquea el comando anterior, usa la **instalación en dos pasos** — descarga primero, ejecuta después:
+> Importante en Windows: Si tu antivirus corporativo (Bitdefender, CrowdStrike, etc.) bloquea el comando anterior, prueba la **instalación en dos pasos** — descarga primero, ejecuta después:
 >
 > ```powershell
 > irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1" -OutFile "$env:TEMP\devcli-bootstrap.ps1"
