@@ -72,17 +72,17 @@ Enfoque modular, multiplataforma e idempotente.
 
 Necesitarás tener **PowerShell 7**.
 
-- Comprueba que tienes `winget` (viene con Windows) ejecutando `winget list`.
+- Solo comprueba que tienes `winget` (viene con Windows) ejecutando `winget list`.
 
-- PowerShell 7.0 o superior en modo Administrador. Descargar desde [GitHub](https://github.com/PowerShell/PowerShell/releases) o Microsoft Store
+- Instala PowerShell 7.0 o superior en modo Administrador. Descargar desde [GitHub](https://github.com/PowerShell/PowerShell/releases) o Microsoft Store
 
 - Recomendado preinstalar **Windows Terminal** y **scoop**:
 
 ```PowerShell
-# Instalar Windows Terminal
+# Si no lo tienes ya, instálate Windows Terminal
 winget install Microsoft.WindowsTerminal
 
-# Instalar Scoop
+# Instala Scoop en modo normal (si te da error y necesita administrador, usa el siguiente)
 irm get.scoop.sh | iex
 
 # Instalar Scoop en modo Administrador (si lo necesitases)
