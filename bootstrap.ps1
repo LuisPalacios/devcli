@@ -6,6 +6,10 @@ param(
     [string]$Lang = "es-ES",
 
     [Parameter()]
+    [ValidateSet("minimal", "dev", "full")]
+    [string]$Profile = "full",
+
+    [Parameter()]
     [switch]$Help
 )
 
@@ -78,14 +82,23 @@ Uso: Ejecutar desde PowerShell con política de ejecución apropiada
 
 OPCIONES:
   -Lang LOCALE          Configurar idioma (ej: en-US, es-ES)
+  -Profile PROFILE      Perfil de instalación: minimal, dev, full (defecto: full)
   -Help                 Mostrar esta ayuda
 
+PERFILES:
+  minimal   Herramientas esenciales (fzf, lsd, ripgrep, bat, fd, ...)
+  dev       minimal + herramientas de desarrollo (mkcert, uv, ...)
+  full      Todas las herramientas (defecto)
+
 EJEMPLOS:
-  # Instalación con idioma por defecto (español)
+  # Instalación completa con idioma por defecto (español)
   iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
 
-  # Instalación con idioma inglés
-  iex "& {`$(irm https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1)} -Lang en-US"
+  # Instalación mínima
+  iex "& {`$(irm https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1)} -Profile minimal"
+
+  # Instalación dev con idioma inglés
+  iex "& {`$(irm https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1)} -Profile dev -Lang en-US"
 
 IDIOMAS SOPORTADOS:
   es-ES (español, por defecto)
@@ -275,7 +288,7 @@ function main {
         $isAdmin = Test-Administrator
 
         Write-Log "Windows 11: $($windowsInfo.IsWindows11) | Admin: $isAdmin | Usuario: $CURRENT_USER"
-        Write-Log "Idioma: $Lang"
+        Write-Log "Idioma: $Lang | Perfil: $Profile"
 
         # Verificar prerequisitos
         Test-Prerequisites
@@ -310,6 +323,7 @@ function main {
 
         # Establecer variables de entorno para los scripts
         $env:SETUP_LANG = $Lang
+        $env:DEVCLI_PROFILE = $Profile
         $env:SETUP_DIR = $SETUP_DIR
         $env:CURRENT_USER = $CURRENT_USER
         # Pasar el directorio original a los scripts hijos

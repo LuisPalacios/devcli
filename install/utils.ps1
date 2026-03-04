@@ -352,6 +352,276 @@ function Get-ConfigFromJson {
     }
 }
 
+# Scaffold para ejecutar fases con manejo robusto de errores e interrupciones.
+# Elimina el boilerplate main/trap/try/finally/catch repetido en cada script de fase.
+function Run-Phase {
+    param(
+        [Parameter(Mandatory)]
+        [scriptblock]$Logic
+    )
+
+    function _phase_main {
+        trap {
+            Write-Log "🛑 Excepción no manejada: $($_.Exception.Message)" "ERROR"
+            Restore-OriginalDirectory
+            exit 1
+        }
+
+        Setup-ScriptInterruptionHandler
+
+        try {
+            & $Logic
+            $Global:ShouldRestoreDirectory = $false
+        }
+        finally {
+            if ($Global:ShouldRestoreDirectory) {
+                Restore-OriginalDirectory
+            }
+        }
+    }
+
+    try {
+        _phase_main
+    }
+    catch {
+        Write-Error "❌ Error crítico en script: $($_.Exception.Message)"
+        Restore-OriginalDirectory
+        exit 1
+    }
+}
+
+# ------------------------------------------------------------------
+# Method Dispatchers — catalog-driven tool installation from tools.json
+# ------------------------------------------------------------------
+
+# --- Method: scoop (wraps Install-ScoopPackage) ---
+function Install-MethodScoop {
+    param([Parameter(Mandatory)][hashtable]$Block)
+    $package = $Block["package"]
+    return Install-ScoopPackage -PackageName $package
+}
+
+# --- Method: scoop-bucket (add bucket + install) ---
+function Install-MethodScoopBucket {
+    param([Parameter(Mandatory)][hashtable]$Block)
+
+    try {
+        if (-not (Test-Scoop)) {
+            Write-Log "Scoop no está disponible para instalar" "WARNING"
+            return $true  # Non-critical
+        }
+
+        $bucketName = $Block["bucket_name"]
+        $bucketUrl = $Block["bucket_url"]
+        $package = $Block["package"]
+
+        # Check if already installed
+        if (Test-ScoopPackage -PackageName $package) {
+            Write-Log "$package ya está instalado"
+            return $true
+        }
+
+        # Add bucket if needed
+        $hasBucket = $false
+        try {
+            $buckets = & scoop bucket list 2>$null | Where-Object { $_ -match $bucketName }
+            if ($buckets) { $hasBucket = $true }
+        } catch { }
+
+        if (-not $hasBucket) {
+            Write-Log "Añadiendo bucket $bucketName..."
+            try {
+                & scoop bucket add $bucketName $bucketUrl 2>$null | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Log "Error añadiendo bucket $bucketName (código: $LASTEXITCODE)" "WARNING"
+                    return $true  # Non-critical
+                }
+            } catch {
+                Write-Log "Excepción añadiendo bucket: $($_.Exception.Message)" "WARNING"
+                return $true  # Non-critical
+            }
+        }
+
+        # Install the package
+        Write-Log "Instalando $package..."
+        if (Install-ScoopPackage -PackageName $package) {
+            Write-Log "$package instalado correctamente" "SUCCESS"
+            Write-Log "IMPORTANTE: Reinicia tu terminal/editor para usar las nuevas fuentes" "WARNING"
+            return $true
+        } else {
+            Write-Log "No se pudo instalar $package, pero continuando..." "WARNING"
+            return $true  # Non-critical
+        }
+    } catch {
+        Write-Log "Error en Install-MethodScoopBucket: $($_.Exception.Message)" "WARNING"
+        return $true  # Non-critical
+    }
+}
+
+# --- Hook: Configure CLINK for CMD autorun ---
+function Configure-Clink {
+    Write-Log "Configurando CLINK para CMD..."
+
+    try {
+        if (-not (Test-ScoopPackage -PackageName "clink")) {
+            Write-Log "CLINK no está instalado, omitiendo configuración" "WARNING"
+            return $false
+        }
+
+        $clinkPath = Get-Command "clink" -ErrorAction SilentlyContinue
+        if (-not $clinkPath) {
+            Write-Log "No se pudo encontrar el ejecutable de CLINK" "WARNING"
+            return $false
+        }
+
+        $clinkDir = Split-Path $clinkPath.Source -Parent
+        $clinkCmd = Join-Path $clinkDir "clink.cmd"
+
+        if (-not (Test-Path $clinkCmd)) {
+            $scoopClinkCmd = "$env:USERPROFILE\scoop\shims\clink.cmd"
+            if (Test-Path $scoopClinkCmd) {
+                $clinkCmd = $scoopClinkCmd
+            } else {
+                Write-Log "No se encontró clink.cmd" "WARNING"
+                return $false
+            }
+        }
+
+        $registryPath = "HKCU:\Software\Microsoft\Command Processor"
+        $autoRunValue = "`"$clinkCmd`" inject --autorun"
+
+        try {
+            if (-not (Test-Path $registryPath)) {
+                New-Item -Path $registryPath -Force | Out-Null
+            }
+            $currentAutoRun = Get-ItemProperty -Path $registryPath -Name "Autorun" -ErrorAction SilentlyContinue
+
+            if ($currentAutoRun -and $currentAutoRun.Autorun -like "*clink*") {
+                Write-Log "CLINK ya está configurado en Autorun del CMD"
+            } else {
+                Set-ItemProperty -Path $registryPath -Name "Autorun" -Value $autoRunValue -Force
+                Write-Log "CLINK configurado para inyección automática en CMD" "SUCCESS"
+            }
+        } catch {
+            Write-Log "Error configurando Autorun: $($_.Exception.Message)" "WARNING"
+            return $false
+        }
+
+        return $true
+    } catch {
+        Write-Log "Error configurando CLINK: $($_.Exception.Message)" "WARNING"
+        return $false
+    }
+}
+
+# --- Hook executor ---
+function Invoke-Hook {
+    param(
+        [Parameter(Mandatory)][hashtable]$Hook,
+        [hashtable[]]$ToolsRegistry = @()
+    )
+
+    $action = $Hook["action"]
+
+    switch ($action) {
+        "alias" {
+            $cmdName = $Hook["cmd_name"]
+            $target = $Hook["target"]
+
+            if ((Test-Command $target) -and (-not (Test-Command $cmdName))) {
+                try {
+                    $aliasScript = "@echo off`r`n$target %*"
+                    $aliasPath = Join-Path $Global:BIN_DIR "$cmdName.cmd"
+                    Set-Content -Path $aliasPath -Value $aliasScript -Encoding ASCII
+                    Write-Log "Alias $cmdName -> $target creado" "SUCCESS"
+                } catch {
+                    Write-Log "Error creando alias $cmdName`: $($_.Exception.Message)" "WARNING"
+                }
+            }
+        }
+        "trigger" {
+            $toolName = $Hook["tool"]
+            if ($ToolsRegistry.Count -gt 0) {
+                Install-Tool -ToolName $toolName -ToolsRegistry $ToolsRegistry | Out-Null
+            }
+        }
+        "registry" {
+            $type = $Hook["type"]
+            switch ($type) {
+                "clink-autorun" { Configure-Clink | Out-Null }
+                default { Write-Log "Tipo de registry desconocido: $type" "WARNING" }
+            }
+        }
+        default {
+            Write-Log "Hook desconocido: $action" "WARNING"
+        }
+    }
+}
+
+# --- Main dispatcher: install a tool from tools.json ---
+function Install-Tool {
+    param(
+        [Parameter(Mandatory)][string]$ToolName,
+        [Parameter(Mandatory)][hashtable[]]$ToolsRegistry
+    )
+
+    # Find the tool entry
+    $tool = $null
+    foreach ($t in $ToolsRegistry) {
+        if ($t["name"] -eq $ToolName) {
+            $tool = $t
+            break
+        }
+    }
+    if (-not $tool) {
+        Write-Log "Herramienta no encontrada en registro: $ToolName" "WARNING"
+        return $false
+    }
+
+    # Get the Windows platform block
+    $platformBlock = $tool["windows"]
+    if (-not $platformBlock) {
+        return $true  # Tool not available on this platform, not an error
+    }
+
+    $method = $platformBlock["method"]
+
+    # Execute pre_install hooks (platform-level)
+    if ($platformBlock["pre_install"]) {
+        foreach ($hook in $platformBlock["pre_install"]) {
+            Invoke-Hook -Hook $hook -ToolsRegistry $ToolsRegistry
+        }
+    }
+
+    # Dispatch to method handler
+    $result = switch ($method) {
+        "scoop"        { Install-MethodScoop -Block $platformBlock }
+        "scoop-bucket" { Install-MethodScoopBucket -Block $platformBlock }
+        default {
+            Write-Log "Método desconocido: $method para $ToolName" "WARNING"
+            $false
+        }
+    }
+
+    if ($result) {
+        # Execute platform-level post_install hooks
+        if ($platformBlock["post_install"]) {
+            foreach ($hook in $platformBlock["post_install"]) {
+                Invoke-Hook -Hook $hook -ToolsRegistry $ToolsRegistry
+            }
+        }
+
+        # Execute tool-level post_install hooks
+        if ($tool["post_install"]) {
+            foreach ($hook in $tool["post_install"]) {
+                Invoke-Hook -Hook $hook -ToolsRegistry $ToolsRegistry
+            }
+        }
+    }
+
+    return $result
+}
+
 # Función para verificar dependencias comunes
 function Test-Dependencies {
     param(

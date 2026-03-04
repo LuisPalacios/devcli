@@ -18,58 +18,34 @@ if [[ $IS_ROOT == false ]]; then
   check_sudo_access
 fi
 
-# Preparar Ubuntu/Debian (Azlux's repo) para gping
-case "${OS_TYPE:-}" in
-  linux|wsl2)
-    echo 'deb [signed-by=/usr/share/keyrings/azlux.gpg] https://packages.azlux.fr/debian/ bookworm main' | sudo tee /etc/apt/sources.list.d/azlux.list
-    sudo apt install gpg
-    curl -s https://azlux.fr/repo.gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/azlux.gpg > /dev/null
-    sudo apt update
-    ;;
-esac
-
-# Archivo de configuración
-PACKAGES_CONFIG="$(dirname "${BASH_SOURCE[0]}")/02-packages.json"
-
 # Actualizar repositorios
 log "Actualizando repositorios..."
 update_package_manager
 
-# Instalar paquetes desde JSON
+# Instalar herramientas de productividad desde tools.json (filtradas por perfil)
+TOOLS_JSON="$(dirname "${BASH_SOURCE[0]}")/tools.json"
+
+# Resolver perfil y tags permitidos
+DEVCLI_PROFILE="${DEVCLI_PROFILE:-full}"
+ALLOWED_TAGS_JSON=$(jq -c --arg p "$DEVCLI_PROFILE" '.profiles[$p] // ["core","dev","k8s","win"]' "$TOOLS_JSON")
+log "Perfil: $DEVCLI_PROFILE (tags: $(echo "$ALLOWED_TAGS_JSON" | jq -r 'join(", ")'))"
+
 log "Instalando herramientas de productividad..."
 PACKAGES_INSTALLED=0
 PACKAGES_FAILED=0
 
-while IFS= read -r pkg; do
-  if [[ -n "$pkg" ]]; then
-    if install_package "$pkg"; then
+while IFS= read -r tool_name; do
+  if [[ -n "$tool_name" ]]; then
+    if install_tool "$tool_name" "$TOOLS_JSON"; then
       PACKAGES_INSTALLED=$((PACKAGES_INSTALLED + 1))
     else
-      warning "Falló la instalación de $pkg - continuando con el siguiente paquete"
+      warning "Falló la instalación de $tool_name - continuando con el siguiente"
       PACKAGES_FAILED=$((PACKAGES_FAILED + 1))
     fi
   fi
-done < <(read_packages_with_os_names "$PACKAGES_CONFIG" "packages")
-
-# Instalar Nerd Fonts si lsd está en la lista
-if read_packages_with_os_names "$PACKAGES_CONFIG" "packages" | grep -q "lsd"; then
-  install_nerd_fonts
-fi
-
-# Crear alias para herramientas con nombres diferentes en Debian/Ubuntu
-case "${OS_TYPE:-}" in
-  linux|wsl2)
-    # batcat alias para bat en Debian/Ubuntu
-    if command_exists batcat && ! command_exists bat; then
-      ln -sf "$(command -v batcat)" "$BIN_DIR/bat" >/dev/null 2>&1
-    fi
-
-    # fdfind alias para fd
-    if command_exists fdfind && ! command_exists fd; then
-      ln -sf "$(command -v fdfind)" "$BIN_DIR/fd" >/dev/null 2>&1
-    fi
-    ;;
-esac
+done < <(jq -r --arg os "$OS_TYPE" --argjson tags "$ALLOWED_TAGS_JSON" \
+  '.tools[] | select(.auto_install == null or .auto_install == true) | select(.[$os] != null) | select([.tags[] | . as $t | $tags | index($t)] | any) | .name' \
+  "$TOOLS_JSON")
 
 # Mostrar resumen final
 if [[ $PACKAGES_INSTALLED -gt 0 ]]; then

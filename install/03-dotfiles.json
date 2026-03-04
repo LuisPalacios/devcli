@@ -2,15 +2,43 @@
   "dotfiles": [
     {
       "file": ".zshrc",
-      "dst": "./"
+      "dst": ".zshrc",
+      "platforms": ["linux", "macos", "wsl2"]
     },
     {
       "file": ".tmux.conf",
-      "dst": "./"
+      "dst": ".tmux.conf",
+      "platforms": ["linux", "macos", "wsl2"]
     },
     {
       "file": ".oh-my-posh.json",
-      "dst": "./"
+      "dst": ".oh-my-posh.json",
+      "platforms": ["linux", "macos", "wsl2", "windows"]
+    },
+    {
+      "file": "win.gitbash.bashrc",
+      "dst": ".bashrc",
+      "platforms": ["windows"]
+    },
+    {
+      "file": "oh-my-posh.lua",
+      "dst": "AppData/Local/clink/oh-my-posh.lua",
+      "platforms": ["windows"]
+    },
+    {
+      "file": "Microsoft.PowerShell_profile.ps1",
+      "dst": "Documents/PowerShell/Microsoft.PowerShell_profile.ps1",
+      "platforms": ["windows"]
+    },
+    {
+      "file": "cmd_aliases.cmd",
+      "dst": "cmd_aliases.cmd",
+      "platforms": ["windows"]
+    },
+    {
+      "file": "clink_settings",
+      "dst": "AppData/Local/clink/clink_settings",
+      "platforms": ["windows"]
     }
   ]
 }

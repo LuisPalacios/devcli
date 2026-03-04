@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 
 # Script de instalación de archivos desde repositorios Git para Windows
-# Lee configuración desde 04-gitfiles-win.json
+# Lee configuración desde 04-gitfiles.json
 
 [CmdletBinding()]
 param()
@@ -136,91 +136,63 @@ function Invoke-ProcessRepository {
     }
 }
 
-# Función principal
-function main {
-    trap {
-        Write-Log "🛑 Excepción no manejada: $($_.Exception.Message)" "ERROR"
-        Restore-OriginalDirectory
+Run-Phase {
+    Write-Log "Iniciando instalación de archivos desde repositorios Git..."
+
+    # Verificar dependencias
+    if (-not (Test-Dependencies @("jq", "git"))) {
+        Write-Log "Abortando: dependencias faltantes" "ERROR"
         exit 1
     }
 
-    Setup-ScriptInterruptionHandler
+    # Asegurar que existe el directorio de binarios
+    if (-not (New-DirectoryIfNotExists $Global:BIN_DIR)) {
+        Write-Log "Error creando directorio de binarios" "ERROR"
+        exit 1
+    }
 
+    # Archivo de configuración (compartido entre plataformas)
+    $gitfilesConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\04-gitfiles.json"
+
+    # Validar archivo de configuración
+    if (-not (Test-JsonFile $gitfilesConfig)) {
+        Write-Log "Configuración inválida - abortando" "ERROR"
+        exit 1
+    }
+
+    # Leer configuración usando función común
     try {
-        Write-Log "Iniciando instalación de archivos desde repositorios Git..."
+        $config = Get-ConfigFromJson -JsonPath $gitfilesConfig
+        $repositories = $config.repositories
+    }
+    catch {
+        Write-Log "Error leyendo configuración: $($_.Exception.Message)" "ERROR"
+        exit 1
+    }
 
-        # Verificar dependencias
-        if (-not (Test-Dependencies @("jq", "git"))) {
-            Write-Log "Abortando: dependencias faltantes" "ERROR"
-            exit 1
-        }
+    if ($repositories.Count -eq 0) {
+        Write-Log "No hay repositorios configurados"
+        return
+    }
 
-        # Asegurar que existe el directorio de binarios
-        if (-not (New-DirectoryIfNotExists $Global:BIN_DIR)) {
-            Write-Log "Error creando directorio de binarios" "ERROR"
-            exit 1
-        }
+    $totalFilesCopied = 0
 
-        # Archivo de configuración
-        $gitfilesConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\04-gitfiles-win.json"
-
-        # Validar archivo de configuración
-        if (-not (Test-JsonFile $gitfilesConfig)) {
-            Write-Log "Configuración inválida - abortando" "ERROR"
-            exit 1
-        }
-
-        # Leer configuración usando función común
-        try {
-            $config = Get-ConfigFromJson -JsonPath $gitfilesConfig
-            $repositories = $config.repositories
-        }
-        catch {
-            Write-Log "Error leyendo configuración: $($_.Exception.Message)" "ERROR"
-            exit 1
-        }
-
-        if ($repositories.Count -eq 0) {
-            Write-Log "No hay repositorios configurados"
-            return
-        }
-
-        $totalFilesCopied = 0
-
-        # Procesar cada repositorio
-        foreach ($repo in $repositories) {
-            if ($repo.url -and $repo.files) {
-                $filesCopied = Invoke-ProcessRepository -RepoUrl $repo.url -FilesList $repo.files
-                $totalFilesCopied += $filesCopied
-            }
-            else {
-                Write-Log "Repositorio con configuración incompleta omitido" "WARNING"
-            }
-        }
-
-        # Mostrar resumen final
-        if ($totalFilesCopied -gt 0) {
-            Write-Log "✅ Archivos desde repositorios Git instalados ($totalFilesCopied archivos)" "SUCCESS"
+    # Procesar cada repositorio
+    foreach ($repo in $repositories) {
+        if ($repo.url -and $repo.files) {
+            $filesCopied = Invoke-ProcessRepository -RepoUrl $repo.url -FilesList $repo.files
+            $totalFilesCopied += $filesCopied
         }
         else {
-            Write-Log "No se copiaron archivos desde repositorios Git"
-        }
-
-        $Global:ShouldRestoreDirectory = $false
-    }
-    finally {
-        if ($Global:ShouldRestoreDirectory) {
-            Restore-OriginalDirectory
+            Write-Log "Repositorio con configuración incompleta omitido" "WARNING"
         }
     }
-}
 
-# Ejecutar función principal con manejo robusto
-try {
-    main
-}
-catch {
-    Write-Error "❌ Error crítico en script: $($_.Exception.Message)"
-    Restore-OriginalDirectory
-    exit 1
+    # Mostrar resumen final
+    if ($totalFilesCopied -gt 0) {
+        Write-Log "✅ Archivos desde repositorios Git instalados ($totalFilesCopied archivos)" "SUCCESS"
+    }
+    else {
+        Write-Log "No se copiaron archivos desde repositorios Git"
+    }
 }

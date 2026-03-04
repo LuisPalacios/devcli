@@ -66,9 +66,12 @@ main() {
     exit 1
   fi
 
-  # Leer dotfiles desde JSON
+  # Determinar plataforma para filtrar dotfiles
+  local platform="$OS_TYPE"
+
+  # Leer dotfiles desde JSON (filtrado por plataforma)
   local dotfiles_data
-  if ! dotfiles_data=$(jq -r '.dotfiles[] | @base64' "$dotfiles_config" 2>/dev/null); then
+  if ! dotfiles_data=$(jq -r --arg p "$platform" '.dotfiles[] | select(.platforms | index($p)) | @base64' "$dotfiles_config" 2>/dev/null); then
     error "Error procesando configuración JSON: $dotfiles_config"
     exit 1
   fi
@@ -91,24 +94,19 @@ main() {
 
     local file dst_relative
     file=$(echo "$dotfile_info" | jq -r '.file // empty' 2>/dev/null)
-    dst_relative=$(echo "$dotfile_info" | jq -r '.dst // "./"' 2>/dev/null)
+    dst_relative=$(echo "$dotfile_info" | jq -r '.dst // empty' 2>/dev/null)
 
-    if [[ -z "$file" ]]; then
+    if [[ -z "$file" || -z "$dst_relative" ]]; then
       warning "Dotfile con configuración incompleta omitido"
       failed_count=$((failed_count + 1))
       continue
     fi
 
     local src="$dotfiles_dir/$file"
-    # Construir ruta de destino
+    # dst es la ruta relativa completa (incluyendo nombre de archivo) desde $HOME
+    local dst="$target_home/$dst_relative"
     local dst_dir
-    if [[ "$dst_relative" == "./" || "$dst_relative" == "." ]]; then
-      dst_dir="$target_home"
-    else
-      dst_dir="$target_home/${dst_relative%/}"
-    fi
-
-    local dst="$dst_dir/$file"
+    dst_dir="$(dirname "$dst")"
 
     # Validar que el archivo fuente existe
     if [[ ! -f "$src" ]]; then
@@ -130,9 +128,7 @@ main() {
 
     # Copiar archivo
     if cp -f "$src" "$dst" 2>/dev/null; then
-      local dst_display="${dst_relative%/}"
-      [[ "$dst_display" == "./" || "$dst_display" == "." ]] && dst_display="(home)"
-      success "Copiado: $file → $dst_display"
+      success "Copiado: $file → $dst_relative"
       installed_count=$((installed_count + 1))
 
       # Personalizar .zshrc si es necesario

@@ -60,312 +60,405 @@ package_installed_brew() {
 }
 
 
-# Función para instalar pnpm
-# fuente: https://pnpm.io/installation
-install_pnpm() {
+# -------------------------------------------------------------------
+# Method Dispatchers — catalog-driven tool installation from tools.json
+# -------------------------------------------------------------------
 
-  # Verificar si está instalado
-  if command_exists pnpm; then
-    return 0
-  fi
-
-  local bin_dir="${HOME}/.local/share/pnpm"
-
-  # Ejecutar la instalación
-  curl -fsSL https://get.pnpm.io/install.sh | sh - >/dev/null 2>&1
-
-  # Verificar
-  export PATH="$bin_dir:$PATH"
-  if ! command_exists pnpm; then
-    warning "pnpm no se instaló correctamente"
-    return 1
-  fi
-
-  log "pnpm instalado correctamente en $bin_dir"
-  log "Asegúrate de que $bin_dir esté en tu PATH"
-}
-
-# Función para instalar uv 
-# fuente: https://docs.astral.sh/uv/getting-started/installation
-install_uv() {
-
-  # Verificar si está instalado
-  if command_exists uv; then
-    return 0
-  fi
-
-  local bin_dir="$HOME/.local/bin"
-
-  # Ejecutar la instalación
-  curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1
-
-  # Verificar
-  export PATH="$bin_dir:$PATH"
-  if ! command_exists uv; then
-    warning "uv no se instaló correctamente"
-    return 1
-  fi
-
-  log "uv instalado correctamente en $bin_dir"
-  log "Asegúrate de que $bin_dir esté en tu PATH"
-}
-
-# Función para instalar lsd desde GitHub releases
-install_lsd() {
-  # Verificar si lsd ya está instalado
-  if command_exists lsd; then
-    #log "lsd ya está instalado, omitiendo instalación"
-    return 0
-  fi
-
-  local version="1.1.5"
-  local arch
-
-  # Detectar arquitectura
+# Detect system architecture (amd64/arm64)
+detect_arch() {
   case "$(uname -m)" in
-    x86_64) arch="amd64" ;;
-    aarch64|arm64) arch="arm64" ;;
+    x86_64)       echo "amd64" ;;
+    aarch64|arm64) echo "arm64" ;;
     *)
-      warning "Arquitectura no soportada para lsd: $(uname -m)"
+      warning "Arquitectura no soportada: $(uname -m)"
       return 1
       ;;
   esac
+}
 
-  local deb_file="lsd_${version}_${arch}.deb"
-  local download_url="https://github.com/lsd-rs/lsd/releases/download/v${version}/${deb_file}"
+# Expand shell variables in a JSON string value (${HOME}, ${BIN_DIR}, etc.)
+expand_vars() {
+  eval echo "$1"
+}
+
+# --- Method: apt ---
+method_apt() {
+  local pkg
+  pkg=$(echo "$1" | jq -r '.package')
+
+  if package_installed_apt "$pkg"; then
+    return 0
+  fi
+
+  if ! sudo apt install -y -qq "$pkg" >/dev/null 2>&1; then
+    warning "No se pudo instalar $pkg con apt"
+    return 1
+  fi
+}
+
+# --- Method: brew ---
+method_brew() {
+  local pkg
+  pkg=$(echo "$1" | jq -r '.package')
+
+  if package_installed_brew "$pkg"; then
+    return 0
+  fi
+
+  if ! brew install "$pkg" >/dev/null 2>&1; then
+    warning "No se pudo instalar $pkg con brew"
+    return 1
+  fi
+}
+
+# --- Method: curl-sh (curl URL | sh) ---
+method_curl_sh() {
+  local block="$1"
+  local url args bin_path check_cmd
+
+  url=$(echo "$block" | jq -r '.url')
+  args=$(echo "$block" | jq -r '.args // ""')
+  bin_path=$(echo "$block" | jq -r '.bin_path // ""')
+  check_cmd=$(echo "$block" | jq -r '.check_cmd // ""')
+
+  # Expand variables
+  url=$(expand_vars "$url")
+  args=$(expand_vars "$args")
+  bin_path=$(expand_vars "$bin_path")
+
+  # Check if already installed
+  if [[ -n "$check_cmd" ]]; then
+    # For oh-my-posh, also check BIN_DIR directly
+    if command_exists "$check_cmd" || [[ -x "$BIN_DIR/$check_cmd" ]]; then
+      return 0
+    fi
+  fi
+
+  # Run the installer
+  if [[ -n "$args" ]]; then
+    curl -fsSL "$url" | bash -s -- $args >/dev/null 2>&1
+  else
+    curl -fsSL "$url" | sh - >/dev/null 2>&1
+  fi
+
+  # Add bin_path to PATH if specified
+  if [[ -n "$bin_path" ]]; then
+    export PATH="$bin_path:$PATH"
+  fi
+
+  # Verify installation
+  if [[ -n "$check_cmd" ]]; then
+    if ! command_exists "$check_cmd" && ! [[ -x "$BIN_DIR/$check_cmd" ]]; then
+      warning "$check_cmd no se instaló correctamente"
+      return 1
+    fi
+  fi
+
+  return 0
+}
+
+# --- Method: github-deb (download .deb from GitHub releases) ---
+method_github_deb() {
+  local block="$1"
+  local repo version deb_pattern check_cmd arch
+
+  repo=$(echo "$block" | jq -r '.repo')
+  version=$(echo "$block" | jq -r '.version')
+  deb_pattern=$(echo "$block" | jq -r '.deb_pattern')
+  check_cmd=$(echo "$block" | jq -r '.check_cmd // ""')
+
+  # Check if already installed
+  if [[ -n "$check_cmd" ]] && command_exists "$check_cmd"; then
+    return 0
+  fi
+
+  arch=$(detect_arch) || return 1
+
+  # Expand variables in the deb pattern
+  local deb_file
+  deb_file=$(echo "$deb_pattern" | sed "s/\${version}/$version/g; s/\${arch}/$arch/g")
+  local download_url="https://github.com/${repo}/releases/download/v${version}/${deb_file}"
   local temp_file="/tmp/${deb_file}"
 
-  log "Descargando lsd v${version} para ${arch}..."
+  log "Descargando ${repo} v${version} para ${arch}..."
 
-  # Descargar el paquete .deb
   if ! curl -fsSL -o "$temp_file" "$download_url" >/dev/null 2>&1; then
-    warning "No se pudo descargar lsd desde GitHub"
+    warning "No se pudo descargar desde $download_url"
     return 1
   fi
 
-  # Instalar el paquete .deb
   if ! sudo dpkg -i "$temp_file" >/dev/null 2>&1; then
-    warning "No se pudo instalar lsd desde .deb"
+    warning "No se pudo instalar $deb_file"
     rm -f "$temp_file"
     return 1
   fi
 
-  # Limpiar archivo temporal
   rm -f "$temp_file"
 
-  # Verificar que se instaló correctamente
-  if ! command_exists lsd; then
-    warning "lsd no se instaló correctamente"
+  if [[ -n "$check_cmd" ]] && ! command_exists "$check_cmd"; then
+    warning "$check_cmd no se instaló correctamente"
     return 1
   fi
 
-  log "lsd v${version} instalado correctamente"
+  return 0
 }
 
-# Función para instalar mkcert usando binarios pre-compilados
-install_mkcert() {
-  # Verificar si mkcert ya está instalado
-  if command_exists mkcert; then
-    #log "mkcert ya está instalado, omitiendo instalación"
+# --- Method: github-binary (download pre-compiled binary) ---
+method_github_binary() {
+  local block="$1"
+  local url bin_name check_cmd arch
+
+  url=$(echo "$block" | jq -r '.url')
+  bin_name=$(echo "$block" | jq -r '.bin_name')
+  check_cmd=$(echo "$block" | jq -r '.check_cmd // ""')
+
+  # Check if already installed
+  if [[ -n "$check_cmd" ]] && command_exists "$check_cmd"; then
     return 0
   fi
 
-  local arch
+  arch=$(detect_arch) || return 1
 
-  # Detectar arquitectura
-  case "$(uname -m)" in
-    x86_64) arch="amd64" ;;
-    aarch64|arm64) arch="arm64" ;;
-    *)
-      warning "Arquitectura no soportada para mkcert: $(uname -m)"
-      return 1
-      ;;
-  esac
+  # Expand variables in URL
+  local expanded_url
+  expanded_url=$(echo "$url" | sed "s/\${arch}/$arch/g")
 
-  local download_url="https://dl.filippo.io/mkcert/latest?for=linux/${arch}"
-  local bin_dir="$HOME/bin"
-  local temp_file="/tmp/mkcert-download"
+  local temp_file="/tmp/${bin_name}-download"
 
-  # Crear directorio bin si no existe
-  ensure_directory "$bin_dir"
+  ensure_directory "$BIN_DIR"
 
-  log "Descargando mkcert para linux/${arch}..."
+  log "Descargando $bin_name..."
 
-  # Descargar el binario
-  if ! curl -JLo "$temp_file" "$download_url" >/dev/null 2>&1; then
-    warning "No se pudo descargar mkcert desde dl.filippo.io"
+  if ! curl -JLo "$temp_file" "$expanded_url" >/dev/null 2>&1; then
+    warning "No se pudo descargar $bin_name"
     return 1
   fi
 
-  # Hacer el archivo ejecutable
-  if ! chmod +x "$temp_file" >/dev/null 2>&1; then
-    warning "No se pudo hacer ejecutable el binario de mkcert"
-    rm -f "$temp_file"
+  chmod +x "$temp_file" >/dev/null 2>&1
+  mv "$temp_file" "$BIN_DIR/$bin_name" >/dev/null 2>&1
+
+  export PATH="$BIN_DIR:$PATH"
+
+  if [[ -n "$check_cmd" ]] && ! command_exists "$check_cmd"; then
+    warning "$bin_name no se instaló correctamente"
     return 1
   fi
 
-  # Mover al directorio bin
-  if ! mv "$temp_file" "$bin_dir/mkcert" >/dev/null 2>&1; then
-    warning "No se pudo mover mkcert a $bin_dir"
-    rm -f "$temp_file"
-    return 1
-  fi
-
-  # Verificar que se instaló correctamente (agregando $HOME/bin al PATH temporalmente si es necesario)
-  export PATH="$bin_dir:$PATH"
-  if ! command_exists mkcert; then
-    warning "mkcert no se instaló correctamente"
-    return 1
-  fi
-
-  log "mkcert instalado correctamente en $bin_dir/mkcert"
-  log "Asegúrate de que $bin_dir esté en tu PATH"
+  return 0
 }
 
-# Función para instalar Nerd Fonts
-install_nerd_fonts() {
-  local font_name="${NERD_FONT_NAME:-FiraCode}"
-  local font_dir="$HOME/.local/share/fonts"
-  local fonts_dir="$HOME/.fonts"
-  local temp_dir="/tmp/nerd-fonts-${font_name}"
+# --- Method: github-zip (download zip, extract to dest — used for Nerd Fonts) ---
+method_github_zip() {
+  local block="$1"
+  local url version font_name dest
 
-  # Verificar si las fuentes ya están instaladas (método robusto)
+  url=$(echo "$block" | jq -r '.url')
+  version=$(echo "$block" | jq -r '.version')
+  font_name=$(echo "$block" | jq -r '.font_name // ""')
+  dest=$(echo "$block" | jq -r '.dest')
+
+  # Expand variables
+  font_name=$(expand_vars "$font_name")
+  dest=$(expand_vars "$dest")
+
+  # Expand url template variables
+  local expanded_url
+  expanded_url=$(echo "$url" | sed "s/\${version}/$version/g")
+  expanded_url=$(echo "$expanded_url" | sed "s/\${font_name}/$font_name/g")
+
+  # Check if fonts already installed (multi-method detection)
   local fonts_installed=false
+  local font_full_name="${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}"
 
-  # Método 1: Verificar con fc-list (Linux/WSL2)
   if command_exists fc-list; then
-    if fc-list | grep -q "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" 2>/dev/null; then
+    if fc-list | grep -q "$font_full_name" 2>/dev/null; then
       fonts_installed=true
     fi
   fi
 
-  # Método 2: Verificar directorio estándar
-  if [[ "$fonts_installed" == "false" ]] && [[ -d "$font_dir" ]]; then
-    if find "$font_dir" -name "*${NERD_FONT_NAME:-FiraCode}*" -type f | grep -q "${NERD_FONT_NAME:-FiraCode}" 2>/dev/null; then
+  if [[ "$fonts_installed" == "false" ]] && [[ -d "$dest" ]]; then
+    if find "$dest" -name "*${font_name}*" -type f 2>/dev/null | grep -q "$font_name" 2>/dev/null; then
       fonts_installed=true
     fi
   fi
 
-  # Método 3: Verificar directorio alternativo
-  if [[ "$fonts_installed" == "false" ]] && [[ -d "$fonts_dir" ]]; then
-    if find "$fonts_dir" -name "*${NERD_FONT_NAME:-FiraCode}*" -type f | grep -q "${NERD_FONT_NAME:-FiraCode}" 2>/dev/null; then
+  if [[ "$fonts_installed" == "false" ]] && [[ -d "$HOME/.fonts" ]]; then
+    if find "$HOME/.fonts" -name "*${font_name}*" -type f 2>/dev/null | grep -q "$font_name" 2>/dev/null; then
       fonts_installed=true
     fi
   fi
 
-  # Método 4: Verificar fuentes del sistema (macOS)
   if [[ "$fonts_installed" == "false" ]] && [[ "$OSTYPE" == "darwin"* ]]; then
     if command_exists system_profiler; then
-      if system_profiler SPFontsDataType | grep -q "${NERD_FONT_NAME:-FiraCode}" 2>/dev/null; then
+      if system_profiler SPFontsDataType | grep -q "$font_name" 2>/dev/null; then
         fonts_installed=true
       fi
     fi
   fi
 
   if [[ "$fonts_installed" == "true" ]]; then
-    log "'${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}' ya está instalada, omitiendo instalación"
+    log "'$font_full_name' ya está instalada, omitiendo"
     return 0
   fi
 
-  # Crear directorio de fuentes si no existe
-  mkdir -p "$font_dir"
+  # Install
+  local temp_dir="/tmp/nerd-fonts-${font_name}"
+  mkdir -p "$dest"
 
-  log "Instalando ${font_name} Nerd Font..."
+  log "Instalando $font_name Nerd Font..."
 
-  # Descargar y extraer la fuente
-  if ! curl -fsSL -o "/tmp/${font_name}.zip" "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/${font_name}.zip" >/dev/null 2>&1; then
-    warning "No se pudo descargar ${font_name} Nerd Font"
+  if ! curl -fsSL -o "/tmp/${font_name}.zip" "$expanded_url" >/dev/null 2>&1; then
+    warning "No se pudo descargar $font_name"
     return 1
   fi
 
-  # Extraer fuentes
   if ! unzip -q "/tmp/${font_name}.zip" -d "$temp_dir" >/dev/null 2>&1; then
-    warning "No se pudo extraer ${font_name} Nerd Font"
+    warning "No se pudo extraer $font_name"
     rm -f "/tmp/${font_name}.zip"
     return 1
   fi
 
-  # Copiar fuentes al directorio local
-  if ! cp -r "$temp_dir"/* "$font_dir/" >/dev/null 2>&1; then
-    warning "No se pudo copiar ${font_name} Nerd Font"
-    rm -rf "$temp_dir"
-    rm -f "/tmp/${font_name}.zip"
-    return 1
-  fi
+  cp -r "$temp_dir"/* "$dest/" >/dev/null 2>&1
+  rm -rf "$temp_dir" "/tmp/${font_name}.zip"
 
-  # Limpiar archivos temporales
-  rm -rf "$temp_dir"
-  rm -f "/tmp/${font_name}.zip"
-
-  # Actualizar caché de fuentes
+  # Update font cache
   if command_exists fc-cache; then
     fc-cache -f -v >/dev/null 2>&1
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # En macOS, actualizar el caché de fuentes del sistema
-    if command_exists atsutil; then
-      atsutil server -shutdown >/dev/null 2>&1
-      atsutil server -ping >/dev/null 2>&1
-    fi
+  elif [[ "$OSTYPE" == "darwin"* ]] && command_exists atsutil; then
+    atsutil server -shutdown >/dev/null 2>&1
+    atsutil server -ping >/dev/null 2>&1
   fi
 
-  # Verificar que la instalación fue exitosa
-  if command_exists fc-list; then
-    if ! fc-list | grep -q "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" 2>/dev/null; then
-      warning "No se detectan las fuentes "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" recién instaladas"
-      return 1
-    fi
-  fi
-
-  log "${font_name} Nerd Font instalada correctamente"
-  log "Configura tu terminal para usar '${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}'"
+  log "$font_name Nerd Font instalada correctamente"
 }
 
-# Función para instalar paquete según OS (silenciosa)
-install_package() {
-  local pkg="$1"
+# --- Hook: setup Azlux repo for gping ---
+setup_azlux_repo() {
+  # Idempotent: skip if already configured
+  if [[ -f /etc/apt/sources.list.d/azlux.list ]]; then
+    return 0
+  fi
+  echo 'deb [signed-by=/usr/share/keyrings/azlux.gpg] https://packages.azlux.fr/debian/ bookworm main' | sudo tee /etc/apt/sources.list.d/azlux.list >/dev/null
+  sudo apt install -y -qq gpg >/dev/null 2>&1
+  curl -s https://azlux.fr/repo.gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/azlux.gpg >/dev/null
+  sudo apt update -y -qq >/dev/null 2>&1
+}
 
-  case "${OS_TYPE:-}" in
-    linux|wsl2)
-      # Verificar si ya está instalado
-      if package_installed_apt "$pkg"; then
-        #log "$pkg ya está instalado, omitiendo instalación"
-        return 0
-      fi
+# --- Hook executor ---
+execute_hook() {
+  local hook_json="$1"
+  local json_file="${2:-}"
+  local action
+  action=$(echo "$hook_json" | jq -r '.action')
 
-      # Casos especiales para paquetes no disponibles en repositorios estándar
-      if [[ "$pkg" == "pnpm" ]]; then
-        install_pnpm
-      elif [[ "$pkg" == "uv" ]]; then
-        install_uv
-      elif [[ "$pkg" == "lsd" ]]; then
-        install_lsd
-      elif [[ "$pkg" == "mkcert" ]]; then
-        install_mkcert
-      else
-        # Intentar instalar con manejo de errores usando apt (más moderno)
-        if ! sudo apt install -y -qq "$pkg" >/dev/null 2>&1; then
-          warning "No se pudo instalar $pkg - continuando..."
-          return 1
+  case "$action" in
+    symlink)
+      local from_cmd to platforms_json
+      from_cmd=$(echo "$hook_json" | jq -r '.from_cmd')
+      to=$(echo "$hook_json" | jq -r '.to')
+      to=$(expand_vars "$to")
+      platforms_json=$(echo "$hook_json" | jq -r '.platforms[]? // empty')
+
+      # Check platform filter
+      if [[ -n "$platforms_json" ]]; then
+        if ! echo "$platforms_json" | grep -q "^${OS_TYPE}$"; then
+          return 0
         fi
       fi
-      ;;
-    macos)
-      # Verificar si ya está instalado
-      if package_installed_brew "$pkg"; then
-        #log "$pkg ya está instalado, omitiendo instalación"
-        return 0
-      fi
 
-      if ! brew install "$pkg" >/dev/null 2>&1; then
-        warning "No se pudo instalar $pkg - continuando..."
-        return 1
+      if command_exists "$from_cmd" && ! command_exists "$(basename "$to")"; then
+        ln -sf "$(command -v "$from_cmd")" "$to" >/dev/null 2>&1
+        log "Symlink: $from_cmd → $(basename "$to")"
       fi
       ;;
+
+    trigger)
+      local tool
+      tool=$(echo "$hook_json" | jq -r '.tool')
+      if [[ -n "$json_file" ]]; then
+        install_tool "$tool" "$json_file"
+      fi
+      ;;
+
+    repo)
+      local repo_type
+      repo_type=$(echo "$hook_json" | jq -r '.type')
+      case "$repo_type" in
+        azlux) setup_azlux_repo ;;
+        *) warning "Tipo de repo desconocido: $repo_type" ;;
+      esac
+      ;;
+
     *)
-      error "OS_TYPE no soportado para instalación: $OS_TYPE"
+      warning "Hook desconocido: $action"
+      ;;
+  esac
+}
+
+# --- Main dispatcher: install a tool from tools.json ---
+install_tool() {
+  local tool_name="$1"
+  local json_file="$2"
+
+  # Read the platform block for this tool
+  local platform_block
+  platform_block=$(jq -c --arg name "$tool_name" --arg os "$OS_TYPE" \
+    '.tools[] | select(.name == $name) | .[$os] // empty' "$json_file" 2>/dev/null)
+
+  if [[ -z "$platform_block" ]]; then
+    return 0  # Tool not available on this platform
+  fi
+
+  local method
+  method=$(echo "$platform_block" | jq -r '.method')
+
+  # Execute pre_install hooks (platform-level)
+  local pre_hooks
+  pre_hooks=$(echo "$platform_block" | jq -c '.pre_install[]?' 2>/dev/null)
+  if [[ -n "$pre_hooks" ]]; then
+    while IFS= read -r hook; do
+      [[ -n "$hook" ]] && execute_hook "$hook" "$json_file"
+    done <<< "$pre_hooks"
+  fi
+
+  # Dispatch to method handler
+  case "$method" in
+    apt)            method_apt "$platform_block" ;;
+    brew)           method_brew "$platform_block" ;;
+    curl-sh)        method_curl_sh "$platform_block" ;;
+    github-deb)     method_github_deb "$platform_block" ;;
+    github-binary)  method_github_binary "$platform_block" ;;
+    github-zip)     method_github_zip "$platform_block" ;;
+    *)
+      warning "Método desconocido: $method para $tool_name"
       return 1
       ;;
   esac
+
+  local result=$?
+
+  if [[ $result -eq 0 ]]; then
+    # Execute platform-level post_install hooks
+    local plat_post_hooks
+    plat_post_hooks=$(echo "$platform_block" | jq -c '.post_install[]?' 2>/dev/null)
+    if [[ -n "$plat_post_hooks" ]]; then
+      while IFS= read -r hook; do
+        [[ -n "$hook" ]] && execute_hook "$hook" "$json_file"
+      done <<< "$plat_post_hooks"
+    fi
+
+    # Execute tool-level post_install hooks
+    local tool_post_hooks
+    tool_post_hooks=$(jq -c --arg name "$tool_name" \
+      '.tools[] | select(.name == $name) | .post_install[]?' "$json_file" 2>/dev/null)
+    if [[ -n "$tool_post_hooks" ]]; then
+      while IFS= read -r hook; do
+        [[ -n "$hook" ]] && execute_hook "$hook" "$json_file"
+      done <<< "$tool_post_hooks"
+    fi
+  fi
+
+  return $result
 }
 
 # Función para crear directorio si no existe
@@ -423,67 +516,3 @@ count_installed_packages() {
   echo "$count"
 }
 
-# Función para leer array desde archivo JSON
-read_json_array() {
-  local json_file="$1"
-  local array_key="$2"
-
-  # Verificar que jq está disponible
-  if ! command_exists jq; then
-    error "jq no está disponible"
-    return 1
-  fi
-
-  # Verificar que el archivo existe
-  if [[ ! -f "$json_file" ]]; then
-    error "Archivo JSON no encontrado: $json_file"
-    return 1
-  fi
-
-  # Verificar que el JSON es válido
-  if ! jq empty "$json_file" 2>/dev/null; then
-    error "Archivo JSON inválido: $json_file"
-    return 1
-  fi
-
-  # Leer y retornar el array
-  jq -r ".$array_key[]" "$json_file" 2>/dev/null
-}
-
-# Función para leer paquetes con nombres específicos por OS
-read_packages_with_os_names() {
-  local json_file="$1"
-  local array_key="$2"
-
-  # Verificar que jq está disponible
-  if ! command_exists jq; then
-    error "jq no está disponible"
-    return 1
-  fi
-
-  # Verificar que el archivo existe
-  if [[ ! -f "$json_file" ]]; then
-    error "Archivo JSON no encontrado: $json_file"
-    return 1
-  fi
-
-  # Verificar que el JSON es válido
-  if ! jq empty "$json_file" 2>/dev/null; then
-    error "Archivo JSON inválido: $json_file"
-    return 1
-  fi
-
-  # Leer paquetes con nombres específicos por OS
-  case "${OS_TYPE:-}" in
-    linux|wsl2)
-      jq -r ".$array_key[] | .linux" "$json_file" 2>/dev/null
-      ;;
-    macos)
-      jq -r ".$array_key[] | .macos" "$json_file" 2>/dev/null
-      ;;
-    *)
-      # Fallback: usar linux o macos
-      jq -r ".$array_key[] | .linux // .macos" "$json_file" 2>/dev/null
-      ;;
-  esac
-}

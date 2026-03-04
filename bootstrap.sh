@@ -21,18 +21,24 @@ Linux Setup - Configuración automatizada de entorno CLI
 Uso: bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) [OPCIONES]
 
 OPCIONES:
-  -l, --lang LOCALE     Configurar idioma (ej: en_US.UTF-8, es_ES.UTF-8)
-  -h, --help           Mostrar esta ayuda
+  -l, --lang LOCALE      Configurar idioma (ej: en_US.UTF-8, es_ES.UTF-8)
+  -p, --profile PROFILE  Perfil de instalación: minimal, dev, full (defecto: full)
+  -h, --help             Mostrar esta ayuda
+
+PERFILES:
+  minimal   Herramientas esenciales (htop, fzf, lsd, ripgrep, bat, fd, ...)
+  dev       minimal + herramientas de desarrollo (mkcert, pnpm, uv, ...)
+  full      Todas las herramientas (defecto)
 
 EJEMPLOS:
-  # Instalación con idioma por defecto (español)
+  # Instalación completa con idioma por defecto (español)
   bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
 
-  # Instalación con idioma inglés
-  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -l en_US.UTF-8
+  # Instalación mínima
+  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -p minimal
 
-  # Instalación con idioma francés
-  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -l fr_FR.UTF-8
+  # Instalación dev con idioma inglés
+  bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -p dev -l en_US.UTF-8
 
 IDIOMAS SOPORTADOS:
   es_ES.UTF-8 (español, por defecto)
@@ -43,11 +49,16 @@ EOF
 
 # Procesar argumentos de línea de comandos
 SETUP_LANG="es_ES.UTF-8"  # Valor por defecto
+DEVCLI_PROFILE="${DEVCLI_PROFILE:-full}"  # Valor por defecto
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     -l|--lang)
       SETUP_LANG="$2"
+      shift 2
+      ;;
+    -p|--profile)
+      DEVCLI_PROFILE="$2"
       shift 2
       ;;
     -h|--help)
@@ -202,8 +213,10 @@ chmod +x "$SETUP_DIR/install"/*.sh >/dev/null 2>&1
 # Ejecutar scripts de instalación
 cd "$SETUP_DIR/install"
 
-# Exportar SETUP_LANG para que los scripts lo usen
+# Exportar variables para que los scripts las usen
 export SETUP_LANG
+export DEVCLI_PROFILE
+log "Perfil: $DEVCLI_PROFILE"
 
 # Ejecuta la instalación por fases (silenciosa)
 log "Ejecutando scripts de instalación:"

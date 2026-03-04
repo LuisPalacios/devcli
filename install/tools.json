@@ -1,0 +1,203 @@
+{
+  "profiles": {
+    "minimal": ["core"],
+    "dev": ["core", "dev"],
+    "full": ["core", "dev", "k8s", "win"]
+  },
+  "tools": [
+    {
+      "name": "git",
+      "tags": ["system"],
+      "linux":   { "method": "apt", "package": "git" },
+      "macos":   { "method": "brew", "package": "git" },
+      "wsl2":    { "method": "apt", "package": "git" }
+    },
+    {
+      "name": "curl",
+      "tags": ["system"],
+      "linux":   { "method": "apt", "package": "curl" },
+      "macos":   { "method": "brew", "package": "curl" },
+      "wsl2":    { "method": "apt", "package": "curl" }
+    },
+    {
+      "name": "wget",
+      "tags": ["system"],
+      "linux":   { "method": "apt", "package": "wget" },
+      "macos":   { "method": "brew", "package": "wget" },
+      "wsl2":    { "method": "apt", "package": "wget" }
+    },
+    {
+      "name": "nano",
+      "tags": ["system"],
+      "linux":   { "method": "apt", "package": "nano" },
+      "macos":   { "method": "brew", "package": "nano" },
+      "wsl2":    { "method": "apt", "package": "nano" }
+    },
+    {
+      "name": "zsh",
+      "tags": ["system"],
+      "linux":   { "method": "apt", "package": "zsh" },
+      "macos":   { "method": "brew", "package": "zsh" },
+      "wsl2":    { "method": "apt", "package": "zsh" }
+    },
+    {
+      "name": "jq",
+      "tags": ["system"],
+      "linux":   { "method": "apt", "package": "jq" },
+      "macos":   { "method": "brew", "package": "jq" },
+      "wsl2":    { "method": "apt", "package": "jq" },
+      "windows": { "method": "scoop", "package": "jq" }
+    },
+    {
+      "name": "oh-my-posh",
+      "tags": ["system"],
+      "linux":   { "method": "curl-sh", "url": "https://ohmyposh.dev/install.sh", "args": "-d ${BIN_DIR}", "check_cmd": "oh-my-posh" },
+      "macos":   { "method": "curl-sh", "url": "https://ohmyposh.dev/install.sh", "args": "-d ${BIN_DIR}", "check_cmd": "oh-my-posh" },
+      "wsl2":    { "method": "curl-sh", "url": "https://ohmyposh.dev/install.sh", "args": "-d ${BIN_DIR}", "check_cmd": "oh-my-posh" },
+      "windows": { "method": "scoop", "package": "oh-my-posh" }
+    },
+    {
+      "name": "htop",
+      "tags": ["core"],
+      "linux":   { "method": "apt", "package": "htop" },
+      "macos":   { "method": "brew", "package": "htop" },
+      "wsl2":    { "method": "apt", "package": "htop" },
+      "windows": { "method": "scoop", "package": "bottom", "post_install": [{ "action": "alias", "cmd_name": "htop", "target": "btm" }] }
+    },
+    {
+      "name": "tmux",
+      "tags": ["core"],
+      "linux":   { "method": "apt", "package": "tmux" },
+      "macos":   { "method": "brew", "package": "tmux" },
+      "wsl2":    { "method": "apt", "package": "tmux" }
+    },
+    {
+      "name": "zoxide",
+      "tags": ["core"],
+      "linux":   { "method": "apt", "package": "zoxide" },
+      "macos":   { "method": "brew", "package": "zoxide" },
+      "wsl2":    { "method": "apt", "package": "zoxide" },
+      "windows": { "method": "scoop", "package": "zoxide" }
+    },
+    {
+      "name": "fzf",
+      "tags": ["core"],
+      "linux":   { "method": "apt", "package": "fzf" },
+      "macos":   { "method": "brew", "package": "fzf" },
+      "wsl2":    { "method": "apt", "package": "fzf" },
+      "windows": { "method": "scoop", "package": "fzf" }
+    },
+    {
+      "name": "mkcert",
+      "tags": ["dev"],
+      "linux":   { "method": "github-binary", "url": "https://dl.filippo.io/mkcert/latest?for=linux/${arch}", "bin_name": "mkcert", "check_cmd": "mkcert" },
+      "macos":   { "method": "brew", "package": "mkcert" },
+      "wsl2":    { "method": "github-binary", "url": "https://dl.filippo.io/mkcert/latest?for=linux/${arch}", "bin_name": "mkcert", "check_cmd": "mkcert" },
+      "windows": { "method": "scoop", "package": "mkcert" }
+    },
+    {
+      "name": "nss",
+      "tags": ["dev"],
+      "linux":   { "method": "apt", "package": "libnss3-tools" },
+      "macos":   { "method": "brew", "package": "nss" },
+      "wsl2":    { "method": "apt", "package": "libnss3-tools" }
+    },
+    {
+      "name": "bat",
+      "tags": ["core"],
+      "linux":   { "method": "apt", "package": "bat" },
+      "macos":   { "method": "brew", "package": "bat" },
+      "wsl2":    { "method": "apt", "package": "bat" },
+      "post_install": [
+        { "action": "symlink", "platforms": ["linux", "wsl2"], "from_cmd": "batcat", "to": "${BIN_DIR}/bat" }
+      ]
+    },
+    {
+      "name": "fd",
+      "tags": ["core"],
+      "linux":   { "method": "apt", "package": "fd-find" },
+      "macos":   { "method": "brew", "package": "fd" },
+      "wsl2":    { "method": "apt", "package": "fd-find" },
+      "windows": { "method": "scoop", "package": "fd" },
+      "post_install": [
+        { "action": "symlink", "platforms": ["linux", "wsl2"], "from_cmd": "fdfind", "to": "${BIN_DIR}/fd" }
+      ]
+    },
+    {
+      "name": "ripgrep",
+      "tags": ["core"],
+      "linux":   { "method": "apt", "package": "ripgrep" },
+      "macos":   { "method": "brew", "package": "ripgrep" },
+      "wsl2":    { "method": "apt", "package": "ripgrep" },
+      "windows": { "method": "scoop", "package": "ripgrep" }
+    },
+    {
+      "name": "tree",
+      "tags": ["core"],
+      "linux":   { "method": "apt", "package": "tree" },
+      "macos":   { "method": "brew", "package": "tree" },
+      "wsl2":    { "method": "apt", "package": "tree" }
+    },
+    {
+      "name": "lsd",
+      "tags": ["core"],
+      "linux":   { "method": "github-deb", "repo": "lsd-rs/lsd", "version": "1.1.5", "deb_pattern": "lsd_${version}_${arch}.deb", "check_cmd": "lsd" },
+      "macos":   { "method": "brew", "package": "lsd" },
+      "wsl2":    { "method": "github-deb", "repo": "lsd-rs/lsd", "version": "1.1.5", "deb_pattern": "lsd_${version}_${arch}.deb", "check_cmd": "lsd" },
+      "windows": { "method": "scoop", "package": "lsd" },
+      "post_install": [
+        { "action": "trigger", "tool": "nerd-fonts" }
+      ]
+    },
+    {
+      "name": "pnpm",
+      "tags": ["dev"],
+      "linux":   { "method": "curl-sh", "url": "https://get.pnpm.io/install.sh", "bin_path": "${HOME}/.local/share/pnpm", "check_cmd": "pnpm" },
+      "macos":   { "method": "curl-sh", "url": "https://get.pnpm.io/install.sh", "bin_path": "${HOME}/.local/share/pnpm", "check_cmd": "pnpm" },
+      "wsl2":    { "method": "curl-sh", "url": "https://get.pnpm.io/install.sh", "bin_path": "${HOME}/.local/share/pnpm", "check_cmd": "pnpm" }
+    },
+    {
+      "name": "uv",
+      "tags": ["dev"],
+      "linux":   { "method": "curl-sh", "url": "https://astral.sh/uv/install.sh", "bin_path": "${HOME}/.local/bin", "check_cmd": "uv" },
+      "macos":   { "method": "curl-sh", "url": "https://astral.sh/uv/install.sh", "bin_path": "${HOME}/.local/bin", "check_cmd": "uv" },
+      "wsl2":    { "method": "curl-sh", "url": "https://astral.sh/uv/install.sh", "bin_path": "${HOME}/.local/bin", "check_cmd": "uv" },
+      "windows": { "method": "scoop", "package": "main/uv" }
+    },
+    {
+      "name": "gping",
+      "tags": ["core"],
+      "linux":   { "method": "apt", "package": "gping", "pre_install": [{ "action": "repo", "type": "azlux" }] },
+      "macos":   { "method": "brew", "package": "gping" },
+      "wsl2":    { "method": "apt", "package": "gping", "pre_install": [{ "action": "repo", "type": "azlux" }] },
+      "windows": { "method": "scoop", "package": "gping" }
+    },
+    {
+      "name": "kubectl",
+      "tags": ["k8s"],
+      "linux":   { "method": "apt", "package": "kubectl" },
+      "macos":   { "method": "brew", "package": "kubectl" },
+      "wsl2":    { "method": "apt", "package": "kubectl" },
+      "windows": { "method": "scoop", "package": "kubectl" }
+    },
+    {
+      "name": "clink",
+      "tags": ["win"],
+      "windows": { "method": "scoop", "package": "clink", "post_install": [{ "action": "registry", "type": "clink-autorun" }] }
+    },
+    {
+      "name": "quicklook",
+      "tags": ["win"],
+      "windows": { "method": "scoop", "package": "quicklook" }
+    },
+    {
+      "name": "nerd-fonts",
+      "tags": ["fonts"],
+      "auto_install": false,
+      "linux":   { "method": "github-zip", "url": "https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${font_name}.zip", "version": "3.4.0", "font_name": "${NERD_FONT_NAME}", "dest": "${HOME}/.local/share/fonts" },
+      "macos":   { "method": "github-zip", "url": "https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${font_name}.zip", "version": "3.4.0", "font_name": "${NERD_FONT_NAME}", "dest": "${HOME}/.local/share/fonts" },
+      "wsl2":    { "method": "github-zip", "url": "https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${font_name}.zip", "version": "3.4.0", "font_name": "${NERD_FONT_NAME}", "dest": "${HOME}/.local/share/fonts" },
+      "windows": { "method": "scoop-bucket", "bucket_name": "nerd-fonts", "bucket_url": "https://github.com/matthewjberger/scoop-nerd-fonts", "package": "FiraCode-NF" }
+    }
+  ]
+}

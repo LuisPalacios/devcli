@@ -21,36 +21,28 @@ fi
 # Asegurar que existe el directorio de binarios
 ensure_directory "$BIN_DIR"
 
-# Paquetes esenciales obligatorios
-COMMON_PACKAGES=(git curl wget nano zsh)
-
-# Comprueba que git esté instalado o lo instala
+# Comprueba que git esté instalado (necesario antes de todo)
 if ! command_exists git; then
   log "Instalando git..."
-  install_package git
+  sudo apt install -y -qq git >/dev/null 2>&1 || brew install git >/dev/null 2>&1
 fi
 
 # Actualizar repositorios
 log "Actualizando repositorios..."
 update_package_manager
 
-# Instalar paquetes comunes
+# Instalar herramientas del sistema desde tools.json (tag: system)
+TOOLS_JSON="$(dirname "${BASH_SOURCE[0]}")/tools.json"
+
 log "Instalando paquetes base..."
-for pkg in "${COMMON_PACKAGES[@]}"; do
-  install_package "$pkg"
-done
-
-# Instala oh-my-posh en $BIN_DIR (ver env.sh)
-if ! command -v "$BIN_DIR/oh-my-posh" &>/dev/null; then
-  log "Instalando oh-my-posh..."
-  curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$BIN_DIR" >/dev/null 2>&1
-
-  # Validar que se instaló correctamente
-  if ! command -v "$BIN_DIR/oh-my-posh" &>/dev/null; then
-    error "oh-my-posh no se instaló correctamente"
-    exit 1
+SYSTEM_INSTALLED=0
+while IFS= read -r tool_name; do
+  if [[ -n "$tool_name" ]] && install_tool "$tool_name" "$TOOLS_JSON"; then
+    SYSTEM_INSTALLED=$((SYSTEM_INSTALLED + 1))
   fi
-fi
+done < <(jq -r --arg os "$OS_TYPE" \
+  '.tools[] | select(.tags | index("system")) | select(.[$os] != null) | .name' \
+  "$TOOLS_JSON")
 
 # Convertir LANG canónica, por ejemplo: es_ES.UTF-8 → nombre usado en locale -a (es_ES.utf8)
 SETUP_LOCALE_NAME="$(echo "$SETUP_LANG" | sed 's/UTF-8/utf8/I')"
@@ -70,5 +62,4 @@ if [[ "$OS_TYPE" == "linux" ]]; then
 fi
 
 # Mostrar resumen final
-PACKAGES_COUNT=$(count_installed_packages "${COMMON_PACKAGES[@]}")
-success "Configuración base completada ($PACKAGES_COUNT paquetes verificados)"
+success "Configuración base completada ($SYSTEM_INSTALLED herramientas del sistema)"

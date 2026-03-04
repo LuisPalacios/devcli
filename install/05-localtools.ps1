@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 
 # Script de instalación de herramientas locales para Windows
-# Lee configuración desde 05-localtools-win.json
+# Lee configuración desde 05-localtools.json
 
 [CmdletBinding()]
 param()
@@ -33,100 +33,83 @@ function Update-NerdFontVariables {
     }
 }
 
-# Función principal
-function main {
-    trap {
-        Write-Log "🛑 Excepción no manejada: $($_.Exception.Message)" "ERROR"
-        Restore-OriginalDirectory
+Run-Phase {
+    Write-Log "Iniciando instalación de herramientas locales..."
+
+    # Asegurar que existe el directorio de binarios
+    if (-not (New-DirectoryIfNotExists $Global:BIN_DIR)) {
+        Write-Log "Error creando directorio de binarios" "ERROR"
         exit 1
     }
 
-    Setup-ScriptInterruptionHandler
+    # Verificar que existe el directorio de archivos fuente
+    if (-not (Test-Path $Global:FILES_DIR)) {
+        Write-Log "Directorio de archivos fuente no encontrado: $Global:FILES_DIR" "ERROR"
+        exit 1
+    }
 
-    try {
-        Write-Log "Iniciando instalación de herramientas locales..."
+    # Archivo de configuración (compartido, con filtro por plataforma)
+    $localToolsConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\05-localtools.json"
 
-        # Asegurar que existe el directorio de binarios
-        if (-not (New-DirectoryIfNotExists $Global:BIN_DIR)) {
-            Write-Log "Error creando directorio de binarios" "ERROR"
-            exit 1
-        }
+    # Leer herramientas desde JSON usando función común
+    $allTools = Get-ConfigFromJson -JsonPath $localToolsConfig -PropertyName "tools"
 
-        # Verificar que existe el directorio de archivos fuente
-        if (-not (Test-Path $Global:FILES_DIR)) {
-            Write-Log "Directorio de archivos fuente no encontrado: $Global:FILES_DIR" "ERROR"
-            exit 1
-        }
+    if (-not $allTools -or $allTools.Count -eq 0) {
+        Write-Log "No hay herramientas para instalar"
+        return
+    }
 
-        # Archivo de configuración
-        $localToolsConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\05-localtools-win.json"
+    # Filtrar por plataforma Windows
+    $tools = $allTools | Where-Object {
+        $_.platforms -contains "windows"
+    }
 
-        # Leer herramientas desde JSON usando función común
-        $tools = Get-ConfigFromJson -JsonPath $localToolsConfig -PropertyName "tools"
+    if ($tools.Count -eq 0) {
+        Write-Log "No hay herramientas para Windows"
+        return
+    }
 
-        if ($tools.Count -eq 0) {
-            Write-Log "No hay herramientas para instalar"
-            return
-        }
+    $toolsInstalled = 0
 
-        $toolsInstalled = 0
+    Write-Log "Instalando herramientas locales..."
+    foreach ($tool in $tools) {
+        $toolName = $tool.name
+        if (-not $toolName) { continue }
 
-        Write-Log "Instalando herramientas locales..."
-        foreach ($tool in $tools) {
-            if (-not $tool) { continue }
+        $src = Join-Path $Global:FILES_DIR $toolName
+        $dst = Join-Path $Global:BIN_DIR $toolName
 
-            $src = Join-Path $Global:FILES_DIR $tool
-            $dst = Join-Path $Global:BIN_DIR $tool
+        if (Test-Path $src) {
+            try {
+                Copy-Item $src $dst -Force
 
-            if (Test-Path $src) {
-                try {
-                    Copy-Item $src $dst -Force
-
-                    # Actualizar variables de Nerd Fonts en scripts específicos
-                    if ($tool -eq "nerd-setup.ps1" -or $tool -eq "nerd-verify.ps1") {
-                        $updateResult = Update-NerdFontVariables $dst
-                        if ($updateResult) {
-                            Write-Log "Variables de Nerd Fonts actualizadas en $tool"
-                        } else {
-                            Write-Log "Error actualizando variables de Nerd Fonts en $tool" "WARNING"
-                        }
+                # Actualizar variables de Nerd Fonts en scripts específicos
+                if ($toolName -eq "nerd-setup.ps1" -or $toolName -eq "nerd-verify.ps1") {
+                    $updateResult = Update-NerdFontVariables $dst
+                    if ($updateResult) {
+                        Write-Log "Variables de Nerd Fonts actualizadas en $toolName"
+                    } else {
+                        Write-Log "Error actualizando variables de Nerd Fonts en $toolName" "WARNING"
                     }
-
-                    Write-Log "Copiado: $tool"
-                    $toolsInstalled++
                 }
-                catch {
-                    Write-Log "Error copiando $tool`: $($_.Exception.Message)" "WARNING"
-                }
-            }
-            else {
-                Write-Log "Herramienta no encontrada: $tool" "WARNING"
-            }
-        }
 
-        # Mostrar resumen final
-        if ($toolsInstalled -gt 0) {
-            Write-Log "✅ Herramientas locales instaladas ($toolsInstalled herramientas)" "SUCCESS"
+                Write-Log "Copiado: $toolName"
+                $toolsInstalled++
+            }
+            catch {
+                Write-Log "Error copiando $toolName`: $($_.Exception.Message)" "WARNING"
+            }
         }
         else {
-            Write-Log "No se instalaron herramientas locales"
-        }
-
-        $Global:ShouldRestoreDirectory = $false
-    }
-    finally {
-        if ($Global:ShouldRestoreDirectory) {
-            Restore-OriginalDirectory
+            Write-Log "Herramienta no encontrada: $toolName" "WARNING"
         }
     }
-}
 
-# Ejecutar función principal con manejo robusto
-try {
-    main
-}
-catch {
-    Write-Error "❌ Error crítico en script: $($_.Exception.Message)"
-    Restore-OriginalDirectory
-    exit 1
+    # Mostrar resumen final
+    if ($toolsInstalled -gt 0) {
+        Write-Log "✅ Herramientas locales instaladas ($toolsInstalled herramientas)" "SUCCESS"
+    }
+    else {
+        Write-Log "No se instalaron herramientas locales"
+    }
 }

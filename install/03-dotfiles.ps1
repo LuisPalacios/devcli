@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 
 # Script de instalación de dotfiles para Windows
-# Lee configuración desde 03-dotfiles-win.json
+# Lee configuración desde 03-dotfiles.json (filtrado por plataforma)
 
 [CmdletBinding()]
 param()
@@ -118,161 +118,138 @@ function ConfigureWindowsTerminal {
     }
 }
 
-# Función principal
-function main {
-    trap {
-        Write-Log "🛑 Excepción no manejada: $($_.Exception.Message)" "ERROR"
-        Restore-OriginalDirectory
+Run-Phase {
+    Write-Log "Iniciando instalación de dotfiles..."
+    Write-Log "Usuario: $env:USERNAME | Idioma: $Global:LOCALE"
+    Write-Log "Directorio original: $Global:OriginalDirectory"
+
+    # Directorio de dotfiles
+    $dotfilesDir = Join-Path $Global:SETUP_DIR "dotfiles"
+
+    if (-not (Test-Path $dotfilesDir)) {
+        Write-Log "Directorio de dotfiles no encontrado: $dotfilesDir" "ERROR"
         exit 1
     }
 
-    Setup-ScriptInterruptionHandler
+    # Archivo de configuración (compartido, con filtro por plataforma)
+    $dotfilesConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\03-dotfiles.json"
 
-    try {
-        Write-Log "Iniciando instalación de dotfiles..."
-        Write-Log "Usuario: $env:USERNAME | Idioma: $Global:LOCALE"
-        Write-Log "Directorio original: $Global:OriginalDirectory"
+    # Leer dotfiles desde JSON usando función común
+    $allDotfiles = Get-ConfigFromJson -JsonPath $dotfilesConfig -PropertyName "dotfiles"
 
-        # Directorio de dotfiles
-        $dotfilesDir = Join-Path $Global:SETUP_DIR "dotfiles"
+    if (-not $allDotfiles -or $allDotfiles.Count -eq 0) {
+        Write-Log "No hay dotfiles para instalar"
+        return
+    }
 
-        if (-not (Test-Path $dotfilesDir)) {
-            Write-Log "Directorio de dotfiles no encontrado: $dotfilesDir" "ERROR"
-            exit 1
+    # Filtrar por plataforma Windows
+    $dotfiles = $allDotfiles | Where-Object {
+        $_.platforms -contains "windows"
+    }
+
+    if ($dotfiles.Count -eq 0) {
+        Write-Log "No hay dotfiles para Windows"
+        return
+    }
+
+    $installedCount = 0
+    $failedCount = 0
+
+    Write-Log "Copiando dotfiles según configuración..."
+    foreach ($dotfile in $dotfiles) {
+        if (-not $dotfile.file) {
+            Write-Log "Dotfile con configuración incompleta omitido" "WARNING"
+            $failedCount++
+            continue
         }
 
-        # Archivo de configuración
-        $dotfilesConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\03-dotfiles-win.json"
+        $src = Join-Path $dotfilesDir $dotfile.file
 
-        # Leer dotfiles desde JSON usando función común
-        $dotfiles = Get-ConfigFromJson -JsonPath $dotfilesConfig -PropertyName "dotfiles"
-
-        if ($dotfiles.Count -eq 0) {
-            Write-Log "No hay dotfiles para instalar"
-            return
+        # Construir ruta de destino (dst es la ruta relativa a HOME incluyendo el nombre)
+        if (-not $dotfile.dst) {
+            Write-Log "Dotfile sin ruta destino especificada: $($dotfile.file)" "WARNING"
+            $failedCount++
+            continue
         }
 
-        $installedCount = 0
-        $failedCount = 0
+        # Normalizar la ruta destino (forward slashes en JSON → separador nativo)
+        $dstRelative = $dotfile.dst.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
 
-        Write-Log "Copiando dotfiles según configuración..."
-        foreach ($dotfile in $dotfiles) {
-            if (-not $dotfile.file) {
-                Write-Log "Dotfile con configuración incompleta omitido" "WARNING"
-                $failedCount++
-                continue
-            }
+        # Construir ruta completa al archivo destino
+        $dst = Join-Path $env:USERPROFILE $dstRelative
 
-            $src = Join-Path $dotfilesDir $dotfile.file
+        # Extraer directorio padre para crear la estructura de directorios
+        $dstDir = Split-Path $dst -Parent
 
-            # Construir ruta de destino (dst ahora incluye el nombre del archivo)
-            if (-not $dotfile.dst) {
-                Write-Log "Dotfile sin ruta destino especificada: $($dotfile.file)" "WARNING"
-                $failedCount++
-                continue
-            }
-
-            # Normalizar la ruta destino
-            $dstRelative = $dotfile.dst.Replace('\\', [System.IO.Path]::DirectorySeparatorChar)
-
-            # Si empieza con .\ o ./, quitarlo ya que es relativo al HOME
-            if ($dstRelative.StartsWith(".\") -or $dstRelative.StartsWith("./")) {
-                $dstRelative = $dstRelative.Substring(2)
-            }
-
-            # Construir ruta completa al archivo destino
-            $dst = Join-Path $env:USERPROFILE $dstRelative
-
-            # Extraer directorio padre para crear la estructura de directorios
-            $dstDir = Split-Path $dst -Parent
-
-            if (-not (Test-Path $src)) {
-                Write-Log "Archivo fuente no encontrado: $src" "WARNING"
-                $failedCount++
-                continue
-            }
-
-            try {
-                # Crear directorio de destino si no existe
-                if (-not (Test-Path $dstDir)) {
-                    New-Item -Path $dstDir -ItemType Directory -Force | Out-Null
-                    Write-Log "Directorio creado: $dstDir"
-                }
-
-                # Copiar archivo
-                Copy-Item $src $dst -Force
-                Write-Log "✅ Copiado: $($dotfile.file) → $dstRelative" "SUCCESS"
-                $installedCount++
-            }
-            catch {
-                Write-Log "Error copiando $($dotfile.file): $($_.Exception.Message)" "WARNING"
-                $failedCount++
-            }
+        if (-not (Test-Path $src)) {
+            Write-Log "Archivo fuente no encontrado: $src" "WARNING"
+            $failedCount++
+            continue
         }
 
-        # Configurar variables de entorno específicas para Windows Terminal
         try {
-            [Environment]::SetEnvironmentVariable("OMP_OS_ICON", "🪟", "User")
-            Write-Log "Variable de entorno OMP_OS_ICON configurada"
+            # Crear directorio de destino si no existe
+            if (-not (Test-Path $dstDir)) {
+                New-Item -Path $dstDir -ItemType Directory -Force | Out-Null
+                Write-Log "Directorio creado: $dstDir"
+            }
+
+            # Copiar archivo
+            Copy-Item $src $dst -Force
+            Write-Log "✅ Copiado: $($dotfile.file) → $dstRelative" "SUCCESS"
+            $installedCount++
         }
         catch {
-            Write-Log "Error configurando variables de entorno: $($_.Exception.Message)" "WARNING"
-        }
-
-        # Configurar Windows Terminal para usar cmd_aliases.cmd
-        $terminalConfigured = $false
-        $aliasesFile = Join-Path $env:USERPROFILE "cmd_aliases.cmd"
-        if (Test-Path $aliasesFile) {
-            $terminalConfigured = ConfigureWindowsTerminal
-        }
-        else {
-            Write-Log "cmd_aliases.cmd no encontrado, omitiendo configuración de Windows Terminal" "WARNING"
-        }
-
-        # Mostrar resumen final
-        if ($installedCount -gt 0) {
-            Write-Log "✅ Dotfiles instalados ($installedCount archivos)" "SUCCESS"
-            if ($failedCount -gt 0) {
-                Write-Log "$failedCount archivos fallaron en la copia" "WARNING"
-            }
-            if ($terminalConfigured) {
-                Write-Log "✅ Windows Terminal configurado para usar cmd_aliases.cmd" "SUCCESS"
-            }
-        }
-        else {
-            Write-Log "No se instalaron dotfiles nuevos"
-        }
-
-        # Verificar archivos críticos instalados
-        $criticalFiles = @(".oh-my-posh.json", "cmd_aliases.cmd")
-        $missingFiles = @()
-
-        foreach ($file in $criticalFiles) {
-            $filePath = Join-Path $env:USERPROFILE $file
-            if (-not (Test-Path $filePath)) {
-                $missingFiles += $file
-            }
-        }
-
-        if ($missingFiles.Count -gt 0) {
-            Write-Log "❌ Archivos críticos no disponibles: $($missingFiles -join ', ')" "WARNING"
-        }
-
-        $Global:ShouldRestoreDirectory = $false
-    }
-    finally {
-        if ($Global:ShouldRestoreDirectory) {
-            Restore-OriginalDirectory
+            Write-Log "Error copiando $($dotfile.file): $($_.Exception.Message)" "WARNING"
+            $failedCount++
         }
     }
-}
 
-# Ejecutar función principal con manejo robusto
-try {
-    main
-}
-catch {
-    Write-Error "❌ Error crítico en script: $($_.Exception.Message)"
-    Restore-OriginalDirectory
-    exit 1
+    # Configurar variables de entorno específicas para Windows Terminal
+    try {
+        [Environment]::SetEnvironmentVariable("OMP_OS_ICON", "🪟", "User")
+        Write-Log "Variable de entorno OMP_OS_ICON configurada"
+    }
+    catch {
+        Write-Log "Error configurando variables de entorno: $($_.Exception.Message)" "WARNING"
+    }
+
+    # Configurar Windows Terminal para usar cmd_aliases.cmd
+    $terminalConfigured = $false
+    $aliasesFile = Join-Path $env:USERPROFILE "cmd_aliases.cmd"
+    if (Test-Path $aliasesFile) {
+        $terminalConfigured = ConfigureWindowsTerminal
+    }
+    else {
+        Write-Log "cmd_aliases.cmd no encontrado, omitiendo configuración de Windows Terminal" "WARNING"
+    }
+
+    # Mostrar resumen final
+    if ($installedCount -gt 0) {
+        Write-Log "✅ Dotfiles instalados ($installedCount archivos)" "SUCCESS"
+        if ($failedCount -gt 0) {
+            Write-Log "$failedCount archivos fallaron en la copia" "WARNING"
+        }
+        if ($terminalConfigured) {
+            Write-Log "✅ Windows Terminal configurado para usar cmd_aliases.cmd" "SUCCESS"
+        }
+    }
+    else {
+        Write-Log "No se instalaron dotfiles nuevos"
+    }
+
+    # Verificar archivos críticos instalados
+    $criticalFiles = @(".oh-my-posh.json", "cmd_aliases.cmd")
+    $missingFiles = @()
+
+    foreach ($file in $criticalFiles) {
+        $filePath = Join-Path $env:USERPROFILE $file
+        if (-not (Test-Path $filePath)) {
+            $missingFiles += $file
+        }
+    }
+
+    if ($missingFiles.Count -gt 0) {
+        Write-Log "❌ Archivos críticos no disponibles: $($missingFiles -join ', ')" "WARNING"
+    }
 }

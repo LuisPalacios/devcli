@@ -48,7 +48,7 @@ update_nerd_font_variables() {
   fi
 }
 
-# Copiar herramientas al directorio de los binarios
+# Copiar herramientas al directorio de los binarios (filtrado por plataforma)
 log "Instalando herramientas locales..."
 while IFS= read -r tool; do
   if [[ -n "$tool" ]]; then
@@ -68,7 +68,7 @@ while IFS= read -r tool; do
       TOOLS_INSTALLED=$((TOOLS_INSTALLED + 1))
     fi
   fi
-done < <(read_json_array "$LOCAL_TOOLS_CONFIG" "tools")
+done < <(jq -r --arg p "$OS_TYPE" '.tools[] | select(.platforms | index($p)) | .name' "$LOCAL_TOOLS_CONFIG" 2>/dev/null)
 
 # Configuración y directorios dependientes del sistema operativo
 case "${OS_TYPE:-}" in
