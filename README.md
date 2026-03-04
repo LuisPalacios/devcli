@@ -70,9 +70,9 @@ Enfoque modular, multiplataforma e idempotente.
 
 ## 🪟 Requisitos Windows
 
-Necesitarás tener **PowerShell 7** y **winget**.
+Necesitarás tener **PowerShell 7**.
 
-- Instala y ejecuta `winget list` para aceptar.
+- Comprueba que tienes `winget` (viene con Windows) ejecutando `winget list`.
 
 - PowerShell 7.0 o superior en modo Administrador. Descargar desde [GitHub](https://github.com/PowerShell/PowerShell/releases) o Microsoft Store
 
