@@ -127,13 +127,14 @@ Enfoque modular, multiplataforma e idempotente. Un solo comando descarga el repo
 
 ## 🐧 Requisitos Linux, macOS y WSL2
 
-- La versión actual solo soporta **Debian/Ubuntu** (usa `apt` para instalar software).
-- Tener `curl` o `wget`.
-- Tener `zsh` como shell.
-  - En Linux y WSL2: [guía](https://luispa.com/posts/2024-04-23-zsh/).
+> Importante: En linux solo soporta **Debian/Ubuntu** (usa `apt` para instalar software).
+
+- Necesitas tener `curl` o `wget`.
+- Necesitas `zsh` como la shell de tu usuario
+  - Si no lo conoces, aquí tienes un [apunte técnico](https://luispa.com/posts/2024-04-23-zsh/) sobre ZSH en Linux y WSL2.
   - En macOS viene por defecto.
-- En macOS: `Homebrew` ([guía](https://brew.sh)).
-- Usuario normal con acceso a `sudo` sin contraseña:
+- Necesitas, en macOS, tener instalado `Homebrew` ([guía](https://brew.sh)).
+- Necesitas que tu usuario tenga acceso a `sudo` sin contraseña:
 
     ```bash
     apt install sudo
@@ -141,7 +142,7 @@ Enfoque modular, multiplataforma e idempotente. Un solo comando descarga el repo
     echo "<usuario> ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/10-<usuario>
     ```
 
-- Puedes ejecutar el script como `root`, útil para entornos headless.
+- Ah!, incluso puedes ejecutar el script como `root`, útil para entornos headless.
 
 <br/>
 
