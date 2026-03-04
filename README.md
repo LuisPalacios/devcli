@@ -4,11 +4,11 @@
 
 Me he pasado años instalando sistemas operativos, una y otra vez. Cada vez acabo echando un par de horas para sacarles brillo y dejar el entorno que me gusta. Un mismo CLI (Command Line Interface), herramientas y todo bien configurado.
 
-El propósito de este proyecto es automatizarlo al máximo, reducir tiempo y poder tener casi el mismo interfaz y comandos en **PowerShell, CMD** y las shells **WSL2, macOS y Linux**.
+El propósito de este proyecto es automatizarlo al máximo, reducir tiempo y poder tener casi el mismo interfaz y comandos en **PowerShell, CMD** y las shells **WSL2, macOS y Linux**. Tiene que dar igual en qué terminal estoy, todos deben comportarse parecido.
 
-Que de igual si estoy en PowerShell, Alacritty, VSCode, iTerm, SSH. A medida que descubra nuevas utilidades que cumplan con este enfoque multiplataforma y sin dependencias pesadas, las iré incorporando.
+A medida que descubra nuevas utilidades que cumplan con este enfoque multiplataforma y sin dependencias pesadas, las iré incorporando.
 
-Contiene las herramientas que yo uso, siempre puedes hacerte un fork y adaptarlo a lo que te guste.
+> Importante: Este repo lo hice para todos pero contiene las herramientas que yo uso. Te recomiendo que si quieres adaptarlo te hagas un fork.
 
 El repositorio configura el entorno de línea de comandos (CLI) en **Linux**, **macOS**, **WSL2** o **Windows**. En vez de perder una hora configurando, este script añade las herramientas CLI, algunos ejecutables, scripts y fonts, que utilizo en mi día a día.
 
