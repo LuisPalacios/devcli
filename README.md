@@ -2,13 +2,9 @@
 
 ![devcli](assets/old-hacker.jpg)
 
-Me he pasado años instalando sistemas operativos, una y otra vez. Cada vez acabo echando un par de horas para sacarles brillo y dejar el entorno que me gusta. Un mismo CLI (Command Line Interface), herramientas y todo bien configurado.
+Me he pasado años instalando sistemas operativos, una y otra vez. Cada vez acabo echando un par de horas para sacarles dejar el entorno de CLI como me gusta. El propósito de este proyecto es automatizar al máximo la parametrización del Terminal (CLI) y conseguir casi idénticas opciones en **Windows: Git Bash, PowerShell, CMD** y **UX: WSL2, macOS y Linux**.
 
-El propósito de este proyecto es automatizarlo al máximo, reducir tiempo y poder tener casi el mismo interfaz y comandos en **PowerShell, CMD** y las shells **WSL2, macOS y Linux**. Tiene que dar igual en qué terminal estoy, todos deben comportarse parecido.
-
-A medida que descubra nuevas utilidades que cumplan con este enfoque multiplataforma y sin dependencias pesadas, las iré incorporando.
-
-**Linux, macOS y WSL2** (lee los [requisitos](#-requisitos-linux-macos-y-wsl2)):
+**Linux, macOS y WSL2** (lee los [requisitos](#-requisitos-linux-macos-y-wsl2)).
 
 ```console
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
@@ -16,7 +12,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/boo
 
 > *wget*: `bash <(wget -qO- https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)`
 
-**Windows 10/11** (lee los [requisitos para Windows](#-requisitos-windows)):
+**Windows 10/11 desde Powershell 7** (lee los [requisitos para Windows](#-requisitos-windows)):
 
 ```console
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
@@ -29,13 +25,13 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 > & "$env:TEMP\devcli-bootstrap.ps1"
 > ```
 
-**Windows — desde Git Bash:**
+**Windows 10/11 desde Git Bash:**
 
 ```console
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
 ```
 
-> Detecta automáticamente Git Bash y delega la instalación a PowerShell 7.
+> Detecta automáticamente que estás en Git Bash y delega la instalación a PowerShell 7.
 
 <br/>
 
