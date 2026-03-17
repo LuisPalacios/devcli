@@ -29,6 +29,14 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 > & "$env:TEMP\devcli-bootstrap.ps1"
 > ```
 
+**Windows — desde Git Bash:**
+
+```console
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
+```
+
+> Detecta automáticamente Git Bash y delega la instalación a PowerShell 7.
+
 <br/>
 
 ## Perfiles de instalación
@@ -117,7 +125,7 @@ Enfoque modular, multiplataforma e idempotente. Un solo comando descarga el repo
 - **tmux**: `.tmux.conf` con configuración personalizada.
 - **PowerShell**: perfil con aliases y oh-my-posh (`Microsoft.PowerShell_profile.ps1`).
 - **CMD**: aliases via clink (`cmd_aliases.cmd`, `oh-my-posh.lua`, `clink_settings`).
-- **Git Bash**: `.bashrc` con oh-my-posh para Windows.
+- **Git Bash**: `.bashrc` con oh-my-posh, zoxide, fzf, lsd y autocompletado avanzado.
 - **Git**: scripts de gestión de repos (`git-config-repos.sh`, `git-status-pull.sh/.ps1`).
 - **Locale**: establece LANG (por defecto `es_ES.UTF-8`) en Linux, macOS y WSL2.
 - **Fuentes**: instala automáticamente **FiraCode Nerd Font** para iconos en `lsd`.

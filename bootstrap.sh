@@ -84,6 +84,15 @@ fi
 detect_os_type() {
   if [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
     OS_TYPE="wsl2"
+  elif [[ "$OSTYPE" == msys* ]]; then
+    # Git Bash en Windows: delegar a PowerShell 7 (bootstrap.ps1)
+    if ! command -v pwsh &>/dev/null; then
+      echo "[bootstrap] ❌ PowerShell 7 (pwsh) es necesario en Windows."
+      echo "  Instálalo desde: https://github.com/PowerShell/PowerShell/releases"
+      exit 1
+    fi
+    log "Detectado Git Bash — delegando instalación a PowerShell 7..."
+    exec pwsh -NoProfile -Command 'iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")'
   elif [[ "$OSTYPE" == darwin* ]]; then
     OS_TYPE="macos"
   elif [[ "$OSTYPE" == linux* ]]; then
