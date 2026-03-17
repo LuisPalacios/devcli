@@ -209,20 +209,19 @@ function Test-Prerequisites {
 
     # Verificar y agregar bucket extras si scoop ya estaba instalado
     if (Get-Command scoop -ErrorAction SilentlyContinue) {
-        # Verificar si el bucket extras ya está agregado
-        $bucketsOutput = scoop bucket list 2>$null
-        if ($bucketsOutput -and $bucketsOutput -notmatch "extras") {
+        $hasBucketExtras = (scoop bucket list 2>$null) | Where-Object { $_.Name -eq "extras" }
+        if (-not $hasBucketExtras) {
             Write-Log "Agregando bucket extras de scoop..."
             try {
-                scoop bucket add extras
-                Write-Log "✅ Bucket extras agregado correctamente" -ForegroundColor Green
+                scoop bucket add extras *>$null
+                Write-Log "✅ Bucket extras agregado correctamente"
             }
             catch {
                 Write-Warning "⚠️ No se pudo agregar el bucket extras: $_"
             }
         }
         else {
-            Write-Log "✅ Bucket extras ya está disponible" -ForegroundColor Green
+            Write-Log "✅ Bucket extras ya está disponible"
         }
     }
 

@@ -126,7 +126,7 @@ Enfoque modular, multiplataforma e idempotente. Un solo comando descarga el repo
 - **PowerShell**: perfil con aliases y oh-my-posh (`Microsoft.PowerShell_profile.ps1`).
 - **CMD**: aliases via clink (`cmd_aliases.cmd`, `oh-my-posh.lua`, `clink_settings`).
 - **Git Bash**: `.bashrc` con oh-my-posh, zoxide, fzf, lsd y autocompletado avanzado.
-- **Git**: scripts de gestión de repos (`git-config-repos.sh`, `git-status-pull.sh/.ps1`).
+- **Git**: scripts de gestión de repos (`git-config-repos.sh`, `git-status-pull.sh`).
 - **Locale**: establece LANG (por defecto `es_ES.UTF-8`) en Linux, macOS y WSL2.
 - **Fuentes**: instala automáticamente **FiraCode Nerd Font** para iconos en `lsd`.
 - **Scripts auxiliares** en `~/bin`: `e` (editor rápido), `s` (ssh wrapper), `confcat` (muestra config sin comentarios), `nerd-setup`/`nerd-verify` (gestión de Nerd Fonts).
