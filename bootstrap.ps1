@@ -289,29 +289,12 @@ function main {
         # Verificar prerequisitos
         Test-Prerequisites
 
-        # Clonar o actualizar repositorio
+        # Clonar repositorio (siempre limpio para garantizar la última versión)
         Write-Log "Preparando repositorio..."
         if (Test-Path $SETUP_DIR) {
-            try {
-                Push-Location $SETUP_DIR
-                try {
-                    git reset --hard HEAD *>$null
-                    git clean -fd *>$null
-                    git pull *>$null
-                }
-                finally {
-                    Pop-Location
-                }
-            }
-            catch {
-                Write-Warning "Error actualizando repositorio, clonando de nuevo..."
-                Remove-Item $SETUP_DIR -Recurse -Force -ErrorAction SilentlyContinue
-                git clone --branch $BRANCH $REPO_URL $SETUP_DIR *>$null
-            }
+            Remove-Item $SETUP_DIR -Recurse -Force -ErrorAction SilentlyContinue
         }
-        else {
-            git clone --branch $BRANCH $REPO_URL $SETUP_DIR *>$null
-        }
+        git clone --branch $BRANCH $REPO_URL $SETUP_DIR *>$null
 
         if (-not (Test-Path $SETUP_DIR)) {
             Write-Error "❌ Error clonando repositorio" -ErrorAction Stop
