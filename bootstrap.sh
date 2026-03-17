@@ -92,6 +92,9 @@ detect_os_type() {
       exit 1
     fi
     log "Detectado Git Bash — delegando instalación a PowerShell 7..."
+    # Limpiar variables MSYS2 que pueden interferir con git.exe en PowerShell
+    unset MSYSTEM MINGW_PREFIX MSYSTEM_PREFIX MSYSTEM_CHOST MSYSTEM_CTYPE
+    unset ORIGINAL_PATH ORIGINAL_TEMP ORIGINAL_TMP
     exec pwsh -NoProfile -Command 'iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")'
   elif [[ "$OSTYPE" == darwin* ]]; then
     OS_TYPE="macos"
