@@ -129,6 +129,9 @@ if command -v btm >/dev/null 2>&1; then
     alias htop='btm'
 fi
 
+# Llevo años usando more... me sale solo
+alias more='less'
+
 # =============================================================================
 # INCLUSIÓN DE ALIASES EXTERNOS
 # =============================================================================
