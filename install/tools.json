@@ -153,8 +153,9 @@
       "name": "pnpm",
       "tags": ["dev"],
       "linux":   { "method": "curl-sh", "url": "https://get.pnpm.io/install.sh", "bin_path": "${HOME}/.local/share/pnpm", "check_cmd": "pnpm" },
-      "macos":   { "method": "curl-sh", "url": "https://get.pnpm.io/install.sh", "bin_path": "${HOME}/.local/share/pnpm", "check_cmd": "pnpm" },
-      "wsl2":    { "method": "curl-sh", "url": "https://get.pnpm.io/install.sh", "bin_path": "${HOME}/.local/share/pnpm", "check_cmd": "pnpm" }
+      "macos":   { "method": "brew", "package": "pnpm", "check_cmd": "pnpm" },
+      "wsl2":    { "method": "curl-sh", "url": "https://get.pnpm.io/install.sh", "bin_path": "${HOME}/.local/share/pnpm", "check_cmd": "pnpm" },
+      "windows": { "method": "winget", "package": "pnpm.pnpm", "check_cmd": "pnpm" }
     },
     {
       "name": "uv",
