@@ -1,10 +1,10 @@
 {
   "repositories": [
     {
-      "url": "https://github.com/LuisPalacios/git-config-repos",
+      "url": "https://github.com/LuisPalacios/git-toolkit",
       "files": [
-        "./git-config-repos.sh",
-        "./git-status-pull.sh"
+        "./git-config-repos/git-config-repos.sh",
+        "./git-status-pull/git-status-pull.sh"
       ]
     }
   ]
