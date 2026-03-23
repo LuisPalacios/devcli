@@ -91,14 +91,26 @@ success "Herramientas locales instaladas ($TOOLS_INSTALLED herramientas)"
 
 # Verificar Nerd Fonts
 check_nerd_fonts_installed() {
+  # Método 1: fc-list (Linux/WSL2)
   if command -v fc-list &>/dev/null && fc-list | grep -q "${NERD_FONT_FULL_NAME:-FiraCode Nerd Font}" 2>/dev/null; then
     echo "true"; return
   fi
+  # Método 2: Directorios estándar de fuentes (Linux/WSL2)
   for dir in "$HOME/.local/share/fonts" "$HOME/.fonts"; do
     if [[ -d "$dir" ]] && find "$dir" -name "*${NERD_FONT_NAME:-FiraCode}*" -type f 2>/dev/null | grep -q .; then
       echo "true"; return
     fi
   done
+  # Método 3: Directorio de fuentes de usuario en macOS
+  if [[ -d "$HOME/Library/Fonts" ]] && find "$HOME/Library/Fonts" -name "*${NERD_FONT_NAME:-FiraCode}*" -type f 2>/dev/null | grep -q .; then
+    echo "true"; return
+  fi
+  # Método 4: system_profiler en macOS
+  if [[ "${OS_TYPE:-}" == "macos" ]] && command -v system_profiler &>/dev/null; then
+    if system_profiler SPFontsDataType 2>/dev/null | grep -q "${NERD_FONT_NAME:-FiraCode}"; then
+      echo "true"; return
+    fi
+  fi
   echo "false"
 }
 
