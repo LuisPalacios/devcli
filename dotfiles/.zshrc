@@ -395,40 +395,47 @@ else
       # Eliminar duplicados en PATH
       typeset -U path PATH
 
-      # Inicializar entorno de Homebrew (detecta automáticamente Intel vs Apple Silicon)
-      eval "$(/opt/homebrew/bin/brew shellenv)"
+      # Inicializar entorno de Homebrew (Intel: /usr/local, Apple Silicon: /opt/homebrew)
+      if [[ -x /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      elif [[ -x /usr/local/bin/brew ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+      fi
+
+      # Prefijo de Homebrew (usado para rutas de herramientas)
+      local BREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
 
       # PATH ordenado y optimizado para desarrollo en macOS
       path=(
-        "/opt/homebrew/opt/llvm/bin"             # LLVM/Clang moderno
-        $path                                    # PATH heredado del sistema
-        .                                        # Directorio actual para scripts locales
-        "${HOME}/bin"                            # Binarios personales
-        "${HOME}/.local/bin"                     # Otros binarios personales
-        "${HOME}/Nextcloud/priv/bin"             # Scripts privados sincronizados
-        "${HOME}/.lmstudio/bin"                  # Si instalo LM Studio CLI
-        "${HOME}/.antigravity/antigravity/bin"   # Si instalo Antigravity
-        "/usr/local/sbin"                        # Binarios de administración local
-        "${HOME}/dev-tools/kombine.osx"          # Herramientas de desarrollo específicas
+        "${BREW_PREFIX}/opt/llvm/bin"             # LLVM/Clang moderno
+        $path                                     # PATH heredado del sistema
+        .                                         # Directorio actual para scripts locales
+        "${HOME}/bin"                             # Binarios personales
+        "${HOME}/.local/bin"                      # Otros binarios personales
+        "${HOME}/Nextcloud/priv/bin"              # Scripts privados sincronizados
+        "${HOME}/.lmstudio/bin"                   # Si instalo LM Studio CLI
+        "${HOME}/.antigravity/antigravity/bin"    # Si instalo Antigravity
+        "/usr/local/sbin"                         # Binarios de administración local
+        "${HOME}/dev-tools/kombine.osx"           # Herramientas de desarrollo específicas
       )
 
       # Reflejar PATH en el entorno gráfico para aplicaciones GUI
       launchctl setenv PATH "${(j/:/)path}"
 
       # -----------------------------------------------------------------------
-      # CONFIGURACIÓN DE LLVM/CLANG 17 PARA DESARROLLO C/C++
+      # CONFIGURACIÓN DE LLVM/CLANG PARA DESARROLLO C/C++
       # -----------------------------------------------------------------------
-      export CPLUS_INCLUDE_PATH="/opt/homebrew/opt/llvm/include"
-      export LIBRARY_PATH="/opt/homebrew/opt/llvm/lib"
-      export CC="/opt/homebrew/opt/llvm/bin/clang"
-      export CXX="/opt/homebrew/opt/llvm/bin/clang++"
-      export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
-      export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
+      export CPLUS_INCLUDE_PATH="${BREW_PREFIX}/opt/llvm/include"
+      export LIBRARY_PATH="${BREW_PREFIX}/opt/llvm/lib"
+      export CC="${BREW_PREFIX}/opt/llvm/bin/clang"
+      export CXX="${BREW_PREFIX}/opt/llvm/bin/clang++"
+      export LDFLAGS="-L${BREW_PREFIX}/opt/llvm/lib"
+      export CPPFLAGS="-I${BREW_PREFIX}/opt/llvm/include"
 
       # -----------------------------------------------------------------------
       # HERRAMIENTAS DE DESARROLLO
       # -----------------------------------------------------------------------
-      export SHFMT_PATH="/opt/homebrew/bin/shfmt"    # Formateador de shell scripts
+      export SHFMT_PATH="${BREW_PREFIX}/bin/shfmt"    # Formateador de shell scripts
 
       # Configurar LSD como reemplazo de ls (ya definido en función común)
       alias ls='lsd'
@@ -444,7 +451,7 @@ else
       # -----------------------------------------------------------------------
       alias grep="/usr/bin/grep"                     # Usar grep nativo de macOS
       alias e="/usr/local/bin/code"                  # Abrir Visual Studio Code
-      alias pip="/opt/homebrew/bin/pip3"             # Usar Python 3 por defecto
+      alias pip="${BREW_PREFIX}/bin/pip3"             # Usar Python 3 por defecto
 
       # -----------------------------------------------------------------------
       # OPTIMIZACIONES DE RENDIMIENTO EN BACKGROUND
