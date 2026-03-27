@@ -130,6 +130,11 @@ install_release_binary() {
   cp -f "$binary_path" "$BIN_DIR/$binary_name"
   chmod 755 "$BIN_DIR/$binary_name"
 
+  # En macOS eliminar el atributo de cuarentena para evitar el bloqueo de Gatekeeper
+  if [[ "${OS_TYPE:-}" == "macos" ]]; then
+    xattr -cr "$BIN_DIR/$binary_name"
+  fi
+
   # Limpiar
   rm -rf "$temp_dir"
   return 0

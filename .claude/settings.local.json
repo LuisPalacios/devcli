@@ -1,7 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Read(//c/Users/luis/00.git/github-LuisPalacios/LuisPalacios/devcli/**)",
+      "Bash(ssh jacobo@obelix \"export PATH=\"\"/usr/local/bin:$PATH\"\" && brew install lsd 2>&1 | tail -5\")",
+      "Bash(ssh jacobo@obelix \"export PATH=\"\"/usr/local/bin:$PATH\"\" && brew install bat fd ripgrep tree gping 2>&1 | tail -20\")",
+      "Bash(ssh jacobo@obelix \"sudo -n true 2>&1; echo \"\"exit: $?\"\"\")",
+      "Bash(ssh jacobo@obelix \"export PATH=\"\"/usr/local/bin:$PATH\"\" && cd ~/.devcli && export DEVCLI_PROFILE=full && bash install/02-packages.sh 2>&1\")",
+      "Bash(ssh -t jacobo@obelix \"export PATH=\"\"/usr/local/bin:$PATH\"\" && cd ~/.devcli && export DEVCLI_PROFILE=full && bash install/02-packages.sh 2>&1\")",
+      "Bash(ssh -tt jacobo@obelix \"export PATH=''/usr/local/bin:$PATH'' && cd ~/.devcli && export DEVCLI_PROFILE=full && bash install/02-packages.sh\")",
+      "Bash(ssh -tt jacobo@obelix \"export PATH=''''/usr/local/bin:/bin:/usr/bin:$PATH'''' && cd ~/.devcli && export DEVCLI_PROFILE=full && /bin/bash install/02-packages.sh\")",
+      "Bash(ssh -tt jacobo@obelix \"export PATH=''/usr/local/bin:/bin:/usr/bin:$PATH'' && which lsd && which bat && which fd && which rg && which oh-my-posh && which gitboxcmd\")",
+      "Bash(ssh -tt jacobo@obelix \"ls ~/bin/oh-my-posh && ls ~/bin/gitboxcmd\")"
     ]
   }
 }
