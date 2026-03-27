@@ -1,6 +1,6 @@
 #Requires -Version 7.0
 
-# Script de instalación de archivos desde repositorios Git para Windows
+# Script de instalación de binarios desde GitHub Releases para Windows
 # Lee configuración desde 04-gitfiles.json
 
 [CmdletBinding()]
@@ -10,137 +10,101 @@ param()
 . "$PSScriptRoot\env.ps1"
 . "$PSScriptRoot\utils.ps1"
 
-# Función para validar archivo JSON
-function Test-JsonFile {
-    param([string]$JsonPath)
+# Obtener la URL de descarga del último release de un repositorio GitHub
+function Get-LatestReleaseUrl {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Repo,
 
-    if (-not (Test-Path $JsonPath)) {
-        Write-Log "Archivo de configuración no encontrado: $JsonPath" "ERROR"
-        return $false
-    }
+        [Parameter(Mandatory)]
+        [string]$AssetName
+    )
+
+    $apiUrl = "https://api.github.com/repos/$Repo/releases/latest"
 
     try {
-        $jsonContent = Get-Content $JsonPath -Raw -Encoding UTF8
-        $config = $jsonContent | ConvertFrom-Json
+        $release = Invoke-RestMethod -Uri $apiUrl -Headers @{ Accept = "application/vnd.github+json" }
+        $asset = $release.assets | Where-Object { $_.name -eq $AssetName }
 
-        if (-not $config.repositories) {
-            Write-Log "Estructura JSON inválida: falta 'repositories'" "ERROR"
-            return $false
+        if (-not $asset) {
+            Write-Log "No se encontró el asset '$AssetName' en $Repo/releases/latest" "ERROR"
+            return $null
         }
 
-        return $true
+        return $asset.browser_download_url
     }
     catch {
-        Write-Log "Archivo JSON inválido: $_" "ERROR"
-        return $false
+        Write-Log "Error consultando GitHub API para $Repo`: $_" "ERROR"
+        return $null
     }
 }
 
-# Función para clonar repositorio temporalmente
-function Get-TempRepository {
+# Descargar, extraer e instalar un binario desde un ZIP de GitHub Releases
+function Install-ReleaseBinary {
     param(
         [Parameter(Mandatory)]
-        [string]$RepoUrl,
+        [string]$Repo,
 
         [Parameter(Mandatory)]
-        [string]$TempDir
+        [string]$BinaryName,
+
+        [Parameter(Mandatory)]
+        [string]$AssetName
     )
 
-    try {
-        $result = git clone --depth 1 --quiet $RepoUrl $TempDir 2>&1
-
-        if ($LASTEXITCODE -eq 0) {
-            return $true
-        }
-        else {
-            Write-Log "Error clonando repositorio $RepoUrl`: $result" "ERROR"
-            return $false
-        }
-    }
-    catch {
-        Write-Log "Excepción clonando repositorio $RepoUrl`: $_" "ERROR"
+    # Obtener URL de descarga
+    $downloadUrl = Get-LatestReleaseUrl -Repo $Repo -AssetName $AssetName
+    if (-not $downloadUrl) {
         return $false
     }
-}
-
-# Función para copiar archivo con permisos apropiados
-function Copy-FileWithPermissions {
-    param(
-        [Parameter(Mandatory)]
-        [string]$SourceFile,
-
-        [Parameter(Mandatory)]
-        [string]$DestFile
-    )
-
-    try {
-        Copy-Item $SourceFile $DestFile -Force
-        return $true
-    }
-    catch {
-        Write-Log "Error copiando archivo: $($_.Exception.Message)" "ERROR"
-        return $false
-    }
-}
-
-# Función para procesar un repositorio
-function Invoke-ProcessRepository {
-    param(
-        [Parameter(Mandatory)]
-        [string]$RepoUrl,
-
-        [Parameter(Mandatory)]
-        [array]$FilesList
-    )
 
     $tempDirName = "gitfiles-$(Get-Date -Format 'yyyyMMddHHmmss')-$PID"
     $tempDir = Join-Path $env:TEMP $tempDirName
+    $zipFile = Join-Path $tempDir $AssetName
 
     try {
-        if (-not (Get-TempRepository -RepoUrl $RepoUrl -TempDir $tempDir)) {
-            return 0
+        # Crear directorio temporal
+        New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+
+        # Descargar el ZIP
+        Write-Log "Descargando $AssetName..."
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $zipFile -UseBasicParsing
+
+        # Extraer el ZIP
+        Expand-Archive -Path $zipFile -DestinationPath $tempDir -Force
+
+        # Buscar el binario (con extensión .exe en Windows)
+        $binaryFile = Get-ChildItem -Path $tempDir -Filter "$BinaryName.exe" -Recurse -File | Select-Object -First 1
+
+        if (-not $binaryFile) {
+            # Intentar sin extensión .exe
+            $binaryFile = Get-ChildItem -Path $tempDir -Filter $BinaryName -Recurse -File | Select-Object -First 1
         }
 
-        $filesCopied = 0
-
-        foreach ($filePath in $FilesList) {
-            $cleanPath = $filePath -replace '^\./', ''
-            $srcFile = Join-Path $tempDir $cleanPath
-            $fileName = Split-Path $cleanPath -Leaf
-            $destFile = Join-Path $Global:BIN_DIR $fileName
-
-            if (Test-Path $srcFile) {
-                if (Copy-FileWithPermissions -SourceFile $srcFile -DestFile $destFile) {
-                    $filesCopied++
-                }
-            }
-            else {
-                Write-Log "Archivo no encontrado en repositorio: $cleanPath" "WARNING"
-            }
+        if (-not $binaryFile) {
+            Write-Log "Binario '$BinaryName' no encontrado en $AssetName" "ERROR"
+            return $false
         }
 
-        return $filesCopied
+        # Copiar al directorio de binarios
+        $destPath = Join-Path $Global:BIN_DIR $binaryFile.Name
+        Copy-Item $binaryFile.FullName $destPath -Force
+
+        return $true
+    }
+    catch {
+        Write-Log "Error instalando $BinaryName desde $Repo`: $($_.Exception.Message)" "ERROR"
+        return $false
     }
     finally {
         if (Test-Path $tempDir) {
-            try {
-                Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-            catch {
-                Write-Log "Advertencia: No se pudo limpiar directorio temporal: $tempDir" "WARNING"
-            }
+            Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
 }
 
 Run-Phase {
-    Write-Log "Instalando archivos desde repositorios Git..."
-
-    # Verificar dependencias
-    if (-not (Test-Dependencies @("jq", "git"))) {
-        Write-Log "Abortando: dependencias faltantes" "ERROR"
-        exit 1
-    }
+    Write-Log "Instalando binarios desde GitHub Releases..."
 
     # Asegurar que existe el directorio de binarios
     if (-not (New-DirectoryIfNotExists $Global:BIN_DIR)) {
@@ -148,48 +112,57 @@ Run-Phase {
         exit 1
     }
 
-    # Archivo de configuración (compartido entre plataformas)
+    # Archivo de configuración
     $gitfilesConfig = Join-Path (Split-Path $PSScriptRoot -Parent) "install\04-gitfiles.json"
 
-    # Validar archivo de configuración
-    if (-not (Test-JsonFile $gitfilesConfig)) {
-        Write-Log "Configuración inválida - abortando" "ERROR"
+    if (-not (Test-Path $gitfilesConfig)) {
+        Write-Log "Archivo de configuración no encontrado: $gitfilesConfig" "ERROR"
         exit 1
     }
 
-    # Leer configuración usando función común
+    # Leer configuración
     try {
-        $config = Get-ConfigFromJson -JsonPath $gitfilesConfig
-        $repositories = $config.repositories
+        $config = Get-Content $gitfilesConfig -Raw -Encoding UTF8 | ConvertFrom-Json
     }
     catch {
         Write-Log "Error leyendo configuración: $($_.Exception.Message)" "ERROR"
         exit 1
     }
 
-    if ($repositories.Count -eq 0) {
-        Write-Log "No hay repositorios configurados"
+    if (-not $config.releases -or $config.releases.Count -eq 0) {
+        Write-Log "No hay releases configurados"
         return
     }
 
-    $totalFilesCopied = 0
+    # Plataforma: siempre win-amd64 en Windows
+    $platformKey = "win-amd64"
 
-    # Procesar cada repositorio
-    foreach ($repo in $repositories) {
-        if ($repo.url -and $repo.files) {
-            $filesCopied = Invoke-ProcessRepository -RepoUrl $repo.url -FilesList $repo.files
-            $totalFilesCopied += $filesCopied
+    $binsInstalled = 0
+
+    foreach ($release in $config.releases) {
+        $repo = $release.repo
+        $binaryName = $release.binary
+        $assetName = $release.assets.$platformKey
+
+        if (-not $assetName) {
+            Write-Log "No hay asset para plataforma '$platformKey' en $repo - omitiendo" "WARNING"
+            continue
+        }
+
+        if (Install-ReleaseBinary -Repo $repo -BinaryName $binaryName -AssetName $assetName) {
+            $binsInstalled++
+            Write-Log "✅ $binaryName instalado desde $repo" "SUCCESS"
         }
         else {
-            Write-Log "Repositorio con configuración incompleta omitido" "WARNING"
+            Write-Log "Error instalando $binaryName desde $repo" "WARNING"
         }
     }
 
-    # Mostrar resumen final
-    if ($totalFilesCopied -gt 0) {
-        Write-Log "✅ Archivos desde repositorios Git instalados ($totalFilesCopied archivos)" "SUCCESS"
+    # Resumen final
+    if ($binsInstalled -gt 0) {
+        Write-Log "✅ Binarios desde GitHub Releases instalados ($binsInstalled)" "SUCCESS"
     }
     else {
-        Write-Log "No se copiaron archivos desde repositorios Git"
+        Write-Log "No se instalaron binarios desde GitHub Releases"
     }
 }

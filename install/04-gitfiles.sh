@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #
+# 04-gitfiles.sh — Descarga binarios desde GitHub Releases
+#
 set -euo pipefail
 
 # Carga las variables de entorno
@@ -22,10 +24,10 @@ GITFILES_CONFIG="$REPO_DIR/install/04-gitfiles.json"
 # Asegurar que existe el directorio de binarios
 ensure_directory "$BIN_DIR"
 
-# Contador de archivos copiados
-FILES_COPIED=0
+# Contador de binarios instalados
+BINS_INSTALLED=0
 
-# Función para verificar si jq está disponible
+# Verificar que jq está disponible
 check_jq() {
   if ! command_exists jq; then
     log "Instalando jq para procesar JSON..."
@@ -50,119 +52,92 @@ check_jq() {
   fi
 }
 
-# Función para verificar si git está disponible
-check_git() {
-  if ! command_exists git; then
-    error "git no está disponible"
-    return 1
-  fi
+# Determinar la clave de plataforma para seleccionar el asset correcto
+get_platform_key() {
+  local arch
+  arch=$(detect_arch) || return 1
+
+  case "${OS_TYPE:-}" in
+    linux|wsl2) echo "linux-${arch}" ;;
+    macos)      echo "macos-${arch}" ;;
+    *)
+      error "Plataforma no soportada: ${OS_TYPE:-desconocida}"
+      return 1
+      ;;
+  esac
 }
 
-# Función para validar archivo JSON
-validate_json() {
-  local json_file="$1"
+# Obtener la URL de descarga del último release de un repositorio GitHub
+get_latest_release_url() {
+  local repo="$1"
+  local asset_name="$2"
+  local api_url="https://api.github.com/repos/${repo}/releases/latest"
 
-  if [[ ! -f "$json_file" ]]; then
-    error "Archivo de configuración no encontrado: $json_file"
+  # Obtener la URL de descarga del asset
+  local download_url
+  download_url=$(curl -fsSL "$api_url" | jq -r --arg name "$asset_name" '.assets[] | select(.name == $name) | .browser_download_url')
+
+  if [[ -z "$download_url" || "$download_url" == "null" ]]; then
+    error "No se encontró el asset '$asset_name' en $repo/releases/latest"
     return 1
   fi
 
-  if ! jq empty "$json_file" 2>/dev/null; then
-    error "Archivo JSON inválido: $json_file"
-
-    return 1
-  fi
-
-  # Verificar estructura básica
-  if ! jq -e '.repositories' "$json_file" >/dev/null 2>&1; then
-    error "Estructura JSON inválida: falta 'repositories'"
-    return 1
-  fi
+  echo "$download_url"
 }
 
-# Función para clonar repositorio temporalmente
-clone_repo_temp() {
-  local repo_url="$1"
-  local temp_dir="$2"
+# Descargar, extraer e instalar un binario desde un ZIP de GitHub Releases
+install_release_binary() {
+  local repo="$1"
+  local binary_name="$2"
+  local asset_name="$3"
 
-  # Clonar repositorio directamente en el directorio temporal
-  if ! git clone --depth 1 --quiet "$repo_url" "$temp_dir" >/dev/null 2>&1; then
-    error "No se pudo clonar repositorio: $repo_url"
-    return 1
-  fi
+  # Obtener URL de descarga
+  local download_url
+  download_url=$(get_latest_release_url "$repo" "$asset_name") || return 1
 
-  # Verificar que el directorio se creó correctamente
-  if [[ ! -d "$temp_dir" ]]; then
-    error "Directorio clonado no encontrado: $temp_dir"
-    return 1
-  fi
-
-  return 0
-}
-
-# Función para copiar archivo con permisos apropiados
-copy_file_with_permissions() {
-  local src_file="$1"
-  local dst_file="$2"
-
-  # Verificar que el archivo fuente existe
-  if [[ ! -f "$src_file" ]]; then
-    warning "Archivo no encontrado: $src_file"
-    return 1
-  fi
-
-  # Copiar archivo
-  if ! cp -f "$src_file" "$dst_file" >/dev/null 2>&1; then
-    error "No se pudo copiar: $src_file -> $dst_file"
-    return 1
-  fi
-
-  # Aplicar permisos según extensión
-  local filename=$(basename "$src_file")
-  if [[ "$filename" != *.ps1 ]]; then
-    chmod 755 "$dst_file" >/dev/null 2>&1
-  fi
-  return 0
-}
-
-# Función para procesar un repositorio
-process_repository() {
-  local repo_url="$1"
-  local files_array="$2"
-
-  # Crear directorio temporal único
+  # Crear directorio temporal
   local temp_dir="/tmp/gitfiles-$(date +%s)-$$"
+  mkdir -p "$temp_dir"
 
-  # Clonar repositorio
-  if ! clone_repo_temp "$repo_url" "$temp_dir"; then
-    rm -rf "$temp_dir" >/dev/null 2>&1 || true
+  local zip_file="$temp_dir/$asset_name"
+
+  # Descargar el ZIP
+  log "Descargando $asset_name..."
+  if ! curl -fsSL -o "$zip_file" "$download_url"; then
+    error "No se pudo descargar: $download_url"
+    rm -rf "$temp_dir"
     return 1
   fi
 
-  # Contador de archivos copiados en este repositorio
-  local repo_files_copied=0
+  # Extraer el ZIP
+  if ! unzip -o -q "$zip_file" -d "$temp_dir"; then
+    error "No se pudo extraer: $zip_file"
+    rm -rf "$temp_dir"
+    return 1
+  fi
 
-  # Procesar cada archivo
-  while IFS= read -r file_path; do
-    # Limpiar path (remover ./ si existe)
-    local clean_path="${file_path#./}"
-    local src_file="$temp_dir/$clean_path"
-    local filename=$(basename "$clean_path")
-    local dst_file="$BIN_DIR/$filename"
+  # Buscar el binario dentro del directorio extraído
+  local binary_path
+  binary_path=$(find "$temp_dir" -name "$binary_name" -type f | head -1)
 
-    if copy_file_with_permissions "$src_file" "$dst_file"; then
-      repo_files_copied=$((repo_files_copied + 1))
-      FILES_COPIED=$((FILES_COPIED + 1))
-    fi
-  done < <(echo "$files_array" | jq -r '.[]')
+  if [[ -z "$binary_path" ]]; then
+    error "Binario '$binary_name' no encontrado en $asset_name"
+    rm -rf "$temp_dir"
+    return 1
+  fi
 
-  # Limpiar directorio temporal
-  rm -rf "$temp_dir" >/dev/null 2>&1 || true
+  # Copiar al directorio de binarios y dar permisos de ejecución
+  cp -f "$binary_path" "$BIN_DIR/$binary_name"
+  chmod 755 "$BIN_DIR/$binary_name"
+
+  # Limpiar
+  rm -rf "$temp_dir"
+  return 0
 }
 
 # Función principal
 main() {
-  log "Instalando archivos desde repositorios Git..."
+  log "Instalando binarios desde GitHub Releases..."
 
   # Verificar dependencias
   if ! check_jq; then
@@ -170,47 +145,60 @@ main() {
     exit 1
   fi
 
-  if ! check_git; then
-    error "git no está disponible - abortando"
-    exit 1
-  fi
-
   # Validar archivo de configuración
-  if ! validate_json "$GITFILES_CONFIG"; then
-    error "Configuración inválida - abortando"
+  if [[ ! -f "$GITFILES_CONFIG" ]]; then
+    error "Archivo de configuración no encontrado: $GITFILES_CONFIG"
     exit 1
   fi
 
-  # Contar repositorios
-  local repo_count
-  repo_count=$(jq '.repositories | length' "$GITFILES_CONFIG")
+  if ! jq empty "$GITFILES_CONFIG" 2>/dev/null; then
+    error "Archivo JSON inválido: $GITFILES_CONFIG"
+    exit 1
+  fi
 
-  if [[ "$repo_count" -eq 0 ]]; then
-    log "No hay repositorios configurados"
+  # Determinar plataforma
+  local platform_key
+  platform_key=$(get_platform_key) || exit 1
+
+  # Contar releases
+  local release_count
+  release_count=$(jq '.releases | length' "$GITFILES_CONFIG")
+
+  if [[ "$release_count" -eq 0 ]]; then
+    log "No hay releases configurados"
     return 0
   fi
 
-  # Procesar cada repositorio
-  local repo_index=0
-  while [[ $repo_index -lt $repo_count ]]; do
-    local repo_url
-    local files_array
+  # Procesar cada release
+  local idx=0
+  while [[ $idx -lt $release_count ]]; do
+    local repo binary asset_name
 
-    repo_url=$(jq -r ".repositories[$repo_index].url" "$GITFILES_CONFIG")
-    files_array=$(jq -c ".repositories[$repo_index].files" "$GITFILES_CONFIG")
+    repo=$(jq -r ".releases[$idx].repo" "$GITFILES_CONFIG")
+    binary=$(jq -r ".releases[$idx].binary" "$GITFILES_CONFIG")
+    asset_name=$(jq -r ".releases[$idx].assets[\"$platform_key\"]" "$GITFILES_CONFIG")
 
-    if ! process_repository "$repo_url" "$files_array"; then
-      warning "Error procesando repositorio: $repo_url"
+    if [[ -z "$asset_name" || "$asset_name" == "null" ]]; then
+      warning "No hay asset para plataforma '$platform_key' en $repo - omitiendo"
+      idx=$((idx + 1))
+      continue
     fi
 
-    repo_index=$((repo_index + 1))
+    if install_release_binary "$repo" "$binary" "$asset_name"; then
+      BINS_INSTALLED=$((BINS_INSTALLED + 1))
+      success "$binary instalado desde $repo"
+    else
+      warning "Error instalando $binary desde $repo"
+    fi
+
+    idx=$((idx + 1))
   done
 
-  # Mostrar resumen final
-  if [[ $FILES_COPIED -gt 0 ]]; then
-    success "Archivos desde repositorios Git instalados ($FILES_COPIED archivos)"
+  # Resumen final
+  if [[ $BINS_INSTALLED -gt 0 ]]; then
+    success "Binarios desde GitHub Releases instalados ($BINS_INSTALLED)"
   else
-    log "No se copiaron archivos desde repositorios Git"
+    log "No se instalaron binarios desde GitHub Releases"
   fi
 }
 

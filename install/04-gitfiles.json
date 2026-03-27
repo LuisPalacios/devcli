@@ -1,11 +1,14 @@
 {
-  "repositories": [
+  "releases": [
     {
-      "url": "https://github.com/LuisPalacios/git-toolkit",
-      "files": [
-        "./git-config-repos/git-config-repos.sh",
-        "./git-status-pull/git-status-pull.sh"
-      ]
+      "repo": "LuisPalacios/gitbox",
+      "binary": "gitboxcmd",
+      "assets": {
+        "linux-amd64": "gitbox-linux-amd64.zip",
+        "macos-amd64": "gitbox-macos-amd64.zip",
+        "macos-arm64": "gitbox-macos-arm64.zip",
+        "win-amd64": "gitbox-win-amd64.zip"
+      }
     }
   ]
-} 
+}
