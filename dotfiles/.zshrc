@@ -331,8 +331,6 @@ if [ "$IS_WSL2" = true ] ; then
     "/mnt/c/Windows/System32/wbem"                     # WMI y herramientas de gestión
     "/mnt/c/Windows/System32/WindowsPowerShell/v1.0"  # PowerShell 5.1
     "/mnt/c/Program Files/PowerShell/7"               # PowerShell 7
-    "/usr/local/go/bin"                               # Go language binaries
-    "${HOME}/go/bin"                                  # Go language binaries del usuario
     "/usr/local/sbin"                                 # Binarios de administración local
     "/usr/local/bin"                                  # Binarios locales
     "/usr/sbin"                                       # Binarios de administración del sistema
@@ -511,8 +509,6 @@ else
           "${HOME}/Nextcloud/priv/bin"    # Scripts privados sincronizados
           "/usr/local/bin"                # Binarios instalados manualmente
           "/usr/local/sbin"               # Binarios de administración local
-          "/usr/local/go/bin"             # Go language binaries
-          "${HOME}/go/bin"                # Go language binaries del usuario
           "/opt/llvm/bin"                 # clang llvm
           $path                           # PATH heredado del sistema
         )
@@ -542,6 +538,16 @@ else
   # ---------------------------------------------------------------------------
   parametriza_zsh_comun
 
+fi
+
+# =============================================================================
+# CONFIGURACIÓN DE GO - PATH DE BINARIOS
+# =============================================================================
+# Si Go está instalado (vía brew, paquete del sistema, etc.), añadir GOPATH/bin
+# al PATH para que los binarios instalados con `go install` estén disponibles.
+# Funciona en todas las plataformas (macOS, Linux, WSL2).
+if command -v go &>/dev/null; then
+  path+=("$(go env GOPATH)/bin")
 fi
 
 # =============================================================================
