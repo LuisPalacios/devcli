@@ -2,7 +2,7 @@
 
 ![devcli](assets/old-hacker.jpg)
 
-Me he pasado años instalando sistemas operativos, una y otra vez. Cada vez acabo echando un par de horas para dejar el entorno de CLI como me gusta. En este repo tengo una herramienta que automatiza dicho proceso, parametriza el Terminal (CLI) y conseguir el mismo UX (casi) en **Windows: Git Bash, PowerShell, CMD** y **UX: WSL2, macOS y Linux**.
+Me he pasado años instalando sistemas operativos, una y otra vez. Cada vez acabo echando un par de horas para dejar el entorno de CLI como me gusta. En este repo tengo una herramienta que automatiza dicho proceso, parametriza el Terminal (CLI) para conseguir el mismo UX (casi) en **Windows: Git Bash, PowerShell, CMD** y **UX: WSL2, macOS y Linux**.
 
 **Linux, macOS y WSL2** (lee los [requisitos](#-requisitos-linux-macos-y-wsl2)).
 
