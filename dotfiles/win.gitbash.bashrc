@@ -160,6 +160,9 @@ fi
 # Deshabilitar telemetría de herramientas de desarrollo
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
+# Servidor X para aplicaciones gráficas (ej: X410, VcXsrv)
+export DISPLAY=localhost:0.0
+
 # =============================================================================
 # CONFIGURACIÓN DE OH MY POSH PARA GIT BASH (WINDOWS)
 # =============================================================================
