@@ -185,6 +185,7 @@ OMP_DIR="$HOME/scoop/apps/oh-my-posh"
 OMP_VER="$(command ls "$OMP_DIR" | grep -E '^[0-9]' | sort -V | tail -1)"
 if [ -n "$OMP_VER" ] && [ -x "$OMP_DIR/$OMP_VER/oh-my-posh.exe" ]; then
     export OMP_PATH="$OMP_DIR/$OMP_VER/oh-my-posh.exe"
+    rm ~/AppData/Local/oh-my-posh/init.*.sh
     eval "$("$OMP_PATH" --init --shell bash --config ~/.oh-my-posh.json)"
 fi
 
