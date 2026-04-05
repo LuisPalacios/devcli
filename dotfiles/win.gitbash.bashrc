@@ -173,10 +173,18 @@ export OMP_OS_ICON="⚡"
 # Ruta al ejecutable de Oh My Posh instalado con Scoop
 #export OMP_PATH="$HOME/scoop/shims/oh-my-posh.exe"
 #export OMP_PATH="$HOME/scoop/apps/oh-my-posh/current/oh-my-posh.exe"
-export OMP_PATH="$(readlink -f "$HOME/scoop/apps/oh-my-posh/current/oh-my-posh.exe")"
+#export OMP_PATH="$(readlink -f "$HOME/scoop/apps/oh-my-posh/current/oh-my-posh.exe")"
 
 # Inicializar Oh My Posh con el tema personalizado
-if [ -x "$OMP_PATH" ]; then
+#if [ -x "$OMP_PATH" ]; then
+#    eval "$("$OMP_PATH" --init --shell bash --config ~/.oh-my-posh.json)"
+#fi
+
+# oh-my-posh
+OMP_DIR="$HOME/scoop/apps/oh-my-posh"
+OMP_VER="$(command ls "$OMP_DIR" | grep -E '^[0-9]' | sort -V | tail -1)"
+if [ -n "$OMP_VER" ] && [ -x "$OMP_DIR/$OMP_VER/oh-my-posh.exe" ]; then
+    export OMP_PATH="$OMP_DIR/$OMP_VER/oh-my-posh.exe"
     eval "$("$OMP_PATH" --init --shell bash --config ~/.oh-my-posh.json)"
 fi
 
@@ -197,9 +205,16 @@ export KUBECONFIG="${HOME}/kubeconfig"
 #    eval "$(zoxide init bash --cmd cd)"
 #fi
 #ZOXIDE_PATH="$HOME/scoop/apps/zoxide/current/zoxide.exe"
-ZOXIDE_PATH="$(readlink -f "$HOME/scoop/apps/zoxide/current/zoxide.exe")"
-if [ -x "$ZOXIDE_PATH" ]; then
-    eval "$("$ZOXIDE_PATH" init bash --cmd cd)"
+#ZOXIDE_PATH="$(readlink -f "$HOME/scoop/apps/zoxide/current/zoxide.exe")"
+#if [ -x "$ZOXIDE_PATH" ]; then
+#    eval "$("$ZOXIDE_PATH" init bash --cmd cd)"
+#fi
+
+# zoxide
+ZOXIDE_DIR="$HOME/scoop/apps/zoxide"
+ZOXIDE_VER="$(command ls "$ZOXIDE_DIR" | grep -E '^[0-9]' | sort -V | tail -1)"
+if [ -n "$ZOXIDE_VER" ] && [ -x "$ZOXIDE_DIR/$ZOXIDE_VER/zoxide.exe" ]; then
+    eval "$("$ZOXIDE_DIR/$ZOXIDE_VER/zoxide.exe" init bash --cmd cd)"
 fi
 
 # =============================================================================
