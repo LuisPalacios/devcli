@@ -106,11 +106,12 @@ alias egrep='egrep --color=auto'
 # =============================================================================
 
 # LSD proporciona iconos, colores mejorados y mejor formato de salida
-if command -v lsd >/dev/null 2>&1; then
-    alias ls='lsd --group-directories-first'
-    alias ll='lsd --group-directories-first -l'
-    alias la='lsd --group-directories-first -a'
-    alias lla='lsd --group-directories-first -la'
+LSD_EXE="$(_scoop_exe lsd lsd.exe)"
+if [ -x "$LSD_EXE" ]; then
+    alias ls="$LSD_EXE --group-directories-first"
+    alias ll="$LSD_EXE --group-directories-first -l"
+    alias la="$LSD_EXE --group-directories-first -a"
+    alias lla="$LSD_EXE --group-directories-first -la"
 fi
 
 # =============================================================================
@@ -140,8 +141,9 @@ alias e='code $*'
 alias gst='git status'
 
 # Monitor de sistema (btm/bottom como alternativa a htop)
-if command -v btm >/dev/null 2>&1; then
-    alias htop='btm'
+BTM_EXE="$(_scoop_exe bottom btm.exe)"
+if [ -x "$BTM_EXE" ]; then
+    alias htop="$BTM_EXE"
 fi
 
 # Llevo años usando more... me sale solo
