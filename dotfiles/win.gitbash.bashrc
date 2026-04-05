@@ -19,6 +19,21 @@ case $- in
 esac
 
 # =============================================================================
+# HELPER: RESOLVER EJECUTABLES DE SCOOP (EVITA JUNCTIONS)
+# =============================================================================
+
+# Scoop usa junctions NTFS para el directorio "current" que fallan al ejecutar
+# binarios en sesiones SSH. Esta función encuentra la versión más reciente
+# directamente, sin pasar por el junction.
+_scoop_exe() {
+    local app="$1" bin="$2"
+    local dir="$HOME/scoop/apps/$app"
+    local ver
+    ver="$(command ls "$dir" 2>/dev/null | grep -E '^[0-9]' | sort -V | tail -1)"
+    [ -n "$ver" ] && echo "$dir/$ver/$bin"
+}
+
+# =============================================================================
 # PATH ADICIONAL (solo afecta a Git Bash, no al PATH de Windows)
 # =============================================================================
 
@@ -170,19 +185,13 @@ export DISPLAY=localhost:0.0
 # Icono del sistema operativo para Oh My Posh
 export OMP_OS_ICON="⚡"
 
-# Ruta al ejecutable de Oh My Posh instalado con Scoop
-#export OMP_PATH="$HOME/scoop/shims/oh-my-posh.exe"
-# Inicializar Oh My Posh con el tema personalizado
-#if [ -x "$OMP_PATH" ]; then
-#    eval "$("$OMP_PATH" --init --shell bash --config ~/.oh-my-posh.json)"
-#fi
-
-# oh-my-posh
-OMP_DIR="$HOME/scoop/apps/oh-my-posh"
-OMP_VER="$(command ls "$OMP_DIR" | grep -E '^[0-9]' | sort -V | tail -1)"
-if [ -n "$OMP_VER" ] && [ -x "$OMP_DIR/$OMP_VER/oh-my-posh.exe" ]; then
-    export OMP_PATH="$OMP_DIR/$OMP_VER/oh-my-posh.exe"
-    rm ~/AppData/Local/oh-my-posh/init.*.sh
+# Oh My Posh cachea un init script que hardcodea la ruta al ejecutable.
+# Si esa ruta pasa por el junction "current" de Scoop, falla en SSH.
+# Eliminamos el cache para que se regenere con la ruta versionada.
+OMP_PATH="$(_scoop_exe oh-my-posh oh-my-posh.exe)"
+if [ -x "$OMP_PATH" ]; then
+    export OMP_PATH
+    rm -f ~/AppData/Local/oh-my-posh/init.*.sh 2>/dev/null
     eval "$("$OMP_PATH" --init --shell bash --config ~/.oh-my-posh.json)"
 fi
 
@@ -199,15 +208,9 @@ export KUBECONFIG="${HOME}/kubeconfig"
 # Reemplaza 'cd' con zoxide para saltar a directorios frecuentes
 # Uso: cd nombre_directorio (salta al directorio más frecuente que coincida)
 #       cdi                 (selector interactivo con fzf)
-#if command -v zoxide >/dev/null 2>&1; then
-#    eval "$(zoxide init bash --cmd cd)"
-#fi
-
-# zoxide
-ZOXIDE_DIR="$HOME/scoop/apps/zoxide"
-ZOXIDE_VER="$(command ls "$ZOXIDE_DIR" | grep -E '^[0-9]' | sort -V | tail -1)"
-if [ -n "$ZOXIDE_VER" ] && [ -x "$ZOXIDE_DIR/$ZOXIDE_VER/zoxide.exe" ]; then
-    eval "$("$ZOXIDE_DIR/$ZOXIDE_VER/zoxide.exe" init bash --cmd cd)"
+ZOXIDE_EXE="$(_scoop_exe zoxide zoxide.exe)"
+if [ -x "$ZOXIDE_EXE" ]; then
+    eval "$("$ZOXIDE_EXE" init bash --cmd cd)"
 fi
 
 # =============================================================================
@@ -215,8 +218,9 @@ fi
 # =============================================================================
 
 # Ctrl+R: búsqueda en historial, Ctrl+T: búsqueda de archivos, Alt+C: cd a directorio
-if command -v fzf >/dev/null 2>&1; then
-    eval "$(fzf --bash 2>/dev/null)"
+FZF_EXE="$(_scoop_exe fzf fzf.exe)"
+if [ -x "$FZF_EXE" ]; then
+    eval "$("$FZF_EXE" --bash 2>/dev/null)"
 fi
 
 # =============================================================================
