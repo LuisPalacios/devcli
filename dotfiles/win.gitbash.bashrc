@@ -171,7 +171,8 @@ export DISPLAY=localhost:0.0
 export OMP_OS_ICON="⚡"
 
 # Ruta al ejecutable de Oh My Posh instalado con Scoop
-export OMP_PATH="$HOME/scoop/shims/oh-my-posh.exe"
+#export OMP_PATH="$HOME/scoop/shims/oh-my-posh.exe"
+export OMP_PATH="$HOME/scoop/apps/oh-my-posh/current/oh-my-posh.exe"
 
 # Inicializar Oh My Posh con el tema personalizado
 if [ -x "$OMP_PATH" ]; then
@@ -191,8 +192,12 @@ export KUBECONFIG="${HOME}/kubeconfig"
 # Reemplaza 'cd' con zoxide para saltar a directorios frecuentes
 # Uso: cd nombre_directorio (salta al directorio más frecuente que coincida)
 #       cdi                 (selector interactivo con fzf)
-if command -v zoxide >/dev/null 2>&1; then
-    eval "$(zoxide init bash --cmd cd)"
+#if command -v zoxide >/dev/null 2>&1; then
+#    eval "$(zoxide init bash --cmd cd)"
+#fi
+ZOXIDE_PATH="$HOME/scoop/apps/zoxide/current/zoxide.exe"
+if [ -x "$ZOXIDE_PATH" ]; then
+    eval "$("$ZOXIDE_PATH" init bash --cmd cd)"
 fi
 
 # =============================================================================
