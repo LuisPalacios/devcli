@@ -2,7 +2,7 @@
   "releases": [
     {
       "repo": "LuisPalacios/gitbox",
-      "binary": "gitboxcmd",
+      "binary": "gitbox",
       "assets": {
         "linux-amd64": "gitbox-linux-amd64.zip",
         "macos-amd64": "gitbox-macos-amd64.zip",
