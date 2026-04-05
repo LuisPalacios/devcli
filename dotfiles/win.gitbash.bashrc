@@ -172,9 +172,6 @@ export OMP_OS_ICON="⚡"
 
 # Ruta al ejecutable de Oh My Posh instalado con Scoop
 #export OMP_PATH="$HOME/scoop/shims/oh-my-posh.exe"
-#export OMP_PATH="$HOME/scoop/apps/oh-my-posh/current/oh-my-posh.exe"
-#export OMP_PATH="$(readlink -f "$HOME/scoop/apps/oh-my-posh/current/oh-my-posh.exe")"
-
 # Inicializar Oh My Posh con el tema personalizado
 #if [ -x "$OMP_PATH" ]; then
 #    eval "$("$OMP_PATH" --init --shell bash --config ~/.oh-my-posh.json)"
@@ -204,11 +201,6 @@ export KUBECONFIG="${HOME}/kubeconfig"
 #       cdi                 (selector interactivo con fzf)
 #if command -v zoxide >/dev/null 2>&1; then
 #    eval "$(zoxide init bash --cmd cd)"
-#fi
-#ZOXIDE_PATH="$HOME/scoop/apps/zoxide/current/zoxide.exe"
-#ZOXIDE_PATH="$(readlink -f "$HOME/scoop/apps/zoxide/current/zoxide.exe")"
-#if [ -x "$ZOXIDE_PATH" ]; then
-#    eval "$("$ZOXIDE_PATH" init bash --cmd cd)"
 #fi
 
 # zoxide

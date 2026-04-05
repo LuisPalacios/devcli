@@ -42,7 +42,7 @@
             "template": "<b>{{ if or .SSHSession (eq .Env.OMP_SSH `1`) }}\ueba9 {{ end }}{{ .UserName }}</b><p:whitesoft>@{{ .HostName }}:</>",
             "foreground": "p:white",
             "foreground_templates": [
-              "{{ if .Root }}p:red{{ end }}"
+              "{{ if and .Root (not .SSHSession) }}p:red{{ end }}"
             ]
           },
           {
