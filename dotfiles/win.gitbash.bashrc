@@ -18,6 +18,17 @@ case $- in
       *) return;;
 esac
 
+# Pongo por delante todos los directorio de las apps instaladas con Scoop
+# de modo que no den problemas cuando me conecta a este windws vía 
+# SSH y use Git Bash
+for _scoop_app in "$HOME/scoop/apps"/*/; do
+    _scoop_ver="$(command ls "$_scoop_app" 2>/dev/null | grep -E '^[0-9]' | sort -V | tail -1)"
+    if [ -n "$_scoop_ver" ]; then
+        PATH="$_scoop_app$_scoop_ver:$PATH"
+    fi
+done
+unset _scoop_app _scoop_ver
+
 # =============================================================================
 # HELPER: RESOLVER EJECUTABLES DE SCOOP (EVITA JUNCTIONS)
 # =============================================================================
