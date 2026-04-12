@@ -202,7 +202,7 @@ function parametriza_zsh_comun() {
 
   # Cargar e inicializar el sistema de autocompletado avanzado de zsh
   autoload -Uz compinit
-  compinit
+  compinit -u
 
   # Configuración detallada del sistema de autocompletado
   zstyle ':completion:*' auto-description 'specify: %d'
