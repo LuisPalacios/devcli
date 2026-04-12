@@ -450,6 +450,16 @@ else
       alias grep="/usr/bin/grep"                     # Usar grep nativo de macOS
       alias e="/usr/local/bin/code"                  # Abrir Visual Studio Code
       alias pip="${BREW_PREFIX}/bin/pip3"             # Usar Python 3 por defecto
+      # Delegar Homebrew dinámicamente al propietario real de la instalación
+      local BREW_BIN="${BREW_PREFIX}/bin/brew"
+      if [[ -x "$BREW_BIN" ]]; then
+        local BREW_OWNER=$(stat -f "%Su" "$BREW_BIN" 2>/dev/null)
+        
+        # Crear alias solo si el dueño existe, no soy yo, y no es root
+        if [[ -n "$BREW_OWNER" && "$SOY" != "$BREW_OWNER" && "$BREW_OWNER" != "root" ]]; then
+          alias brew="sudo -Hu $BREW_OWNER brew"
+        fi
+      fi
 
       # -----------------------------------------------------------------------
       # OPTIMIZACIONES DE RENDIMIENTO EN BACKGROUND
