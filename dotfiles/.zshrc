@@ -711,6 +711,31 @@ else
 fi
 
 # =============================================================================
+# SNAPSHOT PATH A ~/.zshenv PARA SESIONES SSH NO INTERACTIVAS
+# =============================================================================
+# Las shells no interactivas (p.ej. `ssh host 'cmd'`) solo cargan ~/.zshenv,
+# nunca ~/.zshrc. Este bloque congela el PATH que acaba de construirse y lo
+# pone en ~/.zshenv, de modo que cualquier `ssh ... cmd` posterior a un login
+# interactivo hereda el mismo PATH.
+#
+# IMPORTANTE: ~/.zshenv es POR-MÁQUINA. No sincronizar entre dispositivos.
+if [[ -o interactive ]]; then
+  local _zshenv="$HOME/.zshenv"
+  local _desired="export PATH=\"${(j/:/)path}\""
+  local _current=""
+  [[ -f "$_zshenv" ]] && _current="$(grep -E '^export PATH=' "$_zshenv" 2>/dev/null | tail -1)"
+
+  if [[ "$_current" != "$_desired" ]]; then
+    {
+      print -- "# ~/.zshenv — AUTO-GENERATED por ~/.zshrc en $(hostname -s) el $(date '+%Y-%m-%d %H:%M:%S')"
+      print -- "# Snapshot del PATH interactivo para sesiones ssh no interactivas."
+      print -- "# Per-máquina. No sincronizar entre dispositivos."
+      print -- "$_desired"
+    } > "$_zshenv"
+  fi
+fi
+
+# =============================================================================
 # NOTAS IMPORTANTES PARA EL USUARIO:
 # =============================================================================
 # 1. Este archivo se ejecuta automáticamente al iniciar Zsh
