@@ -134,19 +134,34 @@ Run-Phase {
         return
     }
 
-    # Plataforma: siempre win-amd64 en Windows
-    $platformKey = "win-amd64"
+    # Detectar arquitectura: prioridad ARM64 si aplica, fallback a amd64
+    $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()
+    $primaryKey = switch ($arch) {
+        'arm64' { 'win-arm64' }
+        default { 'win-amd64' }
+    }
+    $fallbackKey = 'win-amd64'
 
     $binsInstalled = 0
 
     foreach ($release in $config.releases) {
         $repo = $release.repo
         $binaryName = $release.binary
-        $assetName = $release.assets.$platformKey
+        $assetName = $release.assets.$primaryKey
+        $usingFallback = $false
+
+        if (-not $assetName -and $primaryKey -ne $fallbackKey) {
+            $assetName = $release.assets.$fallbackKey
+            $usingFallback = $true
+        }
 
         if (-not $assetName) {
-            Write-Log "No hay asset para plataforma '$platformKey' en $repo - omitiendo" "WARNING"
+            Write-Log "No hay asset para plataforma '$primaryKey' (ni fallback '$fallbackKey') en $repo - omitiendo" "WARNING"
             continue
+        }
+
+        if ($usingFallback) {
+            Write-Log "$repo no publica asset para $primaryKey — usando $fallbackKey (correrá bajo emulación x64)" "WARNING"
         }
 
         if (Install-ReleaseBinary -Repo $repo -BinaryName $binaryName -AssetName $assetName) {

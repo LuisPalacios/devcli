@@ -7,7 +7,8 @@
         "linux-amd64": "gitbox-linux-amd64.zip",
         "macos-amd64": "gitbox-macos-amd64.zip",
         "macos-arm64": "gitbox-macos-arm64.zip",
-        "win-amd64": "gitbox-win-amd64.zip"
+        "win-amd64": "gitbox-win-amd64.zip",
+        "win-arm64": "gitbox-win-arm64.zip"
       }
     }
   ]
