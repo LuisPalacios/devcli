@@ -109,12 +109,30 @@ function New-DirectoryIfNotExists {
     return $true
 }
 
+# Función para verificar si winget es realmente funcional.
+# En Windows 11 ARM (o en imágenes recién provisionadas) a veces existe el
+# reparse point de 0 bytes en %LOCALAPPDATA%\Microsoft\WindowsApps\winget.exe
+# pero el AppExecutionAlias no está registrado y cualquier invocación devuelve
+# "Acceso denegado". Get-Command winget es insuficiente: hay que ejecutarlo.
+function Test-WingetFunctional {
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) { return $false }
+    try {
+        $null = & winget --version 2>&1
+        return $LASTEXITCODE -eq 0
+    }
+    catch {
+        return $false
+    }
+}
+
 # Función para verificar si un paquete winget está instalado
 function Test-WingetPackage {
     param(
         [Parameter(Mandatory)]
         [string]$PackageId
     )
+
+    if (-not (Test-WingetFunctional)) { return $false }
 
     try {
         $result = winget list --id $PackageId --exact 2>$null
@@ -286,6 +304,11 @@ function Install-WingetPackage {
         [string]$Description = ""
     )
 
+    if (-not (Test-WingetFunctional)) {
+        Write-Log "winget no está operativo — omitiendo $Name. Ejecuta 'Reset' en Settings > Apps > App Installer o actualiza App Installer desde Microsoft Store." "WARNING"
+        return $false
+    }
+
     if (Test-WingetPackage $PackageId) {
         Write-Log "$Name ya está instalado, omitiendo instalación"
         return $true
@@ -399,6 +422,14 @@ function Install-MethodScoop {
     param([Parameter(Mandatory)][hashtable]$Block)
     $package = $Block["package"]
     return Install-ScoopPackage -PackageName $package
+}
+
+# --- Method: winget (wraps Install-WingetPackage) ---
+function Install-MethodWinget {
+    param([Parameter(Mandatory)][hashtable]$Block)
+    $package = $Block["package"]
+    $name = if ($Block["name"]) { $Block["name"] } else { $package }
+    return Install-WingetPackage -PackageId $package -Name $name
 }
 
 # --- Method: scoop-bucket (add bucket + install) ---
@@ -602,6 +633,7 @@ function Install-Tool {
     $result = switch ($method) {
         "scoop"        { Install-MethodScoop -Block $platformBlock }
         "scoop-bucket" { Install-MethodScoopBucket -Block $platformBlock }
+        "winget"       { Install-MethodWinget -Block $platformBlock }
         default {
             Write-Log "Método desconocido: $method para $ToolName" "WARNING"
             $false

@@ -149,11 +149,32 @@ function Test-Administrator {
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
+# Comprobar que winget funciona de verdad (no solo que el .exe esté en el PATH).
+# En W11 ARM o imágenes recién provisionadas el reparse point existe pero el
+# AppExecutionAlias no, y winget devuelve "Acceso denegado" al invocarse.
+function Test-WingetFunctional {
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) { return $false }
+    try {
+        $null = & winget --version 2>&1
+        return $LASTEXITCODE -eq 0
+    }
+    catch {
+        return $false
+    }
+}
+
 # Verificar herramientas necesarias
 function Test-Prerequisites {
-    # Verificar winget
-    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        Write-Error "❌ winget no está disponible. Instala App Installer desde Microsoft Store" -ErrorAction Stop
+    # Verificar winget de forma funcional
+    $wingetOk = Test-WingetFunctional
+    if (-not $wingetOk) {
+        Write-Warning "⚠️ winget no está operativo en esta sesión."
+        Write-Warning "   Causa típica: AppExecutionAlias roto o App Installer desactualizado (común en Windows 11 ARM recién aprovisionado)."
+        Write-Warning "   Arreglos posibles:"
+        Write-Warning "     1) Abrir Microsoft Store → buscar 'App Installer' → Actualizar."
+        Write-Warning "     2) Settings → Apps → Advanced app settings → App execution aliases → activar 'App Installer (winget.exe)'."
+        Write-Warning "     3) Settings → Apps → App Installer → Advanced options → Reset."
+        Write-Warning "   El bootstrap continuará omitiendo los pasos que dependen de winget."
     }
 
     # Verificar e instalar scoop si es necesario
@@ -227,6 +248,9 @@ function Test-Prerequisites {
 
     # Verificar e instalar git si es necesario (con winget)
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        if (-not $wingetOk) {
+            Write-Error "❌ git no está instalado y winget no está operativo. Instala Git for Windows manualmente desde https://git-scm.com/download/win (o en ARM64: https://github.com/git-for-windows/git/releases) y vuelve a ejecutar el bootstrap." -ErrorAction Stop
+        }
         Write-Log "Instalando git con winget..."
         try {
             winget install Git.Git --silent --accept-package-agreements --accept-source-agreements
@@ -246,24 +270,28 @@ function Test-Prerequisites {
         }
     }
 
-    # Verificar e instalar pnpm - gestor de paquetes NodeJS.
+    # Verificar e instalar pnpm (no crítico para el bootstrap: 02-packages lo reintenta).
     if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
-        Write-Log "Instalando pnpm con winget..."
-        try {
-            winget install pnpm.pnpm --silent --accept-package-agreements --accept-source-agreements
-            # Refrescar PATH para que pnpm esté disponible
-            $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
-
-            # Verificar instalación
-            if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
-                Write-Error "❌ No se pudo instalar pnpm automáticamente" -ErrorAction Stop
-            }
-            else {
-                Write-Log "✅ pnpm instalado correctamente" -ForegroundColor Green
-            }
+        if (-not $wingetOk) {
+            Write-Log "⚠️ pnpm no está instalado y winget no está operativo — saltando. Se reintentará en 02-packages si procede."
         }
-        catch {
-            Write-Error "❌ Error instalando pnpm: $_" -ErrorAction Stop
+        else {
+            Write-Log "Instalando pnpm con winget..."
+            try {
+                winget install pnpm.pnpm --silent --accept-package-agreements --accept-source-agreements
+                # Refrescar PATH para que pnpm esté disponible
+                $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+
+                if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
+                    Write-Log "⚠️ pnpm no pudo instalarse — continuando (no es crítico para bootstrap)."
+                }
+                else {
+                    Write-Log "✅ pnpm instalado correctamente" -ForegroundColor Green
+                }
+            }
+            catch {
+                Write-Log "⚠️ Error instalando pnpm: $_ — continuando (no es crítico para bootstrap)."
+            }
         }
     }
 }
