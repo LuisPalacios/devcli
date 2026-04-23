@@ -84,14 +84,14 @@ fi
 detect_os_type() {
   if [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
     OS_TYPE="wsl2"
-  elif [[ "$OSTYPE" == msys* ]]; then
-    # Git Bash en Windows: delegar a PowerShell 7 (bootstrap.ps1)
+  elif [[ "$OSTYPE" == msys* || "$OSTYPE" == cygwin* ]]; then
+    # Git Bash en Windows (MINGW64 x64 o CLANGARM64 en ARM): delegar a PowerShell 7 (bootstrap.ps1)
     if ! command -v pwsh &>/dev/null; then
       echo "[bootstrap] ❌ PowerShell 7 (pwsh) es necesario en Windows."
       echo "  Instálalo desde: https://github.com/PowerShell/PowerShell/releases"
       exit 1
     fi
-    log "Detectado Git Bash — delegando instalación a PowerShell 7..."
+    log "Detectado Git Bash ($OSTYPE) — delegando instalación a PowerShell 7..."
     # Limpiar variables MSYS2 que pueden interferir con git.exe en PowerShell
     unset MSYSTEM MINGW_PREFIX MSYSTEM_PREFIX MSYSTEM_CHOST MSYSTEM_CTYPE
     unset ORIGINAL_PATH ORIGINAL_TEMP ORIGINAL_TMP
