@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# =============================================================================
+# ~/bin/ia
+# =============================================================================
+# Lanza una sesión tmux dedicada con 4 paneles:
+#
+#   +------------------+-----------------+
+#   |                  |   claude sonnet |
+#   |   claude opus    +-----------------+
+#   |                  |   claude haiku  |
+#   +------------------------------------+
+#   |        shell normal (terminal)     |
+#   +------------------------------------+
+#
+# Usa un socket propio ("ai") para no interferir con el tmux principal y
+# carga la configuración ~/.tmux-ai.conf (instalada desde el repo devcli).
+#
+# Dependencias: tmux, claude, ~/.tmux-ai.conf
+# =============================================================================
+
+set -euo pipefail
+
+SESSION="ia"
+SOCKET="ai"
+TMUX_CONF="${HOME}/.tmux-ai.conf"
+
+# ---------------------------------------------------------------------------
+# Comprobaciones previas
+# ---------------------------------------------------------------------------
+if ! command -v tmux >/dev/null 2>&1; then
+  echo "Error: 'tmux' no está instalado o no está en el PATH." >&2
+  exit 1
+fi
+
+if ! command -v claude >/dev/null 2>&1; then
+  echo "Error: 'claude' no está instalado o no está en el PATH." >&2
+  exit 1
+fi
+
+if [[ ! -f "$TMUX_CONF" ]]; then
+  echo "Error: no se encontró $TMUX_CONF" >&2
+  echo "Reinstala los dotfiles del proyecto devcli." >&2
+  exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Si la sesión ya existe, simplemente re-adjuntar
+# ---------------------------------------------------------------------------
+if tmux -L "$SOCKET" has-session -t "$SESSION" 2>/dev/null; then
+  unset TMUX
+  exec tmux -L "$SOCKET" attach-session -t "$SESSION"
+fi
+
+# ---------------------------------------------------------------------------
+# Detección del alias 'claude'
+# ---------------------------------------------------------------------------
+# El proyecto define en ~/.zshrc un alias:
+#   alias claude='claude --allow-dangerously-skip-permissions'
+# Si ese alias está presente, zsh ya añadirá el flag al expandirlo y basta
+# con enviar "claude". Si no está presente (p.ej. bash u otra máquina),
+# se añade el flag explícitamente al comando.
+CLAUDE_CMD="claude --allow-dangerously-skip-permissions"
+for rc in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_aliases"; do
+  if [[ -f "$rc" ]] && \
+     grep -qE "^[[:space:]]*alias[[:space:]]+claude=.*--allow-dangerously-skip-permissions" "$rc" 2>/dev/null; then
+    CLAUDE_CMD="claude"
+    break
+  fi
+done
+
+# ---------------------------------------------------------------------------
+# Construcción de la disposición de paneles
+# ---------------------------------------------------------------------------
+# Usamos el tamaño real del terminal actual para crear la sesión. Sin -x/-y
+# tmux usa 80x24 por defecto y los porcentajes de los splits se redondean
+# sobre ese tamaño mínimo, dejando la disposición descompensada incluso
+# después de que el cliente se adjunte con un terminal mayor.
+COLS=$(tput cols 2>/dev/null || echo 200)
+ROWS=$(tput lines 2>/dev/null || echo 60)
+
+# Fallback robusto por si tput devuelve valores inusables (p. ej. 0)
+[[ "$COLS" -lt 80 ]] && COLS=200
+[[ "$ROWS" -lt 24 ]] && ROWS=60
+
+# 1) Crear la sesión en segundo plano.
+tmux -L "$SOCKET" -f "$TMUX_CONF" new-session -d -s "$SESSION" -n "ai" \
+  -x "$COLS" -y "$ROWS"
+
+# Pane inicial: ocupa toda la ventana; tras los splits quedará arriba-izq (Opus).
+OPUS=$(tmux -L "$SOCKET" display-message -p -t "$SESSION" '#{pane_id}')
+
+# 2) Splits aproximados (el tamaño exacto se fuerza más abajo con resize-pane).
+TERMINAL=$(tmux -L "$SOCKET" split-window -v -l 15% -P -F '#{pane_id}' -t "$OPUS")
+SONNET=$(tmux -L "$SOCKET" split-window -h -l 50% -P -F '#{pane_id}' -t "$OPUS")
+HAIKU=$(tmux -L "$SOCKET" split-window -v -l 50% -P -F '#{pane_id}' -t "$SONNET")
+
+# 3) Forzar dimensiones exactas con resize-pane (en valores absolutos).
+#    Los porcentajes durante los splits pueden dar resultados inestables
+#    al redondear sobre tamaños pequeños o al reajustarse con el cliente;
+#    fijar aquí las alturas garantiza la disposición deseada.
+WIN_H=$(tmux -L "$SOCKET" display-message -p -t "$SESSION" '#{window_height}')
+WIN_W=$(tmux -L "$SOCKET" display-message -p -t "$SESSION" '#{window_width}')
+
+# Terminal inferior: exactamente 15% del alto total (mínimo 5 filas)
+TERM_H=$((WIN_H * 15 / 100))
+[[ "$TERM_H" -lt 5 ]] && TERM_H=5
+tmux -L "$SOCKET" resize-pane -t "$TERMINAL" -y "$TERM_H"
+
+# Columna izquierda (Opus): mitad de la anchura total
+tmux -L "$SOCKET" resize-pane -t "$OPUS" -x $((WIN_W / 2))
+
+# Sonnet / Haiku: mitades exactas del alto restante (tras fijar el terminal)
+RIGHT_H=$(tmux -L "$SOCKET" display-message -p -t "$SONNET" '#{pane_height}')
+RIGHT_H=$((RIGHT_H + $(tmux -L "$SOCKET" display-message -p -t "$HAIKU" '#{pane_height}')))
+tmux -L "$SOCKET" resize-pane -t "$SONNET" -y $((RIGHT_H / 2))
+
+# ---------------------------------------------------------------------------
+# Lanzar Claude en cada pane con su modelo
+# ---------------------------------------------------------------------------
+tmux -L "$SOCKET" send-keys -t "$OPUS"   "$CLAUDE_CMD --model opus"   C-m
+tmux -L "$SOCKET" send-keys -t "$SONNET" "$CLAUDE_CMD --model sonnet" C-m
+tmux -L "$SOCKET" send-keys -t "$HAIKU"  "$CLAUDE_CMD --model haiku"  C-m
+# El pane $TERMINAL se deja con la shell por defecto.
+
+# Foco inicial en el pane de Opus.
+tmux -L "$SOCKET" select-pane -t "$OPUS"
+
+# ---------------------------------------------------------------------------
+# Adjuntar (unset TMUX para permitir ejecutar 'ia' desde dentro de otro tmux)
+# ---------------------------------------------------------------------------
+unset TMUX
+exec tmux -L "$SOCKET" attach-session -t "$SESSION"

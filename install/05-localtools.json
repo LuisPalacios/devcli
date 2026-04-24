@@ -13,6 +13,10 @@
       "platforms": ["linux", "macos", "wsl2"]
     },
     {
+      "name": "ia",
+      "platforms": ["linux", "macos", "wsl2"]
+    },
+    {
       "name": "nerd-setup.sh",
       "platforms": ["linux", "macos", "wsl2"]
     },

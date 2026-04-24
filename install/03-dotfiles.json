@@ -11,6 +11,11 @@
       "platforms": ["linux", "macos", "wsl2"]
     },
     {
+      "file": ".tmux-ai.conf",
+      "dst": ".tmux-ai.conf",
+      "platforms": ["linux", "macos", "wsl2"]
+    },
+    {
       "file": ".oh-my-posh.json",
       "dst": ".oh-my-posh.json",
       "platforms": ["linux", "macos", "wsl2", "windows"]
