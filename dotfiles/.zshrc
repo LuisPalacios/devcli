@@ -117,6 +117,8 @@ function parametriza_zsh_comun() {
   alias ls='lsd'
   # Git status (nota: en WSL se sobreescribe)
   alias gst='git status'
+  # Claude Code: omitir siempre los prompts de permisos
+  alias claude='claude --allow-dangerously-skip-permissions'
 
   # ---------------------------------------------------------------------------
   # CONFIGURACIÓN DE LOCALIZACIÓN (IDIOMA Y REGIÓN)
