@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Session Continuity
+
+Read **`CONTINUITY.md`** at the repo root at the start of every session. It tracks the current goal, in-flight work, recent decisions and the working set of files. The ledger is gitignored (so it's per-machine), but it's the canonical session briefing — earlier chat history may have been compacted out.
+
+Update it whenever the goal, decisions or progress state change.
+
 ## Project Overview
 
 **devcli** is a cross-platform CLI environment provisioning tool. It automates the setup of a unified shell experience (prompt, aliases, tools) across Linux (Debian/Ubuntu), macOS, WSL2, and Windows 11. Written in Bash and PowerShell 7 — no compiled code, no build system.
@@ -66,10 +72,21 @@ To add a new tool: add an entry to `tools.json`. The phase scripts handle the re
 - `Microsoft.PowerShell_profile.ps1` — PowerShell 7 profile
 - `win.gitbash.bashrc` — Git Bash config
 - `cmd_aliases.cmd` / `clink_settings` / `oh-my-posh.lua` — CMD/Clink integration
+- `wezterm.lua` — WezTerm super-config (research seed; not yet wired into `03-dotfiles.json`). **Mirror policy**: every edit to `~/.config/wezterm/wezterm.lua` is also copied to `dotfiles/wezterm.lua`. See `docs/wezterm-ai-mode.md`.
 
 ### Addons
 
 `addons/windecente.ps1` — Windows 11 debloat/privacy/dev setup script (standalone).
+
+### Docs
+
+`docs/` holds internal context for future Claude / future-me. Currently:
+
+- `docs/wezterm-ai-mode.md` — design + §7 installer checklist for the future WezTerm phase.
+
+### Research scratchpad
+
+`tmp/` is gitignored (see `.gitignore`). Used for cloned upstream sources we want at hand without committing (e.g. `tmp/wezterm/`) and for in-flight research notes (e.g. `tmp/wezterm-research/`).
 
 ## Git Commits
 
