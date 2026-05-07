@@ -25,21 +25,23 @@ Este proyecto realiza cambios significativos en tu sistema, entre los que se inc
 
 ## Instalación
 
-Importante que cumplas antes los [Requisitos Windows](docs/requisitos-windows.md) o [Requisitos Unix o MacOS](docs/requisitos-unix.md).
+> Importante que cumplas antes los requisitos para [Windows](docs/requisitos-windows.md) o para [Unix/macOS](docs/requisitos-unix.md).
 
-**Linux, macOS, WSL2 y Git Bash en Windows**:
+Una vez listo, dependiendo de dónde estás, ejecuta lo siguiente:
+
+**Linux, macOS o WSL2/Git-Bash en Windows**:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
 ```
 
-**Windows 10/11** *(PowerShell 7)*:
+**PowerShell 7 en Windows 10/11**:
 
 ```powershell
 iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
 ```
 
-> Windows: Si tu antivirus bloquea el comando, prueba la
+> En el caso de Windows tu antivirus podria bloquear el comando anterior. Si es así, bloquea el comando, prueba la
 > [instalación en dos pasos](docs/requisitos-windows.md#si-tu-antivirus-bloquea-el-bootstrap). </br>
 > Mira opciones adicionales con `--help` y detalle de cada perfil en [docs/perfiles.md](docs/perfiles.md). </br>
 > Las herramientas que se instalan están en [docs/herramientas.md](docs/herramientas.md).
@@ -62,7 +64,7 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 | [Herramientas](docs/herramientas.md) | Las herramientas CLI que se instalan, con ejemplos de uso. |
 | [WezTerm](docs/wezterm.md) | **Terminal recomendada de devcli.** Atajos, selector de shells, selector de temas, persistencia de tamaño. Incluye sección [AI Mode](docs/wezterm.md#ai-mode): cuatro paneles de Claude (opus + sonnet + haiku + shell) en una ventana, en un atajo. |
 | [Requisitos Windows](docs/requisitos-windows.md) | PowerShell 7, winget, scoop. Soluciones a "Acceso denegado" de winget y bloqueos del antivirus. |
-| [Requisitos Unix y MacOS](docs/requisitos-unix.md) | Linux Debian/Ubuntu, macOS con Homebrew, WSL2. `sudo` sin contraseña. |
+| [Requisitos Linux/macOS](docs/requisitos-unix.md) | Linux Debian/Ubuntu, macOS con Homebrew, WSL2. `sudo` sin contraseña. |
 | [Troubleshooting](docs/troubleshooting.md) | Iconos rotos, fallos de instalación de una herramienta concreta, antivirus, modo verbose, log file. |
 | [Auditoria](docs/auditoria.md) | Para auditar el bootstrap antes de ejecutarlo: fases, JSONs, contrato de errores. |
 | [Desinstalar](docs/desinstalar.md) | Cómo dar marcha atrás: qué tocó devcli y cómo revertirlo. |
