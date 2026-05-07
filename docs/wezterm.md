@@ -1,7 +1,7 @@
-# WezTerm con devcli
+# WezTerm
 
-**WezTerm es mi terminal multiplataforma preferida y la única que devcli
-recomienda explícitamente.** Una sola configuración para Windows, macOS y
+**WezTerm es mi terminal multiplataforma preferida y que devcli
+instala.** Una sola configuración para Windows, macOS y
 Linux, con los mismos atajos, los mismos temas y la misma experiencia.
 devcli la instala con los perfiles `dev` y `full`, y le añade una
 **super-config** (~750 líneas en Lua) con todo lo que quieres pero no
