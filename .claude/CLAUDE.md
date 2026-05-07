@@ -95,6 +95,7 @@ To add a new tool: add an entry to `tools.json`. The phase scripts handle the re
 
 - **Never author commits as Claude.** The commit author must always be `LuisPalacios`. Do not add `Co-Authored-By` trailers or modify `user.name`/`user.email` in git config.
 - **Never co-author commits as Claude.**
+- **Never mention Claude, Claude Code, or any other AI assistant / agent / harness by name in commit messages — not in the subject, not in the body, not in trailers, not anywhere.** The commit history credits the human's work; the tooling stays invisible. If a structural reference to the `.claude/` directory is genuinely necessary for context, describe it generically (e.g., "configuración interna de tooling de desarrollo") rather than naming the AI tool. This applies recursively: do not paraphrase, hint at, or include sentences that imply AI authorship ("generated with…", "assistant produced…", emoji robots, etc.).
 - Comments and commit messages in **Spanish**.
 
 ## Conventions
