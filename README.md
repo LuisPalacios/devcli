@@ -62,7 +62,7 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 |------|-----------|
 | [Perfiles](docs/perfiles.md) | Qué hay en cada perfil y cuándo elegir cada uno. |
 | [Herramientas](docs/herramientas.md) | Las herramientas CLI que se instalan, con ejemplos de uso. |
-| [WezTerm](docs/wezterm.md) | **Terminal recomendada de devcli.** Atajos, selector de shells, selector de temas, persistencia de tamaño. Incluye sección [AI Mode](docs/wezterm.md#ai-mode): cuatro paneles de Claude (opus + sonnet + haiku + shell) en una ventana, en un atajo. |
+| [WezTerm](docs/wezterm.md) | **Terminal recomendada**: Atajos, selector de shells, selector de temas, persistencia de tamaño. Incluye sección [AI Mode](docs/wezterm.md#ai-mode): cuatro paneles de Claude (opus + sonnet + haiku + shell) en una ventana, en un atajo. |
 | [Requisitos Windows](docs/requisitos-windows.md) | PowerShell 7, winget, scoop. Soluciones a "Acceso denegado" de winget y bloqueos del antivirus. |
 | [Requisitos Linux/macOS](docs/requisitos-unix.md) | Linux Debian/Ubuntu, macOS con Homebrew, WSL2. `sudo` sin contraseña. |
 | [Troubleshooting](docs/troubleshooting.md) | Iconos rotos, fallos de instalación de una herramienta concreta, antivirus, modo verbose, log file. |
