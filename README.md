@@ -25,6 +25,8 @@ Este proyecto realiza cambios significativos en tu sistema, entre los que se inc
 
 ## Instalación
 
+Importante que cumplas antes los [Requisitos Windows](docs/requisitos-windows.md) o [Requisitos Unix o MacOS](docs/requisitos-unix.md).
+
 **Linux, macOS, WSL2 y Git Bash en Windows**:
 
 ```bash
@@ -58,10 +60,9 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 |------|-----------|
 | [Perfiles](docs/perfiles.md) | Qué hay en cada perfil y cuándo elegir cada uno. |
 | [Herramientas](docs/herramientas.md) | Las herramientas CLI que se instalan, con ejemplos de uso. |
-| [WezTerm](docs/wezterm.md) | **Terminal recomendada de devcli.** Atajos, selector de shells, selector de temas, persistencia de tamaño. |
-| [Wezterm modo IA](docs/wezterm-ai-mode.md) | AI Mode: cuatro paneles de Claude (opus + sonnet + haiku + shell) en una ventana, en un atajo. |
+| [WezTerm](docs/wezterm.md) | **Terminal recomendada de devcli.** Atajos, selector de shells, selector de temas, persistencia de tamaño. Incluye sección [AI Mode](docs/wezterm.md#ai-mode): cuatro paneles de Claude (opus + sonnet + haiku + shell) en una ventana, en un atajo. |
 | [Requisitos Windows](docs/requisitos-windows.md) | PowerShell 7, winget, scoop. Soluciones a "Acceso denegado" de winget y bloqueos del antivirus. |
-| [Requisitos Unix](docs/requisitos-unix.md) | Linux Debian/Ubuntu, macOS con Homebrew, WSL2. `sudo` sin contraseña. |
+| [Requisitos Unix y MacOS](docs/requisitos-unix.md) | Linux Debian/Ubuntu, macOS con Homebrew, WSL2. `sudo` sin contraseña. |
 | [Troubleshooting](docs/troubleshooting.md) | Iconos rotos, fallos de instalación de una herramienta concreta, antivirus, modo verbose, log file. |
 | [Auditoria](docs/auditoria.md) | Para auditar el bootstrap antes de ejecutarlo: fases, JSONs, contrato de errores. |
 | [Desinstalar](docs/desinstalar.md) | Cómo dar marcha atrás: qué tocó devcli y cómo revertirlo. |

@@ -42,7 +42,7 @@ con los perfiles `dev` y `full`, y le añade una **super-config** preparada:
 - Scrollbar lateral arrastrable, shell integration via OSC-7/133, ligaduras
   de fuente, multiplexor integrado.
 
-Detalles en [wezterm.md](wezterm.md) y [wezterm-ai-mode.md](wezterm-ai-mode.md).
+Detalles en [wezterm.md](wezterm.md) (incluida la sección AI Mode).
 
 > Si no quieres WezTerm, devcli funciona igual en Windows Terminal, iTerm2,
 > gnome-terminal, etc. — pero perderás la super-config y los atajos.
@@ -193,7 +193,7 @@ tmux a -t <nombre>         # adjuntar
 
 devcli incluye un `.tmux.conf` con bindings sensatos y tema oscuro. También
 hay `.tmux-ai.conf`, una configuración alternativa pensada para sesiones de
-4 paneles con Claude (más en [wezterm-ai-mode.md](wezterm-ai-mode.md)).
+4 paneles con Claude (más en [wezterm.md#ai-mode](wezterm.md#ai-mode)).
 
 > En Windows no se instala `tmux` (ni hace falta — usa WezTerm para splits y
 > pestañas, o WSL si necesitas tmux real).
