@@ -1,6 +1,6 @@
 # Las herramientas que se instalan
 
-devcli no es sólo una configuración bonita del prompt — instala una colección
+`devcli` no es sólo una configuración bonita del prompt — instala una colección
 curada de herramientas CLI modernas que reemplazan o complementan las clásicas
 de Unix. Esta guía te dice **qué hace cada una** y **cuándo la vas a usar**.
 
