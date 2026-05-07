@@ -1,4 +1,4 @@
-# Las herramientas que vienen contigo
+# Las herramientas que se instalan
 
 devcli no es sólo una configuración bonita del prompt — instala una colección
 curada de herramientas CLI modernas que reemplazan o complementan las clásicas
