@@ -50,8 +50,8 @@ path=(
 # Ubicación del fichero en este caso: /home/<usuario>/.zshrc.local
 path=(
   $path
-  "/mnt/c/Users/${SOY}/Nextcloud/priv/bin"
-  "/mnt/c/Users/${SOY}/dev-tools/"
+  "${HOME}/Nextcloud/priv/bin"
+  "${HOME}/dev-tools/"
   "/opt/llvm/bin"
 )
 
