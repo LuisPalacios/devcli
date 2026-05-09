@@ -52,6 +52,7 @@ path=(
   $path
   "/mnt/c/Users/${SOY}/Nextcloud/priv/bin"
   "/mnt/c/Users/${SOY}/dev-tools/"
+  "/opt/llvm/bin"
 )
 
 # -----------------------------------------------------------------------------
