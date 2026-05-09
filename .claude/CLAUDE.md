@@ -12,7 +12,7 @@ Update it whenever the goal, decisions or progress state change.
 
 `.claude/context/` holds per-feature reference docs. Load the relevant one BEFORE making changes to that feature — they capture architecture, settled trade-offs, and the file map, so you don't relitigate decisions or break invariants.
 
-- **`.claude/context/wezterm-ai-mode.md`** — read this whenever you touch any of: `dotfiles/wezterm.lua`, `dotfiles/wezterm.sh`, `~/.config/wezterm/*`, the `wezterm` entry in `install/tools.json`, the wezterm mappings in `install/03-dotfiles.json`, the `cask:`/`tag_prefix:` extensions in `install/utils.sh`, OR the WezTerm-related blocks in `dotfiles/.zshrc` / `dotfiles/win.gitbash.bashrc` / `dotfiles/Microsoft.PowerShell_profile.ps1`.
+- **`.claude/context/wezterm-ai-mode.md`** — read this whenever you touch any of: `dotfiles/wezterm.lua`, `dotfiles/wezterm.sh`, `~/.config/wezterm/*`, the `wezterm` entry in `install/tools.json`, the wezterm mappings in `install/03-dotfiles.json`, the `cask:`/`tag_prefix:` extensions in `install/utils.sh`, OR the WezTerm-related blocks in `dotfiles/zshrc` / `dotfiles/win.gitbash.bashrc` / `dotfiles/Microsoft.PowerShell_profile.ps1`.
 
 ## Project Overview
 
@@ -72,16 +72,17 @@ To add a new tool: add an entry to `tools.json`. The phase scripts handle the re
 
 `dotfiles/` contains shell configurations copied to `$HOME`:
 
-- `.zshrc` — Zsh config (aliases, completions, plugin-like setup)
-- `.tmux.conf` — Tmux configuration
-- `.tmux-ai.conf` — Tmux variant tuned for 4-pane Claude sessions (paired with WezTerm AI Mode)
-- `.oh-my-posh.json` — Oh-My-Posh prompt theme (shared by all shells across all OSes)
+- `zshrc` — Zsh config (aliases, completions, plugin-like setup); deployed as `~/.zshrc`
+- `tmux.conf` — Tmux configuration; deployed as `~/.tmux.conf`
+- `tmux-ai.conf` — Tmux variant tuned for 4-pane Claude sessions (paired with WezTerm AI Mode); deployed as `~/.tmux-ai.conf`
+- `oh-my-posh.json` — Oh-My-Posh prompt theme (shared by all shells across all OSes); deployed as `~/.oh-my-posh.json`
 - `Microsoft.PowerShell_profile.ps1` — PowerShell 7 profile
 - `win.ps5_profile.ps1` — Windows PowerShell 5.1 profile (reduced parity; UTF-8 with BOM, do not strip)
 - `win.gitbash.bashrc` — Git Bash config
 - `cmd_aliases.cmd` / `clink_settings` / `oh-my-posh.lua` — CMD/Clink integration
 - `wezterm.lua` — WezTerm super-config (sectioned §0-§8: customization knobs, helpers, shell choice, appearance, AI Mode, shell picker, window state, key/mouse bindings). Shipped by `03-dotfiles.json` to `~/.config/wezterm/wezterm.lua`. **Mirror policy**: every edit to `~/.config/wezterm/wezterm.lua` is also copied to `dotfiles/wezterm.lua`. Reference doc: `.claude/context/wezterm-ai-mode.md`.
 - `wezterm.sh` — vendored WezTerm shell-integration helper (OSC-7 CWD + OSC-133 prompt markers). Copied to `~/.config/wezterm/wezterm.sh`; sourced by `.zshrc` / `win.gitbash.bashrc` when `WEZTERM_PANE` is set. The PowerShell profile wraps its own prompt to emit OSC-7 inline.
+- `zshrc.local.example` / `bashrc.local.example` — sample templates for the per-machine override hook. **NOT deployed** by `03-dotfiles.json`. End of the deployed `~/.zshrc` / `~/.bashrc` sources `~/.zshrc.local` / `~/.bashrc.local` if present; users copy the `.example` to `~/.<name>.local` manually for private PATH entries, secrets, etc. (kept out of git).
 
 ### Addons
 

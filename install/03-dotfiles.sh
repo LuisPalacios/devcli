@@ -101,7 +101,7 @@ _install_one_dotfile() {
     return 1
   fi
 
-  [[ "$file" == ".zshrc" ]] && customize_zshrc "$dst"
+  [[ "$file" == "zshrc" ]] && customize_zshrc "$dst"
   return 0
 }
 

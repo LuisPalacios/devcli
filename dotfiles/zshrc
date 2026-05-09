@@ -342,9 +342,6 @@ if [ "$IS_WSL2" = true ] ; then
     .                                    # Directorio actual (útil para desarrollo)
     "${HOME}/bin"                        # Binarios personales del usuario
     "/mnt/c/Users/${SOY}/bin"                         # Binarios personales del usuario
-    "/mnt/c/Users/${SOY}/Nextcloud/priv/bin"           # Scripts privados en Windows
-    "/mnt/c/Users/${SOY}/Nextcloud/priv/bin/win"       # Scripts específicos de Windows
-    "/mnt/c/Users/${SOY}/dev-tools/kombine.win"        # Herramientas de desarrollo
     "/mnt/c/Program Files/Docker/Docker/resources/bin" # Docker Desktop para Windows
     "/mnt/c/Users/${SOY}/AppData/Local/Programs/Microsoft VS Code/bin" # VS Code CLI
     "/mnt/c/Program Files/Git/mingw64/bin"             # Git for Windows
@@ -432,11 +429,9 @@ else
         .                                         # Directorio actual para scripts locales
         "${HOME}/bin"                             # Binarios personales
         "${HOME}/.local/bin"                      # Otros binarios personales
-        "${HOME}/Nextcloud/priv/bin"              # Scripts privados sincronizados
         "${HOME}/.lmstudio/bin"                   # Si instalo LM Studio CLI
         "${HOME}/.antigravity/antigravity/bin"    # Si instalo Antigravity
         "/usr/local/sbin"                         # Binarios de administración local
-        "${HOME}/dev-tools/kombine.osx"           # Herramientas de desarrollo específicas
       )
 
       # Reflejar PATH en el entorno gráfico para aplicaciones GUI
@@ -646,7 +641,7 @@ else
 
   # Configuración de archivos para el tema personalizado
   LOCAL_FILE=~/.oh-my-posh.json                    # Archivo local del tema
-  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/devcli/main/dotfiles/.oh-my-posh.json"
+  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/devcli/main/dotfiles/oh-my-posh.json"
   TEMP_REMOTE_FILE="/tmp/.oh-my-posh_remote.yaml"  # Archivo temporal para comparación
 
   # Detectar sistema operativo para usar comando 'date' correcto
@@ -778,5 +773,13 @@ fi
 if [[ -n "$WEZTERM_PANE" ]] && [[ -f "$HOME/.config/wezterm/wezterm.sh" ]]; then
   source "$HOME/.config/wezterm/wezterm.sh"
 fi
+
+# =============================================================================
+# Override local (no versionado): permite extender PATH, definir alias o
+# funciones específicas de esta máquina sin tocar este archivo. Se ejecuta
+# al final, así que tiene prioridad sobre todo lo anterior.
+# Crea ~/.zshrc.local manualmente si lo necesitas; no existe por defecto.
+# =============================================================================
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 
 # Linux Setup: -------------------------------------------------------------- END

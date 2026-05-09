@@ -143,6 +143,9 @@ Makefile     text eol=lf
 *.ksh      text eol=lf
 *.sh       text eol=lf
 *.zsh      text eol=lf
+zshrc      text eol=lf
+zshrc.local.example  text eol=lf
+bashrc.local.example text eol=lf
 # Windows
 *.bat      text eol=crlf
 *.cmd      text eol=crlf

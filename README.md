@@ -2,20 +2,14 @@
 
 ![devcli](assets/old-hacker.jpg)
 
-He pasado años instalando sistemas operativos, y al terminar, otras dos horas extra para dejar el entorno CLI como me gusta. Hice este proyecto para tener todo listo en un minuto, con una experiencia casi idéntica en **PowerShell, Git Bash, CMD** de Windows y por supuesto en **Linux, macOS y WSL2**.
+He pasado años instalando sistemas operativos, y al terminar siempre tengo que dedicar otras dos horas extra para dejar el entorno CLI como me gusta. Hice este proyecto para hacerlo en 2 minutos y además tener una experiencia casi idéntica en **PowerShell, Git Bash, CMD** (Windows) y en **Linux, macOS y WSL2**.
 
-Mi terminal multiplataforma preferida — y la que recomiendo — es **[WezTerm](https://wezterm.org)**. devcli la instala con los perfiles `dev` y `full` y añade una super-config (selector de shells, AI Mode, persistencia de tamaño, selector de temas). La super noticia es que funciona de forma idéntica en Windows, macOS y Linux. Ver [docs/wezterm.md](docs/wezterm.md).
+Mi terminal multiplataforma preferida — y la que recomiendo — es **[WezTerm](https://wezterm.org)**. La instalo desde aquí con una configuración a medida (selector de shells, AI Mode, persistencia de tamaño, selector de temas). Este terminal funciona de forma idéntica en Windows, macOS y Linux. Echa un ojo al  [Documento sobre Wezterm](docs/wezterm.md).
 
 > [!WARNING]
-> **Aviso Importante: Lee antes de ejecutar**
+> **Aviso Importante: Lee antes de hacer nada.**
 
-Este proyecto realiza cambios significativos en tu sistema, entre los que se incluyen:
-
-* Instalación de software de terceros.
-* Modificación de archivos de configuración en tu directorio `$HOME`.
-* Cambio de tu *shell* por defecto.
-
-**Úsalo bajo tu propia responsabilidad.** Aunque utilizo esta configuración a diario en mis máquinas, cada entorno es distinto. Como se especifica en la licencia MIT, este software se proporciona "tal cual", sin garantías. **Si no estás de acuerdo con estos cambios o no comprendes el código, por favor, no lo utilices.**
+Este proyecto realiza cambios significativos en tu sistema, entre los que se incluyen: instalación de software de terceros, modificación de archivos de configuración en tu directorio `$HOME` y cambio de tu *shell* por defecto. **Úsalo bajo tu propia responsabilidad.**, este software se proporciona "tal cual", sin garantías. **Si no estás de acuerdo con estos cambios o no comprendes el código, por favor, no lo utilices.**
 
 **Recomendaciones antes de empezar:**
 
@@ -25,11 +19,9 @@ Este proyecto realiza cambios significativos en tu sistema, entre los que se inc
 
 ## Instalación
 
-> Importante que cumplas antes los requisitos para [Windows](docs/requisitos-windows.md) o para [Unix/macOS](docs/requisitos-unix.md).
+> Vamos al lío, pero antes comprueba que cumples los requisitos para [Windows](docs/requisitos-windows.md) o para [Linux/macOS](docs/requisitos-unix.md). Una vez listo, dependiendo de dónde estás, ejecuta lo siguiente:
 
-Una vez listo, dependiendo de dónde estás, ejecuta lo siguiente:
-
-**Linux, macOS o WSL2/Git-Bash en Windows**:
+**Linux, macOS o WSL2/Git-Bash (Windows)**:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
@@ -55,6 +47,7 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 - **Abre WezTerm** (instalado con perfiles `dev`/`full`) — es la terminal
   recomendada del proyecto. Atajos, selector de temas, AI Mode y demás en
   [docs/wezterm.md](docs/wezterm.md).
+- **Personaliza tu Shell** en Linux, macOS o WSL2/Git-Bash (Windows). Echa un ojo a los ficheros [zshrc.local.example](./dotfiles/zshrc.local.example) y [bashrc.local.example](./dotfiles/bashrc.local.example)
 
 ## Documentación
 

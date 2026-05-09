@@ -13,7 +13,7 @@
 | `install/tools.json` | WezTerm install entry (`scoop` Win, `brew --cask` mac, `github-deb` Linux; tag `dev`). |
 | `install/03-dotfiles.json` | Maps `wezterm.lua` + `wezterm.sh` → `~/.config/wezterm/`. |
 | `install/utils.sh` | Hosts `method_brew` (with `cask:` support) and `method_github_deb` (with `tag_prefix:` support). Both extensions added for WezTerm; default behavior preserved. |
-| `dotfiles/.zshrc`, `dotfiles/win.gitbash.bashrc` | End-of-file `WEZTERM_PANE`-guarded source-block for `wezterm.sh`. |
+| `dotfiles/zshrc`, `dotfiles/win.gitbash.bashrc` | End-of-file `WEZTERM_PANE`-guarded source-block for `wezterm.sh`. |
 | `dotfiles/Microsoft.PowerShell_profile.ps1` | Prompt wrapper after the zoxide-repair block (~line 273) emits OSC-7 when `$env:WEZTERM_PANE` is set. |
 | `tmp/wezterm/` | Cloned upstream sources (gitignored). Useful for grepping the API. |
 | `tmp/wezterm-research/` | Gitignored research notes from the original design phase. |

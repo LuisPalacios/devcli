@@ -1,0 +1,34 @@
+# =============================================================================
+# Plantilla de ejemplo para ~/.bashrc.local
+# =============================================================================
+# Este archivo NO se despliega ni se copia automáticamente por devcli; es
+# una muestra de referencia. En devcli, ~/.bashrc proviene de Git Bash en
+# Windows. Para usar el override local, cópialo manualmente:
+#
+#   cp ~/.devcli/dotfiles/bashrc.local.example ~/.bashrc.local
+#   ${EDITOR:-vi} ~/.bashrc.local
+#
+# Cuando ~/.bashrc.local existe, ~/.bashrc lo carga al FINAL del arranque,
+# así que las definiciones aquí (PATH, alias, funciones, exports) tienen
+# prioridad sobre lo que define el repositorio.
+#
+# Mantén este fichero FUERA del control de versiones: es por-máquina y
+# suele contener rutas, hostnames internos o secretos privados que no
+# quieres exponer en el repo público.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Ejemplo: extender el PATH en Git Bash con un directorio personal de
+# binarios sincronizado por Nextcloud.
+# -----------------------------------------------------------------------------
+# Bash no tiene array `path=(...)` como zsh, así que usamos `export PATH=...`.
+# Antepón `${PATH}` para APPEND (menor precedencia que lo ya heredado);
+# pospón `${PATH}` para PREPEND (mayor precedencia).
+export PATH="${PATH}:$HOME/Nextcloud/priv/bin"
+
+# -----------------------------------------------------------------------------
+# Otros patrones típicos (descomenta y adapta lo que necesites).
+# -----------------------------------------------------------------------------
+# alias work='cd /c/Users/${USERNAME}/Work/cliente-x'
+# export OPENAI_API_KEY="sk-..."        # nunca lo subas al repo
+# export EDITOR="code --wait"

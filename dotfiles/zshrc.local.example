@@ -1,0 +1,62 @@
+# =============================================================================
+# Plantilla de ejemplo para ~/.zshrc.local
+# =============================================================================
+# Este archivo NO se despliega ni se copia automáticamente por devcli; es
+# una muestra de referencia. Para usarlo, cópialo manualmente a tu home
+# y edítalo con tus propios ajustes:
+#
+#   cp ~/.devcli/dotfiles/zshrc.local.example ~/.zshrc.local
+#   ${EDITOR:-vi} ~/.zshrc.local
+#
+# Cuando ~/.zshrc.local existe, ~/.zshrc lo carga al FINAL del arranque,
+# así que las definiciones aquí (PATH, alias, funciones, exports, overrides
+# del prompt, etc.) tienen prioridad sobre lo que define el repositorio.
+#
+# Mantén este fichero FUERA del control de versiones: es por-máquina y
+# suele contener rutas, hostnames internos o secretos privados que no
+# quieres exponer en el repo público.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Ejemplo: extender el PATH en macOS con un Nextcloud local y dev tools
+# -----------------------------------------------------------------------------
+# Ubicación del fichero en este caso: /Users/<usuario>/.zshrc.local
+#
+# `path=(...)` es la sintaxis de array de zsh. ~/.zshrc ya declara
+# `typeset -U path`, así que los duplicados se eliminan automáticamente.
+# Coloca `$path` al principio para APPEND (menor precedencia) o al final
+# para PREPEND (mayor precedencia que el PATH heredado).
+path=(
+  $path
+  "${HOME}/Library/CloudStorage/Nextcloud-john@nextcloud.local.arpa/priv/bin"
+  "${HOME}/dev-tools"
+)
+
+# -----------------------------------------------------------------------------
+# Ejemplo: extender el PATH en un WSL2
+# -----------------------------------------------------------------------------
+# Ubicación del fichero en este caso: /home/<usuario>/.zshrc.local
+# (el sistema de ficheros de WSL2 vive bajo /home, no bajo /mnt/c).
+path=(
+  $path
+  "/mnt/c/Users/${SOY}/Nextcloud/priv/bin"           # Scripts privados en Windows
+  "/mnt/c/Users/${SOY}/Nextcloud/priv/bin/win"       # Scripts específicos de Windows
+  "/mnt/c/Users/${SOY}/dev-tools/"                   # Herramientas de desarrollo
+)
+
+# -----------------------------------------------------------------------------
+# Ejemplo: extender el PATH en un Linux
+# -----------------------------------------------------------------------------
+# Ubicación del fichero en este caso: /home/<usuario>/.zshrc.local
+path=(
+  $path
+  "/mnt/c/Users/${SOY}/Nextcloud/priv/bin"
+  "/mnt/c/Users/${SOY}/dev-tools/"
+)
+
+# -----------------------------------------------------------------------------
+# Otros patrones típicos (descomenta y adapta lo que necesites).
+# -----------------------------------------------------------------------------
+# alias work='cd ~/Work/cliente-x'
+# export OPENAI_API_KEY="sk-..."        # nunca lo subas al repo
+# export EDITOR="code --wait"

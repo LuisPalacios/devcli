@@ -344,3 +344,11 @@ fi
 # 6. Navegación: autocd (escribir directorio = cd), cdspell (autocorrección)
 # 7. Búsqueda: Ctrl+R (historial), Ctrl+T (archivos), Alt+C (directorios)
 # =============================================================================
+
+# =============================================================================
+# Override local (no versionado): permite extender PATH, definir alias o
+# funciones específicas de esta máquina sin tocar este archivo. Se ejecuta
+# al final, así que tiene prioridad sobre todo lo anterior.
+# Crea ~/.bashrc.local manualmente si lo necesitas; no existe por defecto.
+# =============================================================================
+[ -f ~/.bashrc.local ] && source ~/.bashrc.local

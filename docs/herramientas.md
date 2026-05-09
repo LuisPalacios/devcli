@@ -21,7 +21,7 @@ oh-my-posh print primary --config ~/.oh-my-posh.json   # debug del render
 
 Si quieres ver qué indicadores muestra y customizar segmentos (colores,
 iconos, qué se enseña a la izquierda vs a la derecha) edita el
-`.oh-my-posh.json` del repo y haz un fork.
+`oh-my-posh.json` del repo y haz un fork.
 
 > Si los iconos del prompt salen como cuadraditos, te falta una **Nerd Font**.
 > Mira [troubleshooting.md](troubleshooting.md#los-iconos-no-salen-bien-ezalsd-prompt).
