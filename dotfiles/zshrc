@@ -723,6 +723,21 @@ else
   eval "$(oh-my-posh init zsh --config ~/.oh-my-posh.json)"
 fi
 
+# Integración WezTerm — emite OSC 7 (CWD) y OSC 133 (prompt semántico)
+# para que AI Mode y la barra de pestañas conozcan el directorio activo.
+# Se activa solo dentro de WezTerm (WEZTERM_PANE lo define WezTerm).
+if [[ -n "$WEZTERM_PANE" ]] && [[ -f "$HOME/.config/wezterm/wezterm.sh" ]]; then
+  source "$HOME/.config/wezterm/wezterm.sh"
+fi
+
+# =============================================================================
+# Override local (no versionado): permite extender PATH, definir alias o
+# funciones específicas de esta máquina sin tocar este archivo. Se ejecuta
+# al final, así que tiene prioridad sobre todo lo anterior.
+# Crea ~/.zshrc.local manualmente si lo necesitas; no existe por defecto.
+# =============================================================================
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
 # =============================================================================
 # SNAPSHOT PATH A ~/.zshenv PARA SESIONES SSH NO INTERACTIVAS
 # =============================================================================
@@ -748,6 +763,8 @@ if [[ -o interactive ]]; then
   fi
 fi
 
+# Linux Setup: -------------------------------------------------------------- END
+
 # =============================================================================
 # NOTAS IMPORTANTES PARA EL USUARIO:
 # =============================================================================
@@ -764,20 +781,3 @@ fi
 # 7. Para personalizar, modifica las funciones y variables en este archivo
 # 8. Debug: Descomenta 'set -x' al principio para ver ejecución detallada
 # =============================================================================
-
-# Integración WezTerm — emite OSC 7 (CWD) y OSC 133 (prompt semántico)
-# para que AI Mode y la barra de pestañas conozcan el directorio activo.
-# Se activa solo dentro de WezTerm (WEZTERM_PANE lo define WezTerm).
-if [[ -n "$WEZTERM_PANE" ]] && [[ -f "$HOME/.config/wezterm/wezterm.sh" ]]; then
-  source "$HOME/.config/wezterm/wezterm.sh"
-fi
-
-# =============================================================================
-# Override local (no versionado): permite extender PATH, definir alias o
-# funciones específicas de esta máquina sin tocar este archivo. Se ejecuta
-# al final, así que tiene prioridad sobre todo lo anterior.
-# Crea ~/.zshrc.local manualmente si lo necesitas; no existe por defecto.
-# =============================================================================
-[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
-
-# Linux Setup: -------------------------------------------------------------- END
