@@ -656,8 +656,27 @@ if wezterm.target_triple:find 'windows' then
     mux_w:spawn_tab(spawn)
   end
 
-  wezterm.on('window-focus-changed', function(win, _pn)
+  -- Tabla espejo del exe_to_scheme de §3. Mantén ambas en sync — si añades
+  -- un shell nuevo a una, añádelo a la otra. La de §3 fija el scheme global
+  -- en la PRIMERA ventana (basado en config.default_prog); ésta lo aplica
+  -- por-ventana cuando una ventana gana foco y su pane activo está
+  -- ejecutando un exe conocido. El resultado es que las ventanas spawneadas
+  -- FUERA del picker (gitbox, `wezterm cli spawn`, doble-click en
+  -- WezTerm.app desde Finder, etc.) también reciben el color scheme del
+  -- shell que están hospedando — el picker callback ya lo hace por su
+  -- camino vía pending_scheme_by_window.
+  local exe_to_scheme_runtime = {
+    ['bash.exe']       = 'iTerm2 Dark Background',
+    ['pwsh.exe']       = 'LP-Campbell',
+    ['powershell.exe'] = 'LP-Campbell Powershell',
+    ['cmd.exe']        = 'LP-Campbell',
+    ['wsl.exe']        = 'LP-Ubuntu',
+  }
+
+  wezterm.on('window-focus-changed', function(win, pane)
     local key = tostring(win:window_id())
+
+    -- 1. Prioridad: scheme diferido por el picker (§5 mux.spawn_window).
     local pending = pending_scheme_by_window[key]
     if pending then
       local overrides = win:get_config_overrides() or {}
@@ -666,6 +685,31 @@ if wezterm.target_triple:find 'windows' then
         win:set_config_overrides(overrides)
       end
       pending_scheme_by_window[key] = nil
+      return
+    end
+
+    -- 2. Fallback: aplica el scheme correspondiente al exe en primer plano
+    -- del pane activo. Cubre ventanas que NO pasaron por el picker (gitbox
+    -- launch, `wezterm cli spawn`, etc.) — el shell todavía recibe colores
+    -- consistentes con la convención de §3.
+    --
+    -- Limitación conocida: WezTerm scopa color_scheme POR VENTANA, no por
+    -- pestaña/pane. Si una ventana hosta pestañas con shells distintos,
+    -- el scheme de la ventana refleja el exe del pane FOCUSEADO cuando la
+    -- ventana ganó foco, no necesariamente el de la pestaña que mires
+    -- después.
+    if not pane then return end
+    local proc = pane:get_foreground_process_name() or ''
+    -- Saca el basename y normaliza minúsculas: get_foreground_process_name
+    -- devuelve la ruta completa en Windows (C:\Program Files\PowerShell\7\
+    -- pwsh.exe) y a veces sólo el nombre en Unix.
+    local exe = string.lower(proc:match('([^\\/]+)$') or '')
+    local new_scheme = exe_to_scheme_runtime[exe]
+    if not new_scheme then return end
+    local overrides = win:get_config_overrides() or {}
+    if overrides.color_scheme ~= new_scheme then
+      overrides.color_scheme = new_scheme
+      win:set_config_overrides(overrides)
     end
   end)
 
