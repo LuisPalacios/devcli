@@ -198,7 +198,8 @@ config.enable_scroll_bar = true
 -- │    for n,_ in pairs(wezterm.color.get_builtin_schemes()) do print(n) │
 -- │    end                                                               │
 -- └──────────────────────────────────────────────────────────────────────┘
-config.color_scheme = 'iTerm2 Dark Background'
+-- config.color_scheme = 'iTerm2 Dark Background'
+config.color_scheme = 'LP-GitBash'
 
 -- No preguntar "¿Realmente quieres matar esta ventana?" al cerrar —
 -- asumir que sí. (Pon 'AlwaysPrompt' para restaurar el default si alguna
@@ -445,15 +446,40 @@ end
 -- Para añadir / cambiar perfiles: edita `schemes` y `profiles` abajo. El
 -- orden de `profiles` es el orden en que el picker los muestra.
 
+-- Color de las líneas divisoras
+local pane_split_color = '#a04e18'
+
+-- Mantén los colores intactos cuando otra ventana/pane gana foco; el default
+-- de WezTerm atenúa panes inactivos y vuelve las divisorias a gris.
+config.inactive_pane_hsb = {
+  saturation = 1.0,
+  brightness = 1.0,
+}
+
 if wezterm.target_triple:find 'windows' then
+  local function builtin_scheme_with_split(name)
+    local builtin = wezterm.color.get_builtin_schemes()[name] or {}
+    local scheme = {}
+    for key, value in pairs(builtin) do
+      scheme[key] = value
+    end
+    scheme.split = pane_split_color
+    return scheme
+  end
+
   -- Color schemes hardcoded (paletas canónicas de Microsoft Console + Ubuntu).
   -- Disponibles globalmente vía config.color_scheme y por-ventana vía
   -- mux_window:gui_window():set_config_overrides{ color_scheme = '…' }.
   local schemes = {
+    -- Overrides local del scheme bundled para conservar Git Bash con los
+    -- mismos colores, pero con divisorias naranja.
+    ['iTerm2 Dark Background'] = builtin_scheme_with_split('iTerm2 Dark Background'),
+
     -- Git Bash — fg #BFBFBF sobre negro; la paleta que el usuario mantenía
     -- en el settings.json de WT (verbatim).
     ['LP-GitBash'] = {
-      foreground    = '#BFBFBF', background = '#000000',
+      foreground    = '#BFBFBF', background = '#110c12',
+      split = pane_split_color,
       cursor_bg     = '#FFFFFF', cursor_fg  = '#000000',
       cursor_border = '#FFFFFF',
       selection_bg  = '#FFFFFF', selection_fg = '#000000',
@@ -465,6 +491,7 @@ if wezterm.target_triple:find 'windows' then
     -- Microsoft Console default — usado por PowerShell 7 y cmd.exe.
     ['LP-Campbell'] = {
       foreground    = '#CCCCCC', background = '#0C0C0C',
+      split = pane_split_color,
       cursor_bg     = '#FFFFFF', cursor_fg  = '#0C0C0C',
       cursor_border = '#FFFFFF',
       selection_bg  = '#FFFFFF', selection_fg = '#000000',
@@ -477,6 +504,7 @@ if wezterm.target_triple:find 'windows' then
     -- el icónico fondo azul.
     ['LP-Campbell Powershell'] = {
       foreground    = '#CCCCCC', background = '#012456',
+      split = pane_split_color,
       cursor_bg     = '#FFFFFF', cursor_fg  = '#012456',
       cursor_border = '#FFFFFF',
       selection_bg  = '#FFFFFF', selection_fg = '#000000',
@@ -488,6 +516,7 @@ if wezterm.target_triple:find 'windows' then
     -- Paleta estándar del Ubuntu Terminal (derivada de Tango) — usada por WSL.
     ['LP-Ubuntu'] = {
       foreground    = '#BFBFBF', background = '#300A24',
+      split = pane_split_color,
       cursor_bg     = '#BFBFBF', cursor_fg  = '#300A24',
       cursor_border = '#BFBFBF',
       selection_bg  = '#B5D5FF', selection_fg = '#000000',
@@ -516,7 +545,8 @@ if wezterm.target_triple:find 'windows' then
       label        = 'Git Bash',
       args         = { prog_files .. '\\Git\\bin\\bash.exe', '--login', '-i', '-l' },
       cwd          = home,
-      color_scheme = 'iTerm2 Dark Background',
+      -- color_scheme = 'iTerm2 Dark Background',
+      color_scheme = 'LP-GitBash',
     },
     {
       label        = 'PowerShell 7',
@@ -597,15 +627,16 @@ if wezterm.target_triple:find 'windows' then
   -- Fija el scheme global por defecto para emparejar el shell elegido
   -- en §2, así la primera ventana (que spawnea config.default_prog, no
   -- vía picker) abre con los colores del shell en vez del fallback de §3.
+  --       ['bash.exe']       = 'iTerm2 Dark Background',
   do
     local default_exe = exe_basename(config.default_prog and config.default_prog[1])
     local exe_to_scheme = {
-      ['bash.exe']       = 'iTerm2 Dark Background',
+      ['bash.exe']       = 'LP-GitBash',
       ['pwsh.exe']       = 'LP-Campbell',
       ['powershell.exe'] = 'LP-Campbell Powershell',
       ['cmd.exe']        = 'LP-Campbell',
       ['wsl.exe']        = 'LP-Ubuntu',
-    }
+    } 
     -- Resolvemos contra TANTO los schemes inyectados del usuario (LP-*)
     -- COMO los ~960 bundled de WezTerm — si no, los nombres built-in
     -- silenciosamente fallan el check y la primera ventana cae al scheme
@@ -666,7 +697,7 @@ if wezterm.target_triple:find 'windows' then
   -- shell que están hospedando — el picker callback ya lo hace por su
   -- camino vía pending_scheme_by_window.
   local exe_to_scheme_runtime = {
-    ['bash.exe']       = 'iTerm2 Dark Background',
+    ['bash.exe']       = 'LP-GitBash',
     ['pwsh.exe']       = 'LP-Campbell',
     ['powershell.exe'] = 'LP-Campbell Powershell',
     ['cmd.exe']        = 'LP-Campbell',
