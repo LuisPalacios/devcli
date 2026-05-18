@@ -2,6 +2,8 @@
 #
 # pathdoctor.ps1 — Inspector y editor del PATH de Windows (Sistema y Usuario).
 #
+# Copyright (c) 2026 Luis Palacios
+#
 # Uso:
 #   pathdoctor                              Muestra ambos PATH en orden de búsqueda.
 #   pathdoctor -Export <fichero>            Exporta el PATH actual (formato 'S|U <ruta>').
