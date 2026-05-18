@@ -1,7 +1,6 @@
 #Requires -Version 7.0
 #
 # pathdoctor.ps1 — Inspector y editor del PATH de Windows (Sistema y Usuario).
-# Ubicación instalada: ~/bin/pathdoctor.ps1 (vía install/05-localtools.json).
 #
 # Uso:
 #   pathdoctor                              Muestra ambos PATH en orden de búsqueda.
@@ -274,7 +273,9 @@ function Export-PathToFile {
         $lines.Add($line)
     }
 
-    $resolved = [System.IO.Path]::GetFullPath($Path)
+    # Resolvemos contra $PWD.Path (no contra el CWD de .NET, que en PowerShell
+    # se queda fijado al directorio inicial del proceso y no sigue a Set-Location).
+    $resolved = [System.IO.Path]::GetFullPath($Path, $PWD.Path)
     Set-Content -LiteralPath $resolved -Value $lines -Encoding utf8NoBOM
 
     Out-Line "Exportado: $resolved" Green
@@ -287,7 +288,9 @@ function Export-PathToFile {
 
 function Read-PathManifest {
     param([string]$Path)
-    $resolved = [System.IO.Path]::GetFullPath($Path)
+    # Idéntico criterio que en Export: relativo al $PWD del usuario, no al
+    # CWD inicial del proceso .NET.
+    $resolved = [System.IO.Path]::GetFullPath($Path, $PWD.Path)
     if (-not (Test-Path -LiteralPath $resolved)) {
         throw "Fichero no encontrado: $resolved"
     }
