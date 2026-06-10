@@ -1010,6 +1010,15 @@ local key_bindings = {
     mods   = 'CTRL|SHIFT',
     action = wezterm.action_callback(show_theme_picker),
   },
+  -- SHIFT+Enter → nueva línea en Claude Code (y cualquier TUI que trate
+  -- ESC+CR como "insertar línea", igual que ALT+Enter). Sin este binding
+  -- WezTerm emite un CR normal para SHIFT+Enter — indistinguible de Enter
+  -- — y Claude Code envía el mensaje en vez de añadir una línea.
+  {
+    key    = 'Enter',
+    mods   = 'SHIFT',
+    action = act.SendString '\x1b\r',
+  },
 }
 
 -- Shell picker (§5): alternativa de teclado a clickear en "+".
