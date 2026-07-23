@@ -232,6 +232,9 @@ command -v btm >/dev/null 2>&1 && alias htop='btm'
 # Llevo años usando more... me sale solo
 alias more='less'
 
+# Claude Code permitir no necesitar confirmaciones de permisos
+alias claude='claude --allow-dangerously-skip-permissions'
+
 # =============================================================================
 # INCLUSIÓN DE ALIASES EXTERNOS
 # =============================================================================
