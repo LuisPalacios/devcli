@@ -371,29 +371,7 @@ fi
 # =============================================================================
 # Override local (no versionado): permite extender PATH, definir alias o
 # funciones específicas de esta máquina sin tocar este archivo. Se ejecuta
-# antes que ble.sh (ver más abajo), así que sus cambios (PATH, PS1, etc.)
-# quedan también envueltos por ble.sh.
+# al final, así que tiene prioridad sobre todo lo anterior.
 # Crea ~/.bashrc.local manualmente si lo necesitas; no existe por defecto.
 # =============================================================================
 [ -f ~/.bashrc.local ] && source ~/.bashrc.local
-
-# =============================================================================
-# ble.sh — autosugerencias y resaltado de sintaxis (experimental, sólo Git Bash)
-# =============================================================================
-# Sugiere en gris, mientras escribes, el comando más probable según tu
-# historial (equivalente aproximado a las predicciones de PSReadLine en
-# PowerShell — flecha derecha o Fin para aceptar). ble.sh no tiene paquete
-# scoop/apt/brew: se autoinstala la primera vez vía blesh-install.sh
-# (files/bin/blesh-install.sh) en ~/.local/share/blesh.
-#
-# Para desactivarlo sin desinstalarlo, añade esto a ~/.bashrc.local:
-#   export DEVCLI_BLESH_ENABLED=false
-#
-# Debe ser SIEMPRE lo último que se ejecuta en este archivo (requisito de
-# ble.sh para engancharse correctamente al prompt final).
-if [[ "${DEVCLI_BLESH_ENABLED:-true}" != "false" ]]; then
-    if [[ ! -f "$HOME/.local/share/blesh/ble.sh" ]] && [[ -f "$HOME/bin/blesh-install.sh" ]]; then
-        bash "$HOME/bin/blesh-install.sh"
-    fi
-    [[ -f "$HOME/.local/share/blesh/ble.sh" ]] && source "$HOME/.local/share/blesh/ble.sh"
-fi

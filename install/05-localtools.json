@@ -35,10 +35,6 @@
     {
       "name": "pathdoctor.ps1",
       "platforms": ["windows"]
-    },
-    {
-      "name": "blesh-install.sh",
-      "platforms": ["windows"]
     }
   ]
 }
