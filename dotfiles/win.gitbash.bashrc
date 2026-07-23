@@ -297,7 +297,10 @@ if command -v zoxide >/dev/null 2>&1; then
     eval "$(zoxide init bash --cmd cd --hook none)"
     __devcli_zoxide_cd() {
         builtin cd -- "$@" || return
+        # No dejar que un fallo de "zoxide add" (mero housekeeping en segundo
+        # plano) contamine el exit status visible de "cd" en el prompt.
         command zoxide add -- "$(__zoxide_pwd)" >/dev/null 2>&1
+        return 0
     }
     __zoxide_cd() {
         __devcli_zoxide_cd "$@"
