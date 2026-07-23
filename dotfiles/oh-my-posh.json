@@ -87,7 +87,7 @@
             "properties": {
               "always_enabled": true
             },
-            "template": " {{ if gt .Code 0 }}<p:red>\uf00d</> {{ end }}</><foreground>\u276f</>",
+            "template": " {{ if and (gt .Code 0) (ne .Code 130) }}<p:red>\uf00d</> {{ end }}</><foreground>\u276f</>",
             "foreground": "p:white",
             "background": "transparent"
           }
