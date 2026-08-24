@@ -77,6 +77,18 @@ function test-ls-args {
 function parametriza_zsh_comun() {
 
   # ---------------------------------------------------------------------------
+  # CONFIGURACIÓN DE PNPM (INSTALADOR STANDALONE)
+  # ---------------------------------------------------------------------------
+
+  # El instalador standalone de pnpm (get.pnpm.io) deja los binarios en
+  # $PNPM_HOME/bin y necesita PNPM_HOME exportado para los paquetes globales.
+  # Su bloque de PATH en el rc se pierde al desplegar este fichero, así que
+  # se define aquí. En macOS (brew) el directorio no existe y no hace nada.
+  if [[ -d "${HOME}/.local/share/pnpm" ]]; then
+    export PNPM_HOME="${HOME}/.local/share/pnpm"
+  fi
+
+  # ---------------------------------------------------------------------------
   # CONFIGURACIÓN DE COLORES PARA COMANDOS DE LISTADO
   # ---------------------------------------------------------------------------
 
@@ -341,6 +353,8 @@ if [ "$IS_WSL2" = true ] ; then
   path=(
     .                                    # Directorio actual (útil para desarrollo)
     "${HOME}/bin"                        # Binarios personales del usuario
+    "${HOME}/.local/bin"                 # Otros binarios personales (uv, etc.)
+    "${HOME}/.local/share/pnpm/bin"      # PNPM (instalador standalone)
     "/mnt/c/Users/${SOY}/bin"                         # Binarios personales del usuario
     "/mnt/c/Program Files/Docker/Docker/resources/bin" # Docker Desktop para Windows
     "/mnt/c/Users/${SOY}/AppData/Local/Programs/Microsoft VS Code/bin" # VS Code CLI
@@ -531,7 +545,7 @@ else
           .                               # Directorio actual
           "${HOME}/bin"                   # Binarios personales
           "${HOME}/.local/bin"            # Otros binarios personales
-          "${HOME}/.local/share/pnpm"     # PNPM
+          "${HOME}/.local/share/pnpm/bin" # PNPM (instalador standalone)
           "/usr/local/bin"                # Binarios instalados manualmente
           "/usr/local/sbin"               # Binarios de administración local
           $path                           # PATH heredado del sistema
