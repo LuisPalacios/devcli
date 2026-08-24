@@ -146,6 +146,18 @@ Makefile     text eol=lf
 zshrc      text eol=lf
 zshrc.local.example  text eol=lf
 bashrc.local.example text eol=lf
+# Dotfiles y scripts sin extensión con destino Unix / Git Bash — siempre LF
+# (con text=auto se checkoutean CRLF en Windows y el deploy los arrastra)
+win.gitbash.bashrc text eol=lf
+clink_settings     text eol=lf
+nanorc             text eol=lf
+confcat            text eol=lf
+dkmon              text eol=lf
+e                  text eol=lf
+ia                 text eol=lf
+s                  text eol=lf
+# Lua (wezterm.lua, oh-my-posh.lua) — LF funciona bien también en Windows
+*.lua      text eol=lf
 # Windows
 *.bat      text eol=crlf
 *.cmd      text eol=crlf
