@@ -9,8 +9,8 @@ quieres tener que configurar tú.
 
 > **Linux headless**: al ser una aplicación gráfica, en Linux WezTerm sólo se
 > instala si devcli detecta un entorno de escritorio (sesión gráfica activa,
-> entorno de escritorio instalado, o arranque por defecto en
-> `graphical.target`). En servidores sin GUI se omite y el resto de devcli
+> entorno de escritorio instalado, o un display manager configurado en
+> systemd). En servidores sin GUI se omite y el resto de devcli
 > funciona exactamente igual. Si más adelante conviertes esa máquina en
 > desktop, re-ejecuta el bootstrap y se instalará.
 

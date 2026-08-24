@@ -72,8 +72,10 @@ detect_desktop_environment() {
       elif ls /usr/share/xsessions/*.desktop >/dev/null 2>&1 \
         || ls /usr/share/wayland-sessions/*.desktop >/dev/null 2>&1; then
         IS_DESKTOP=true
-      # 3. systemd arranca por defecto en modo gráfico
-      elif [[ "$(systemctl get-default 2>/dev/null)" == "graphical.target" ]]; then
+      # 3. Hay un display manager configurado (gdm, sddm, lightdm…).
+      #    OJO: no usar `systemctl get-default` — Debian trae graphical.target
+      #    por defecto incluso en servidores headless (falso positivo).
+      elif [[ -e /etc/systemd/system/display-manager.service ]]; then
         IS_DESKTOP=true
       fi
       ;;
