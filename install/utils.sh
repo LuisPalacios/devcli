@@ -362,8 +362,10 @@ setup_gierens_repo() {
   fi
   sudo apt install -y -qq gpg >/dev/null 2>&1
   sudo install -d -m 0755 /etc/apt/keyrings
+  # --batch --yes: sobrescribir sin preguntar si el keyring ya existe
+  # (p.ej. quedó de una ejecución anterior interrumpida antes de crear el .list)
   curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
-    | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+    | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/gierens.gpg
   sudo chmod 644 /etc/apt/keyrings/gierens.gpg
   echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
     | sudo tee /etc/apt/sources.list.d/gierens.list >/dev/null
