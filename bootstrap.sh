@@ -211,6 +211,13 @@ export DEVCLI_VERBOSE
 source "$SETUP_DIR/install/utils.sh"
 ux_init "$HOME/.devcli/install.log"
 
+# IS_DESKTOP para el aviso final de WezTerm en ux_summary. No se puede cargar
+# env.sh entero aquí (pisaría SETUP_LANG del flag -l), así que se deriva en
+# un subshell. Si algo falla, se asume escritorio (comportamiento previo).
+IS_DESKTOP="$(source "$SETUP_DIR/install/env.sh" >/dev/null 2>&1; echo "${IS_DESKTOP:-true}")" || true
+IS_DESKTOP="${IS_DESKTOP:-true}"
+export IS_DESKTOP
+
 # Etiqueta amigable para el banner.
 case "$OS_TYPE" in
   wsl2)  os_label="WSL2 (Ubuntu)" ;;
