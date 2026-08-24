@@ -7,6 +7,13 @@ devcli la instala con los perfiles `dev` y `full`, y le añade una
 **super-config** (~750 líneas en Lua) con todo lo que quieres pero no
 quieres tener que configurar tú.
 
+> **Linux headless**: al ser una aplicación gráfica, en Linux WezTerm sólo se
+> instala si devcli detecta un entorno de escritorio (sesión gráfica activa,
+> entorno de escritorio instalado, o arranque por defecto en
+> `graphical.target`). En servidores sin GUI se omite y el resto de devcli
+> funciona exactamente igual. Si más adelante conviertes esa máquina en
+> desktop, re-ejecuta el bootstrap y se instalará.
+
 [WezTerm](https://wezterm.org) es un emulador moderno escrito en Rust: rápido
 (GPU acceleration), configuración en Lua (no JSON) y muy extensible. Frente a
 las terminales nativas (Windows Terminal, iTerm2, gnome-terminal) gana en

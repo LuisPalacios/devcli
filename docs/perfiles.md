@@ -14,6 +14,11 @@ estás en un servidor sin entorno gráfico, o si simplemente no quieres ruido.
 
 > Las herramientas "base" (git, curl, wget, nano, zsh, jq, oh-my-posh) **siempre**
 > se instalan, independientemente del perfil. Sin ellas, devcli no funciona.
+>
+> **WezTerm en Linux**: aunque elijas `dev` o `full`, en Linux sólo se instala
+> si devcli detecta un entorno de escritorio. En servidores headless se omite
+> automáticamente (es una app gráfica). Más detalles en
+> [wezterm.md](wezterm.md).
 
 ## Cómo elegir un perfil
 

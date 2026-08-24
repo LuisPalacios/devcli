@@ -46,6 +46,10 @@ Detalles en [wezterm.md](wezterm.md) (incluida la sección AI Mode).
 
 > Si no quieres WezTerm, devcli funciona igual en Windows Terminal, iTerm2,
 > gnome-terminal, etc. — pero perderás la super-config y los atajos.
+>
+> En **Linux headless** (sin entorno de escritorio) WezTerm se omite
+> automáticamente aunque uses los perfiles `dev`/`full` — no tiene sentido
+> instalar una app gráfica en un servidor.
 
 ## Navegación y archivos
 

@@ -44,7 +44,8 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 - Si los iconos no salen bien (prueba con `ls`, que ahora va por `eza`), ejecuta `~/bin/nerd-setup.sh`
   (Linux/macOS/WSL2) o `~/bin/nerd-setup.ps1` (Windows). Más en
   [docs/troubleshooting.md](docs/troubleshooting.md).
-- **Abre WezTerm** (instalado con perfiles `dev`/`full`) — es la terminal
+- **Abre WezTerm** (instalado con perfiles `dev`/`full`; en Linux sólo si hay
+  entorno de escritorio — en servidores headless se omite) — es la terminal
   recomendada del proyecto. Atajos, selector de temas, AI Mode y demás en
   [docs/wezterm.md](docs/wezterm.md).
 - **Personaliza tu Shell** en Linux, macOS o WSL2/Git-Bash (Windows). Echa un ojo a los ficheros [zshrc.local.example](./dotfiles/zshrc.local.example) y [bashrc.local.example](./dotfiles/bashrc.local.example)
