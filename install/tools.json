@@ -224,7 +224,7 @@
     {
       "name": "wezterm",
       "tags": ["dev"],
-      "linux":   { "method": "github-deb", "repo": "wezterm/wezterm", "version": "20240203-110809-5046fc22", "tag_prefix": "", "deb_pattern": "wezterm-${version}.Ubuntu22.04.deb", "check_cmd": "wezterm" },
+      "linux":   { "method": "github-deb", "repo": "wezterm/wezterm", "version": "20240203-110809-5046fc22", "tag_prefix": "", "deb_pattern": "wezterm-${version}.Ubuntu22.04.deb", "check_cmd": "wezterm", "requires_desktop": true },
       "macos":   { "method": "brew", "package": "wezterm", "cask": true },
       "windows": { "method": "scoop", "package": "wezterm" }
     },

@@ -54,6 +54,37 @@ detect_os_type() {
   fi
 }
 
+# Detección de entorno de escritorio (para herramientas GUI como WezTerm)
+# IS_DESKTOP=true  → tiene sentido instalar aplicaciones gráficas
+# IS_DESKTOP=false → equipo headless (o WSL2): se omiten las herramientas
+#                    marcadas con "requires_desktop" en tools.json
+detect_desktop_environment() {
+  case "$OS_TYPE" in
+    macos)
+      IS_DESKTOP=true
+      ;;
+    linux)
+      IS_DESKTOP=false
+      # 1. Sesión gráfica activa (X11 o Wayland)
+      if [[ -n "${DISPLAY:-}" || -n "${WAYLAND_DISPLAY:-}" ]]; then
+        IS_DESKTOP=true
+      # 2. Algún entorno de escritorio instalado (aunque entremos por SSH)
+      elif ls /usr/share/xsessions/*.desktop >/dev/null 2>&1 \
+        || ls /usr/share/wayland-sessions/*.desktop >/dev/null 2>&1; then
+        IS_DESKTOP=true
+      # 3. systemd arranca por defecto en modo gráfico
+      elif [[ "$(systemctl get-default 2>/dev/null)" == "graphical.target" ]]; then
+        IS_DESKTOP=true
+      fi
+      ;;
+    *)
+      # wsl2 y otros: sin escritorio nativo donde instalar apps GUI
+      IS_DESKTOP=false
+      ;;
+  esac
+  export IS_DESKTOP
+}
+
 # Detección de usuario root
 detect_root_user() {
   if [[ $EUID -eq 0 ]]; then
@@ -66,4 +97,5 @@ detect_root_user() {
 # Ejecutar detecciones al cargar
 detect_current_user
 detect_os_type
+detect_desktop_environment
 detect_root_user

@@ -959,10 +959,12 @@ ux_summary() {
   fi
 
   # Aviso de Personalización de WezTerm — sólo cuando WezTerm forma parte
-  # del perfil instalado (dev/full) y no hubo errores duros. El usuario debe
-  # abrir el dotfile y revisar la sección §0 para los knobs ajustables.
+  # del perfil instalado (dev/full), hay entorno de escritorio (en headless
+  # y WSL2 no se instala) y no hubo errores duros. El usuario debe abrir el
+  # dotfile y revisar la sección §0 para los knobs ajustables.
   local profile="${DEVCLI_PROFILE:-full}"
-  if [[ $phases_fail -eq 0 ]] && [[ "$profile" == "dev" || "$profile" == "full" ]]; then
+  if [[ $phases_fail -eq 0 ]] && [[ "$profile" == "dev" || "$profile" == "full" ]] \
+    && [[ "${IS_DESKTOP:-true}" == "true" ]]; then
     printf "\n%sWezTerm:%s abre %s~/.config/wezterm/wezterm.lua%s y revisa\n" \
       "$_DEVCLI_UX_C_BOLD" "$_DEVCLI_UX_C_RESET" \
       "$_DEVCLI_UX_C_DIM" "$_DEVCLI_UX_C_RESET"

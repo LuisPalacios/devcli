@@ -119,10 +119,12 @@ Final layout (≈ cell ratios):
 "linux":   { "method": "github-deb", "repo": "wezterm/wezterm",
              "version": "20240203-110809-5046fc22", "tag_prefix": "",
              "deb_pattern": "wezterm-${version}.Ubuntu22.04.deb",
-             "check_cmd": "wezterm" },
+             "check_cmd": "wezterm", "requires_desktop": true },
 "macos":   { "method": "brew", "package": "wezterm", "cask": true },
 "windows": { "method": "scoop", "package": "wezterm" }
 ```
+
+**Headless Linux skip (2026-08-24)**: `requires_desktop: true` on a platform block makes `02-packages.sh` drop the tool when `IS_DESKTOP != true`. `IS_DESKTOP` is set by `detect_desktop_environment()` in `install/env.sh`: always `true` on macOS, always `false` on WSL2/other, and on Linux `true` if ANY of — `DISPLAY`/`WAYLAND_DISPLAY` set, a DE is installed (`/usr/share/{xsessions,wayland-sessions}/*.desktop`), or `systemctl get-default` is `graphical.target`. Skipped GUI tools are logged (log file only). The `ux_summary` WezTerm hint is also gated on `IS_DESKTOP`. The wezterm dotfiles (`wezterm.lua`/`wezterm.sh`) still deploy on headless Linux — harmless, and ready if the user installs WezTerm manually. PowerShell side untouched (Windows is always desktop).
 
 ```json
 // 03-dotfiles.json — both files, no wsl2 (GUI app)
