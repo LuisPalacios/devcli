@@ -236,6 +236,42 @@ alias more='less'
 alias claude='claude --allow-dangerously-skip-permissions'
 
 # =============================================================================
+# PING ESTILO LINUX (DELEGADO A WSL2)
+# =============================================================================
+#
+# El ping.exe de Windows usa su propia sintaxis (-n, -w, -l) y NO se puede
+# sustituir por PATH: Windows compone el PATH del proceso como Máquina +
+# Usuario, y C:\Windows\system32 vive en el de máquina, así que nada puesto
+# en ~/bin puede taparlo. La única vía limpia es una función de shell.
+#
+# Delegamos en el ping real de iputils dentro de WSL2: -c, -i, -D, -s, -w,
+# -q, -f y el resumen con "rtt min/avg/max/mdev". Es idéntico al de Linux
+# porque es el de Linux. El código de salida se propaga tal cual (0 = ok,
+# 1 = sin respuesta, 2 = error de resolución).
+#
+# Ajustes (exportar en ~/.bashrc.local, que se carga al final del fichero):
+#   DEVCLI_PING_WSL=0              desactiva la delegación y usa ping.exe
+#   DEVCLI_PING_WSL_DISTRO=nombre  fuerza una distro (vacío = la por defecto)
+#
+# Limitaciones conocidas:
+#   - El origen es la interfaz NAT de WSL2, no el stack de red de Windows:
+#     no atraviesa adaptadores exclusivos del host (p.ej. una VPN levantada
+#     en Windows). Para esos casos, `ping.exe` sigue disponible sin alias.
+#   - `-i` por debajo de 0.2s requiere root dentro de la distro.
+#   - Sólo aplica a Git Bash; en PowerShell sigue vigente su propia función.
+ping() {
+    if [ "${DEVCLI_PING_WSL:-1}" = "1" ] && command -v wsl.exe >/dev/null 2>&1; then
+        if [ -n "${DEVCLI_PING_WSL_DISTRO:-}" ]; then
+            wsl.exe -d "${DEVCLI_PING_WSL_DISTRO}" -e ping "$@"
+        else
+            wsl.exe -e ping "$@"
+        fi
+    else
+        ping.exe "$@"
+    fi
+}
+
+# =============================================================================
 # INCLUSIÓN DE ALIASES EXTERNOS
 # =============================================================================
 

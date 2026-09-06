@@ -32,3 +32,12 @@ export PATH="${PATH}:$HOME/Nextcloud/priv/bin"
 # alias work='cd /c/Users/${USERNAME}/Work/cliente-x'
 # export OPENAI_API_KEY="sk-..."        # nunca lo subas al repo
 # export EDITOR="code --wait"
+
+# -----------------------------------------------------------------------------
+# Ejemplo: ajustar el `ping` estilo Linux que ~/.bashrc delega a WSL2.
+# -----------------------------------------------------------------------------
+# Por defecto `ping` en Git Bash ejecuta el ping de iputils dentro de WSL2
+# (sintaxis Linux: -c, -i, -D, -s, -w...). Descomenta para volver al
+# ping.exe nativo de Windows, o para fijar una distro concreta.
+# export DEVCLI_PING_WSL=0
+# export DEVCLI_PING_WSL_DISTRO="Ubuntu-24.04"
