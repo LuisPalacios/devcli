@@ -43,6 +43,23 @@ local CUSTOMIZE = {
   -- que `claude` te pida confirmación cada vez, déjalo vacío:
   --   CLAUDE_EXTRA_ARGS = {},
   CLAUDE_EXTRA_ARGS = { '--allow-dangerously-skip-permissions' },
+
+  -- (Sólo macOS) Qué Option/⌥ se comporta como Meta y cuál compone
+  -- caracteres. Lo aplica §3. En un teclado español ISO de Mac los
+  -- caracteres de programación viven detrás de Option:
+  --     ⌥+2 → @      ⌥+3 → #      ⌥+1 → |      ⌥+º → \
+  --     ⌥+ç → }      ⌥+` → [      ⌥+ñ → ~ (dead key)
+  -- ...así que dejar las DOS Option como Meta (el default de WezTerm)
+  -- hace imposible teclear @ en la shell: WezTerm manda ESC+2 en vez de
+  -- pedirle a macOS el carácter compuesto.
+  --
+  --   'right' → ⌥ izquierda compone (@ # | \ [ ] { } ~), ⌥ derecha es
+  --             Meta/ESC+ para los atajos de zsh (⌥b, ⌥f, ⌥d, ⌥.).
+  --             Default: es la combinación que quiere un teclado ES.
+  --   'left'  → al revés (⌥ izquierda Meta, ⌥ derecha compone).
+  --   'both'  → las dos Option son Meta. Default de WezTerm; NO teclearás @.
+  --   'none'  → las dos Option componen. Default de iTerm2; sin Meta.
+  MAC_OPTION_AS_META = 'right',
 }
 
 -- ─── §1  Bootstrap & helpers ───────────────────────────────────────────────
@@ -155,6 +172,100 @@ config.audible_bell     = 'Disabled'
 -- gris discreto integrado con el tema).
 config.enable_scroll_bar = true
 
+-- Color de las líneas divisoras
+local pane_split_color = '#a04e18'
+
+-- Mantén los colores intactos cuando otra ventana/pane gana foco; el default
+-- de WezTerm atenúa panes inactivos y vuelve las divisorias a gris.
+config.inactive_pane_hsb = {
+  saturation = 1.0,
+  brightness = 1.0,
+}
+
+local function builtin_scheme_with_split(name)
+  local builtin = wezterm.color.get_builtin_schemes()[name] or {}
+  local scheme = {}
+  for key, value in pairs(builtin) do
+    scheme[key] = value
+  end
+  scheme.split = pane_split_color
+  return scheme
+end
+
+-- Color schemes hardcoded (paletas canónicas de Microsoft Console + Ubuntu).
+-- Disponibles globalmente vía config.color_scheme y por-ventana vía
+-- mux_window:gui_window():set_config_overrides{ color_scheme = '…' }.
+--
+-- Definidos en TODOS los SO: aunque el picker que los usa por perfil sea
+-- Windows-only (§5), `config.color_scheme` de abajo referencia 'LP-GitBash'
+-- globalmente, y el theme picker (CTRL+SHIFT+E) los lista en cualquier
+-- plataforma. Definirlos sólo en la rama Windows dejaba a macOS/Linux con
+-- `ERROR config: color_scheme="LP-GitBash" ... not found` y cayendo al
+-- tema por defecto de WezTerm.
+local schemes = {
+  -- Overrides local del scheme bundled para conservar Git Bash con los
+  -- mismos colores, pero con divisorias naranja.
+  ['iTerm2 Dark Background'] = builtin_scheme_with_split('iTerm2 Dark Background'),
+
+  -- Git Bash — fg #BFBFBF sobre negro; la paleta que el usuario mantenía
+  -- en el settings.json de WT (verbatim).
+  ['LP-GitBash'] = {
+    foreground    = '#BFBFBF', background = '#110c12',
+    split = pane_split_color,
+    cursor_bg     = '#FFFFFF', cursor_fg  = '#000000',
+    cursor_border = '#FFFFFF',
+    selection_bg  = '#FFFFFF', selection_fg = '#000000',
+    ansi    = { '#0C0C0C', '#BF0000', '#00A400', '#BFBF00',
+                '#6060FF', '#BF00BF', '#3A96DD', '#FFFFFF' },
+    brights = { '#767676', '#E74856', '#16C60C', '#F9F1A5',
+                '#3b78ff', '#B4009E', '#61D6D6', '#F2F2F2' },
+  },
+  -- Microsoft Console default — usado por PowerShell 7 y cmd.exe.
+  ['LP-Campbell'] = {
+    foreground    = '#CCCCCC', background = '#0C0C0C',
+    split = pane_split_color,
+    cursor_bg     = '#FFFFFF', cursor_fg  = '#0C0C0C',
+    cursor_border = '#FFFFFF',
+    selection_bg  = '#FFFFFF', selection_fg = '#000000',
+    ansi    = { '#0C0C0C', '#C50F1F', '#13A10E', '#C19C00',
+                '#0037DA', '#881798', '#3A96DD', '#CCCCCC' },
+    brights = { '#767676', '#E74856', '#16C60C', '#F9F1A5',
+                '#3B78FF', '#B4009E', '#61D6D6', '#F2F2F2' },
+  },
+  -- Microsoft Console (PowerShell 5) — misma paleta que Campbell con
+  -- el icónico fondo azul.
+  ['LP-Campbell Powershell'] = {
+    foreground    = '#CCCCCC', background = '#012456',
+    split = pane_split_color,
+    cursor_bg     = '#FFFFFF', cursor_fg  = '#012456',
+    cursor_border = '#FFFFFF',
+    selection_bg  = '#FFFFFF', selection_fg = '#000000',
+    ansi    = { '#0C0C0C', '#C50F1F', '#13A10E', '#C19C00',
+                '#0037DA', '#881798', '#3A96DD', '#CCCCCC' },
+    brights = { '#767676', '#E74856', '#16C60C', '#F9F1A5',
+                '#3B78FF', '#B4009E', '#61D6D6', '#F2F2F2' },
+  },
+  -- Paleta estándar del Ubuntu Terminal (derivada de Tango) — usada por WSL.
+  ['LP-Ubuntu'] = {
+    foreground    = '#BFBFBF', background = '#300A24',
+    split = pane_split_color,
+    cursor_bg     = '#BFBFBF', cursor_fg  = '#300A24',
+    cursor_border = '#BFBFBF',
+    selection_bg  = '#B5D5FF', selection_fg = '#000000',
+    ansi    = { '#2E3436', '#CC0000', '#4E9A06', '#C4A000',
+                '#3465A4', '#75507B', '#06989A', '#D3D7CF' },
+    brights = { '#555753', '#EF2929', '#8AE234', '#FCE94F',
+                '#729FCF', '#AD7FA8', '#34E2E2', '#EEEEEC' },
+  },
+}
+
+-- Inyectamos los schemes en config.color_schemes para que
+-- set_config_overrides pueda referenciarlos por nombre.
+config.color_schemes = config.color_schemes or {}
+for name, scheme in pairs(schemes) do
+  config.color_schemes[name] = scheme
+end
+
 -- Color scheme global. Windows lo sobreescribe en §5 para emparejarlo con
 -- el shell por defecto, así la primera ventana abre con los colores
 -- propios del shell.
@@ -205,6 +316,24 @@ config.color_scheme = 'LP-GitBash'
 -- asumir que sí. (Pon 'AlwaysPrompt' para restaurar el default si alguna
 -- vez pierdes trabajo por accidente.)
 config.window_close_confirmation = 'NeverPrompt'
+
+-- Teclado de macOS: rol de la tecla Option (⌥). Ver CUSTOMIZE.MAC_OPTION_AS_META
+-- en §0 para el porqué y las alternativas.
+--
+-- WezTerm decide por cada Option si (a) manda la tecla como Meta —prefijo
+-- ESC, que es lo que esperan los atajos de readline/zsh— o (b) le pide a
+-- macOS el carácter compuesto de la distribución activa. Sus defaults son
+-- izquierda = Meta, derecha = compone; con distribución española eso
+-- significa que ⌥+2 en la Option izquierda NO produce `@` (zsh lo recibe
+-- como ESC-2 = digit-argument y no aparece nada). iTerm2 por defecto compone
+-- en las dos, y por eso allí sí funciona.
+if wezterm.target_triple:find 'darwin' then
+  local meta = CUSTOMIZE.MAC_OPTION_AS_META
+  config.send_composed_key_when_left_alt_is_pressed =
+    not (meta == 'left' or meta == 'both')
+  config.send_composed_key_when_right_alt_is_pressed =
+    not (meta == 'right' or meta == 'both')
+end
 
 -- Theme picker en vivo. Bindeado a CTRL+SHIFT+E en §7.
 -- Abre un InputSelector fuzzy sobre todos los schemes disponibles — tanto
@@ -443,97 +572,11 @@ end
 -- pestañas compartan un único scheme, sustituye mux.spawn_window por
 -- mux_window:spawn_tab del active window en el callback del picker.
 --
--- Para añadir / cambiar perfiles: edita `schemes` y `profiles` abajo. El
--- orden de `profiles` es el orden en que el picker los muestra.
-
--- Color de las líneas divisoras
-local pane_split_color = '#a04e18'
-
--- Mantén los colores intactos cuando otra ventana/pane gana foco; el default
--- de WezTerm atenúa panes inactivos y vuelve las divisorias a gris.
-config.inactive_pane_hsb = {
-  saturation = 1.0,
-  brightness = 1.0,
-}
+-- Para añadir / cambiar perfiles: edita `profiles` abajo. El orden de
+-- `profiles` es el orden en que el picker los muestra. Los color schemes
+-- LP-* que referencian se definen en §3 (son cross-platform).
 
 if wezterm.target_triple:find 'windows' then
-  local function builtin_scheme_with_split(name)
-    local builtin = wezterm.color.get_builtin_schemes()[name] or {}
-    local scheme = {}
-    for key, value in pairs(builtin) do
-      scheme[key] = value
-    end
-    scheme.split = pane_split_color
-    return scheme
-  end
-
-  -- Color schemes hardcoded (paletas canónicas de Microsoft Console + Ubuntu).
-  -- Disponibles globalmente vía config.color_scheme y por-ventana vía
-  -- mux_window:gui_window():set_config_overrides{ color_scheme = '…' }.
-  local schemes = {
-    -- Overrides local del scheme bundled para conservar Git Bash con los
-    -- mismos colores, pero con divisorias naranja.
-    ['iTerm2 Dark Background'] = builtin_scheme_with_split('iTerm2 Dark Background'),
-
-    -- Git Bash — fg #BFBFBF sobre negro; la paleta que el usuario mantenía
-    -- en el settings.json de WT (verbatim).
-    ['LP-GitBash'] = {
-      foreground    = '#BFBFBF', background = '#110c12',
-      split = pane_split_color,
-      cursor_bg     = '#FFFFFF', cursor_fg  = '#000000',
-      cursor_border = '#FFFFFF',
-      selection_bg  = '#FFFFFF', selection_fg = '#000000',
-      ansi    = { '#0C0C0C', '#BF0000', '#00A400', '#BFBF00',
-                  '#6060FF', '#BF00BF', '#3A96DD', '#FFFFFF' },
-      brights = { '#767676', '#E74856', '#16C60C', '#F9F1A5',
-                  '#3b78ff', '#B4009E', '#61D6D6', '#F2F2F2' },
-    },
-    -- Microsoft Console default — usado por PowerShell 7 y cmd.exe.
-    ['LP-Campbell'] = {
-      foreground    = '#CCCCCC', background = '#0C0C0C',
-      split = pane_split_color,
-      cursor_bg     = '#FFFFFF', cursor_fg  = '#0C0C0C',
-      cursor_border = '#FFFFFF',
-      selection_bg  = '#FFFFFF', selection_fg = '#000000',
-      ansi    = { '#0C0C0C', '#C50F1F', '#13A10E', '#C19C00',
-                  '#0037DA', '#881798', '#3A96DD', '#CCCCCC' },
-      brights = { '#767676', '#E74856', '#16C60C', '#F9F1A5',
-                  '#3B78FF', '#B4009E', '#61D6D6', '#F2F2F2' },
-    },
-    -- Microsoft Console (PowerShell 5) — misma paleta que Campbell con
-    -- el icónico fondo azul.
-    ['LP-Campbell Powershell'] = {
-      foreground    = '#CCCCCC', background = '#012456',
-      split = pane_split_color,
-      cursor_bg     = '#FFFFFF', cursor_fg  = '#012456',
-      cursor_border = '#FFFFFF',
-      selection_bg  = '#FFFFFF', selection_fg = '#000000',
-      ansi    = { '#0C0C0C', '#C50F1F', '#13A10E', '#C19C00',
-                  '#0037DA', '#881798', '#3A96DD', '#CCCCCC' },
-      brights = { '#767676', '#E74856', '#16C60C', '#F9F1A5',
-                  '#3B78FF', '#B4009E', '#61D6D6', '#F2F2F2' },
-    },
-    -- Paleta estándar del Ubuntu Terminal (derivada de Tango) — usada por WSL.
-    ['LP-Ubuntu'] = {
-      foreground    = '#BFBFBF', background = '#300A24',
-      split = pane_split_color,
-      cursor_bg     = '#BFBFBF', cursor_fg  = '#300A24',
-      cursor_border = '#BFBFBF',
-      selection_bg  = '#B5D5FF', selection_fg = '#000000',
-      ansi    = { '#2E3436', '#CC0000', '#4E9A06', '#C4A000',
-                  '#3465A4', '#75507B', '#06989A', '#D3D7CF' },
-      brights = { '#555753', '#EF2929', '#8AE234', '#FCE94F',
-                  '#729FCF', '#AD7FA8', '#34E2E2', '#EEEEEC' },
-    },
-  }
-
-  -- Inyectamos los schemes en config.color_schemes para que
-  -- set_config_overrides pueda referenciarlos por nombre.
-  config.color_schemes = config.color_schemes or {}
-  for name, scheme in pairs(schemes) do
-    config.color_schemes[name] = scheme
-  end
-
   -- Lista de perfiles hardcoded. El orden importa — el picker los muestra
   -- de arriba abajo en este orden exacto, con shortcuts numéricos 1-5.
   local prog_files = os.getenv('ProgramFiles') or 'C:\\Program Files'
