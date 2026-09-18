@@ -13,6 +13,7 @@ Update it whenever the goal, decisions or progress state change.
 `.claude/context/` holds per-feature reference docs. Load the relevant one BEFORE making changes to that feature — they capture architecture, settled trade-offs, and the file map, so you don't relitigate decisions or break invariants.
 
 - **`.claude/context/wezterm-ai-mode.md`** — read this whenever you touch any of: `dotfiles/wezterm.lua`, `dotfiles/wezterm.sh`, `~/.config/wezterm/*`, the `wezterm` entry in `install/tools.json`, the wezterm mappings in `install/03-dotfiles.json`, the `cask:`/`tag_prefix:` extensions in `install/utils.sh`, OR the WezTerm-related blocks in `dotfiles/zshrc` / `dotfiles/win.gitbash.bashrc` / `dotfiles/Microsoft.PowerShell_profile.ps1`.
+- **`.claude/context/ping-windows.md`** — read this whenever you touch `files/bin/devcli-ping.ps1` or the `ping` wrappers in `dotfiles/win.gitbash.bashrc`, `dotfiles/Microsoft.PowerShell_profile.ps1` and `dotfiles/cmd_aliases.cmd`.
 
 ## Project Overview
 
