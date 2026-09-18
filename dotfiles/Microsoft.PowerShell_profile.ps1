@@ -352,10 +352,11 @@ if ($IsTTY -and (Get-Module -ListAvailable -Name PSReadLine)) {
         Set-PSReadLineOption -PredictionViewStyle InlineView
     }
 } else {
-    # No-TTY / redirigido: evitar errores — configuraciones mínimas y seguras
+    # No-TTY / redirigido: sin predicciones. Activar cualquier PredictionSource
+    # (también History) exige una consola con VT y, si la salida está redirigida,
+    # PSReadLine lanza un error en cada arranque del perfil.
     if (Get-Module -ListAvailable -Name PSReadLine) {
-        Set-PSReadLineOption -PredictionSource History
-        Set-PSReadLineOption -PredictionViewStyle InlineView
+        Set-PSReadLineOption -PredictionSource None
         Set-PSReadLineOption -EditMode Windows
     }
 }
