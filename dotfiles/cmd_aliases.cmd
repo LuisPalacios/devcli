@@ -30,6 +30,11 @@ doskey cat=bat $*
 doskey find=fd $*
 doskey grep=rg $*
 
+REM ping estilo Linux: mismo guion que envuelven Git Bash y PowerShell 7
+REM (banderas y salida de iputils, continuo hasta Ctrl-C con resumen).
+REM Para la sintaxis de Windows, ping.exe sigue disponible por su nombre.
+doskey ping=pwsh -NoProfile -File "%USERPROFILE%\bin\devcli-ping.ps1" $*
+
 REM Alias para git status
 doskey gst=git --status
 

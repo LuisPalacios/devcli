@@ -38,25 +38,21 @@ $IsTTY = Test-IsInteractiveTerminal
 # PERSONALIZACIÓN DEL COMANDO 'ping' PARA QUE SE PAREZCA AL DE LINUX
 # =============================================================================
 
-# Cambiar el alias interno de ping para que se comporte como el de Linux
+# Toda la lógica vive en ~/bin/devcli-ping.ps1 (lo despliega la fase 05):
+# salida y banderas de iputils (-c -i -s -W -w -t -q -n -4 -6), continuo hasta
+# Ctrl-C con resumen, códigos de salida 0/1/2. Git Bash y cmd envuelven el
+# mismo guion. Aquí se ejecuta en proceso (sin el coste de arrancar otro pwsh);
+# su `exit` sólo termina el guion y deja el código en $LASTEXITCODE.
+# Para la sintaxis de Windows, `ping.exe` sigue disponible por su nombre.
 
 function ping {
-    # Verificar si el primer argumento es un parámetro (comienza con '-')
-    # Si se proporciona un parámetro (por ejemplo, 'ping -n 5'), asumimos que el usuario no quiere -t y llama al ping original.
-    if ($args[0] -notlike '-*') {
-        # La parte 'ip' es el objetivo (x.x.x.x)
-        $ip = $args[0]
-
-        # Obtener todos los demás argumentos (por ejemplo, si se añadió '-n 5')
-        $otrosArgumentos = $args | Select-Object -Skip 1
-
-        # Ejecutar el comando original de Windows ping.exe con -t, la IP y cualquier otro argumento
-        & ping.exe -t $ip $otrosArgumentos
+    $pingScript = Join-Path $HOME 'bin\devcli-ping.ps1'
+    if (Test-Path $pingScript) {
+        & $pingScript @args
     }
     else {
-        # Si el primer argumento es un parámetro, o si no se proporcionan argumentos,
-        # simplemente ejecutar el ping.exe original con todos los argumentos.
-        & ping.exe $args
+        Write-Warning "ping: falta $pingScript; se usa ping.exe (sintaxis de Windows)"
+        & ping.exe @args
     }
 }
 

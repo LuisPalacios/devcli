@@ -236,7 +236,7 @@ alias more='less'
 alias claude='claude --allow-dangerously-skip-permissions'
 
 # =============================================================================
-# PING ESTILO LINUX (DELEGADO A WSL2)
+# PING ESTILO LINUX
 # =============================================================================
 #
 # El ping.exe de Windows usa su propia sintaxis (-n, -w, -l) y NO se puede
@@ -244,29 +244,21 @@ alias claude='claude --allow-dangerously-skip-permissions'
 # Usuario, y C:\Windows\system32 vive en el de máquina, así que nada puesto
 # en ~/bin puede taparlo. La única vía limpia es una función de shell.
 #
-# Delegamos en el ping real de iputils dentro de WSL2: -c, -i, -D, -s, -w,
-# -q, -f y el resumen con "rtt min/avg/max/mdev". Es idéntico al de Linux
-# porque es el de Linux. El código de salida se propaga tal cual (0 = ok,
-# 1 = sin respuesta, 2 = error de resolución).
+# Toda la lógica vive en ~/bin/devcli-ping.ps1 (lo despliega la fase 05):
+# salida y banderas de iputils (-c -i -s -W -w -t -q -n -4 -6), continuo
+# hasta Ctrl-C con el resumen "rtt min/avg/max/mdev" y códigos de salida
+# 0 = hubo respuesta, 1 = ninguna, 2 = error. Mide desde el stack de red de
+# Windows (ve una VPN levantada en el host) y no arranca WSL. PowerShell 7 y
+# cmd envuelven el mismo guion, así que `ping` se comporta igual en los tres.
 #
-# Ajustes (exportar en ~/.bashrc.local, que se carga al final del fichero):
-#   DEVCLI_PING_WSL=0              desactiva la delegación y usa ping.exe
-#   DEVCLI_PING_WSL_DISTRO=nombre  fuerza una distro (vacío = la por defecto)
-#
-# Limitaciones conocidas:
-#   - El origen es la interfaz NAT de WSL2, no el stack de red de Windows:
-#     no atraviesa adaptadores exclusivos del host (p.ej. una VPN levantada
-#     en Windows). Para esos casos, `ping.exe` sigue disponible sin alias.
-#   - `-i` por debajo de 0.2s requiere root dentro de la distro.
-#   - Sólo aplica a Git Bash; en PowerShell sigue vigente su propia función.
+# Aquí sólo se reenvían los argumentos; arrancar pwsh cuesta ~0,25 s.
+# Para la sintaxis de Windows, `ping.exe` sigue disponible por su nombre.
 ping() {
-    if [ "${DEVCLI_PING_WSL:-1}" = "1" ] && command -v wsl.exe >/dev/null 2>&1; then
-        if [ -n "${DEVCLI_PING_WSL_DISTRO:-}" ]; then
-            wsl.exe -d "${DEVCLI_PING_WSL_DISTRO}" -e ping "$@"
-        else
-            wsl.exe -e ping "$@"
-        fi
+    local script="${HOME}/bin/devcli-ping.ps1"
+    if command -v pwsh.exe >/dev/null 2>&1 && [ -f "${script}" ]; then
+        pwsh.exe -NoProfile -File "${script}" "$@"
     else
+        echo "ping: falta pwsh.exe o ${script}; se usa ping.exe (sintaxis de Windows)" >&2
         ping.exe "$@"
     fi
 }

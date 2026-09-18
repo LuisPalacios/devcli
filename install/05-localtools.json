@@ -35,6 +35,10 @@
     {
       "name": "pathdoctor.ps1",
       "platforms": ["windows"]
+    },
+    {
+      "name": "devcli-ping.ps1",
+      "platforms": ["windows"]
     }
   ]
 }
