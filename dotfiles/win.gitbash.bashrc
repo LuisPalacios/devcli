@@ -264,6 +264,40 @@ ping() {
 }
 
 # =============================================================================
+# COMANDOS DE WINDOWS CON BANDERAS /x
+# =============================================================================
+#
+# Al lanzar un .exe nativo, Git Bash convierte a ruta de Windows todo argumento
+# que parezca una ruta Unix: `ipconfig /all` le llega a ipconfig como
+# "C:/Program Files/Git/all" y falla. Esa conversión NO se puede desactivar
+# globalmente (export MSYS_NO_PATHCONV=1): es la que hace que eza, rg, git,
+# code o el propio ping de arriba entiendan ~/... y /c/...
+#
+# Se desactiva sólo para comandos que usan banderas /x y nunca reciben rutas.
+# Quedan fuera a propósito reg, robocopy, icacls o xcopy, que mezclan banderas
+# con rutas reales: con ellos, escribir la bandera con doble barra (//s).
+ipconfig() { MSYS_NO_PATHCONV=1 ipconfig.exe "$@"; }
+netsh()    { MSYS_NO_PATHCONV=1 netsh.exe "$@"; }
+sc()       { MSYS_NO_PATHCONV=1 sc.exe "$@"; }
+tasklist() { MSYS_NO_PATHCONV=1 tasklist.exe "$@"; }
+taskkill() { MSYS_NO_PATHCONV=1 taskkill.exe "$@"; }
+net()      { MSYS_NO_PATHCONV=1 net.exe "$@"; }
+nslookup() { MSYS_NO_PATHCONV=1 nslookup.exe "$@"; }
+
+# whoami es distinto: en Git Bash gana el de MSYS (/usr/bin/whoami, también
+# con el nombre whoami.exe), que no conoce /groups, /priv, /all... Sólo si algún
+# argumento empieza por / se llama al de Windows, por su ruta completa.
+whoami() {
+    local arg
+    for arg in "$@"; do
+        case "${arg}" in
+            /*) MSYS_NO_PATHCONV=1 "$(cygpath -S)/whoami.exe" "$@"; return ;;
+        esac
+    done
+    command whoami "$@"
+}
+
+# =============================================================================
 # INCLUSIÓN DE ALIASES EXTERNOS
 # =============================================================================
 
