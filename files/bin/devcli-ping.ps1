@@ -333,8 +333,14 @@ try {
                         (Format-PingSource $reply.Address), $seq, $ttlText, (Format-PingTime $ms)
                 }
             }
-            elseif ($status -ne 'TimedOut') {
-                # Un timeout no imprime nada (como iputils); el resto son errores ICMP.
+            elseif ($status -eq 'TimedOut') {
+                # iputils calla ante un timeout (salvo con -O); aquí se avisa siempre,
+                # con el texto del ping de macOS/BSD: se ve al momento que el destino
+                # ha caído. No cuenta como error ICMP, sólo como pérdida.
+                if (-not $quiet) { "Request timeout for icmp_seq $seq" }
+            }
+            else {
+                # El resto de estados son errores ICMP.
                 $errors++
                 if (-not $quiet) {
                     $text = switch -Wildcard ($status) {
