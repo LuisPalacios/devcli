@@ -24,7 +24,9 @@ esac
 
 # Scoop ya añade ~/scoop/shims al PATH del usuario; las apps se invocan por
 # nombre (eza, btm, oh-my-posh, zoxide, fzf) sin resolución manual.
-export PATH="$HOME/bin:$HOME/Nextcloud/priv/bin:/c/Windows/System32/OpenSSH:$PATH"
+# Rutas privadas de cada usuario (p. ej. scripts sincronizados) van en
+# ~/.bashrc.local, no aquí (ver bashrc.local.example).
+export PATH="$HOME/bin:/c/Windows/System32/OpenSSH:$PATH"
 
 # -----------------------------------------------------------------------------
 # SSH + RedirectionGuard de Windows OpenSSH

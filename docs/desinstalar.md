@@ -33,9 +33,9 @@ restáuralos desde tu backup según prefieras:
 **Windows:**
 - `%USERPROFILE%\.bashrc` (para Git Bash)
 - `%USERPROFILE%\.oh-my-posh.json`
-- `%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`
-- `%USERPROFILE%\AppData\Local\clink\oh-my-posh.lua`
-- `%USERPROFILE%\AppData\Local\clink\clink_settings`
+- `$PROFILE` de PowerShell 7 (`<Documentos>\PowerShell\Microsoft.PowerShell_profile.ps1`) y de PowerShell 5.1 (`<Documentos>\WindowsPowerShell\...`). `<Documentos>` es tu carpeta Documentos real, que puede estar redirigida a OneDrive; compruébalo con `$PROFILE`
+- `%LOCALAPPDATA%\clink\oh-my-posh.lua`
+- `%LOCALAPPDATA%\clink\clink_settings`
 - `%USERPROFILE%\cmd_aliases.cmd`
 - `%USERPROFILE%\.config\wezterm\wezterm.lua`, `wezterm.sh`
 

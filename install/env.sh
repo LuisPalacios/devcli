@@ -9,9 +9,6 @@ export REPO_URL="https://github.com/LuisPalacios/devcli.git"
 # Rama del repositorio
 export BRANCH="main"
 
-# Usuario actual
-export CURRENT_USER="$(id -un)"
-
 # Directorio de instalación
 export SETUP_DIR="$HOME/.devcli"
 
@@ -25,16 +22,13 @@ export SETUP_LANG="es_ES.UTF-8"
 export NERD_FONT_NAME="FiraCode"
 export NERD_FONT_FULL_NAME="FiraCode Nerd Font"
 
-# Función para detectar el usuario actual de forma dinámica
+# Usuario actual: siempre la identidad efectiva, la misma a la que pertenece
+# $HOME (dotfiles, ~/bin, ~/.devcli). NO usar $SUDO_USER ni $USER: con
+# `sudo bash bootstrap.sh` HOME=/root y SUDO_USER=<otro>, así que el chsh de
+# 03-dotfiles cambiaría la shell de un usuario cuyos dotfiles no se tocaron;
+# y $USER puede venir heredado (`su -m`).
 detect_current_user() {
-  # Priorizar variables de entorno comunes
-  if [[ -n "${SUDO_USER:-}" ]]; then
-    export CURRENT_USER="$SUDO_USER"
-  elif [[ -n "${USER:-}" ]]; then
-    export CURRENT_USER="$USER"
-  else
-    export CURRENT_USER="$(id -un)"
-  fi
+  export CURRENT_USER="$(id -un)"
 }
 
 # Detección de sistema operativo compatible

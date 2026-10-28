@@ -133,6 +133,16 @@ detect_root_user() {
 detect_os_type
 detect_root_user
 
+# `sudo bash bootstrap.sh` sin cambiar HOME (macOS, o sudoers con env_keep)
+# instalaría como root dentro del home de otro usuario: ficheros de root en
+# su $HOME. Root de verdad (login, `sudo -i`, Ubuntu/Debian, que fijan
+# HOME=/root) sí está soportado.
+ROOT_HOME=~root
+if [[ "$IS_ROOT" == true && -n "${SUDO_USER:-}" && "$HOME" != "$ROOT_HOME" ]]; then
+  echo "No ejecutes el bootstrap con sudo: lánzalo como el usuario a configurar (HOME=$HOME)."
+  exit 1
+fi
+
 # Verificar permisos sudo
 if ! sudo -n true 2>/dev/null; then
   echo "sudo no está instalado o el usuario '$CURRENT_USER' no tiene acceso sin contraseña."

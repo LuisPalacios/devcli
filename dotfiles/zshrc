@@ -348,6 +348,31 @@ if [ "$IS_WSL2" = true ] ; then
   # Eliminar duplicados en PATH usando typeset -U (unique)
   typeset -U path PATH
 
+  # Carpeta del usuario de Windows. NO se deduce de $SOY: el usuario Linux
+  # y el de Windows pueden llamarse distinto, y el perfil puede no estar en
+  # C:. Se pregunta a Windows (%USERPROFILE% vía cmd.exe /u → UTF-16, así
+  # sobreviven tildes y ñ) y se cachea: lanzar cmd.exe en cada shell cuesta.
+  # Si la interop está desactivada queda vacía y se omiten sus entradas.
+  WIN_HOME_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/devcli/win-home"
+  WIN_HOME=""
+  [[ -r "$WIN_HOME_CACHE" ]] && WIN_HOME="$(<"$WIN_HOME_CACHE")"
+  if [[ -z "$WIN_HOME" || ! -d "$WIN_HOME" ]]; then
+    WIN_HOME=""
+    _cmd_exe="$(command -v cmd.exe 2>/dev/null)"
+    [[ -z "$_cmd_exe" && -x /mnt/c/Windows/System32/cmd.exe ]] && _cmd_exe=/mnt/c/Windows/System32/cmd.exe
+    if [[ -n "$_cmd_exe" ]] && command -v wslpath &>/dev/null; then
+      _win_profile="$(cd / && "$_cmd_exe" /u /c 'echo %USERPROFILE%' 2>/dev/null \
+        | iconv -f UTF-16LE -t UTF-8 2>/dev/null | tr -d '\r\n')"
+      [[ -n "$_win_profile" ]] && WIN_HOME="$(wslpath -u "$_win_profile" 2>/dev/null)"
+      if [[ -n "$WIN_HOME" && -d "$WIN_HOME" ]]; then
+        mkdir -p "${WIN_HOME_CACHE:h}" && print -r -- "$WIN_HOME" >| "$WIN_HOME_CACHE"
+      else
+        WIN_HOME=""
+      fi
+    fi
+    unset _cmd_exe _win_profile
+  fi
+
   # Construcción limpia y ordenada del PATH para WSL2
   # Incluye rutas tanto de Linux como de Windows accesibles desde WSL2
   path=(
@@ -355,9 +380,9 @@ if [ "$IS_WSL2" = true ] ; then
     "${HOME}/bin"                        # Binarios personales del usuario
     "${HOME}/.local/bin"                 # Otros binarios personales (uv, etc.)
     "${HOME}/.local/share/pnpm/bin"      # PNPM (instalador standalone)
-    "/mnt/c/Users/${SOY}/bin"                         # Binarios personales del usuario
+    ${WIN_HOME:+"$WIN_HOME/bin"}                      # Binarios personales del usuario
     "/mnt/c/Program Files/Docker/Docker/resources/bin" # Docker Desktop para Windows
-    "/mnt/c/Users/${SOY}/AppData/Local/Programs/Microsoft VS Code/bin" # VS Code CLI
+    ${WIN_HOME:+"$WIN_HOME/AppData/Local/Programs/Microsoft VS Code/bin"} # VS Code CLI
     "/mnt/c/Program Files/Git/mingw64/bin"             # Git for Windows
     "/mnt/c/Windows/System32"                          # Comandos de sistema Windows
     "/mnt/c/Windows"                                   # Directorio Windows
@@ -384,7 +409,7 @@ if [ "$IS_WSL2" = true ] ; then
   parametriza_zsh_comun
 
   # Aliases específicos para WSL2
-  alias c="cd /mnt/c/Users/${SOY}"       # Acceso rápido al directorio de usuario Windows
+  [[ -n "$WIN_HOME" ]] && alias c="cd ${(q)WIN_HOME}"  # Acceso rápido al directorio de usuario Windows
   alias git="git.exe"                    # Usar Git for Windows desde WSL2 para mejor integración
   alias gst="git.exe status"             # Mostrar git status
 

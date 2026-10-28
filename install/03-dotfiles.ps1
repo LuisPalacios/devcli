@@ -111,6 +111,26 @@ function ConfigureWindowsTerminal {
     }
 }
 
+# Traduce el destino relativo del JSON a una ruta absoluta del usuario.
+# Documents\ y AppData\Local\ NO cuelgan siempre de %USERPROFILE%: la carpeta
+# Documentos se redirige a menudo (copia de seguridad de OneDrive, carpeta
+# movida) y $PROFILE de pwsh/PS5 sigue a la real; clink lee de %LOCALAPPDATA%.
+function Resolve-DotfileDestination {
+    param(
+        [Parameter(Mandatory)][string]$Relative,
+        [string]$UserProfile  = $env:USERPROFILE,
+        [string]$Documents    = [Environment]::GetFolderPath('MyDocuments'),
+        [string]$LocalAppData = $env:LOCALAPPDATA
+    )
+    if ($Documents -and $Relative -match '^Documents[\\/](.+)$') {
+        return Join-Path $Documents $Matches[1]
+    }
+    if ($LocalAppData -and $Relative -match '^AppData[\\/]Local[\\/](.+)$') {
+        return Join-Path $LocalAppData $Matches[1]
+    }
+    return Join-Path $UserProfile $Relative
+}
+
 # Handler por archivo: copia src→dst. Devuelve $true / $false.
 $installOne = {
     param($d)
@@ -121,7 +141,7 @@ $installOne = {
 
     $src = Join-Path $dotfilesDir $d.file
     $dstRelative = $d.dst.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
-    $dst = Join-Path $env:USERPROFILE $dstRelative
+    $dst = Resolve-DotfileDestination -Relative $dstRelative
     $dstDir = Split-Path $dst -Parent
 
     if (-not (Test-Path $src)) {
