@@ -658,8 +658,11 @@ if wezterm.target_triple:find 'windows' then
       color_scheme = 'LP-Campbell',
     },
     {
+      -- Distro WSL por defecto (`wsl --set-default <nombre>`), sin -d: el
+      -- nombre cambia por usuario (Ubuntu, Ubuntu-24.04…) y no sigue a la
+      -- versión tras un do-release-upgrade.
       label        = 'Ubuntu',
-      args         = { 'wsl.exe', '-d', 'Ubuntu-24.04' },
+      args         = { 'wsl.exe' },
       cwd          = nil,
       color_scheme = 'LP-Ubuntu',
     },
