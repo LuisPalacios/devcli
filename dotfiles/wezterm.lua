@@ -880,6 +880,27 @@ if wezterm.target_triple:find 'windows' then
       return false   -- suprime el comportamiento default de new-tab
     end
   end)
+
+  -- Pegado en Git Bash: el portapapeles de Windows trae CRLF y, con el
+  -- default de WezTerm en Windows (CarriageReturnAndLineFeed), Git Bash
+  -- convierte el CR en un salto más y cada línea pegada deja una línea
+  -- vacía extra. 'LineFeed' lo arregla, pero aplicado global rompe el
+  -- pegado multilínea en cmd (junta las líneas) y en pwsh (no ejecuta
+  -- hasta pulsar Enter). Por eso sólo se aplica cuando el proceso en
+  -- primer plano del pane activo es bash.exe. El override es por ventana,
+  -- así que update-status (cada segundo y al cambiar de pestaña) lo
+  -- reajusta. Dentro de un programa lanzado desde Git Bash (vim, claude…)
+  -- el primer plano es ese programa y se queda el default.
+  wezterm.on('update-status', function(win, pane)
+    local proc = pane:get_foreground_process_name() or ''
+    local exe = string.lower(proc:match('([^\\/]+)$') or '')
+    local want = (exe == 'bash.exe') and 'LineFeed' or nil
+    local overrides = win:get_config_overrides() or {}
+    if overrides.canonicalize_pasted_newlines ~= want then
+      overrides.canonicalize_pasted_newlines = want
+      win:set_config_overrides(overrides)
+    end
+  end)
 end
 
 
