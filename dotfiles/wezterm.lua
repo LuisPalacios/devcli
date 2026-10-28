@@ -158,14 +158,20 @@ config.initial_rows     = 50
 config.font_size        = (wezterm.target_triple:find 'darwin' and 13)
                        or (wezterm.target_triple:find 'linux'  and 12)
                        or 13
--- Efectivamente ilimitado para uso normal. WezTerm no tiene una opción
--- "infinito" real; esto guarda 100 K líneas/pane en RAM (~10 MB a 100 B/línea
--- de media). Súbelo si haces scroll por encima de eso; 1_000_000 es seguro.
-config.scrollback_lines = 100000
+-- Scrollback de 1 M filas por pane, para poder capturar sesiones
+-- inmensas (ver CTRL+SHIFT+A en §7). WezTerm no tiene "infinito" real y
+-- el buffer vive en RAM. Cuenta filas físicas: una línea que se parte
+-- por el ancho del pane ocupa varias. Medido en
+-- Windows (WezTerm 20240203): ~330 B por fila de 80 columnas de texto
+-- plano, así que un pane lleno ronda los 330 MB. Solo gasta lo que se va
+-- llenando; un pane con poca salida apenas consume. `clear` borra el
+-- scrollback y libera ~2/3 al momento; el resto queda reservado y se
+-- reutiliza al volver a llenarlo (no crece entre rondas).
+config.scrollback_lines = 1000000
 config.audible_bell     = 'Disabled'
 
 -- Scrollbar visible en el borde derecho del pane. Útil con
--- `scrollback_lines = 100000`: el thumb escala con la posición dentro
+-- `scrollback_lines = 1000000`: el thumb escala con la posición dentro
 -- del buffer y se puede arrastrar para navegar grandes scrollbacks
 -- mucho más rápido que scrolleando línea a línea con la rueda.
 -- Color del thumb se hereda del color scheme activo (suele ser un
@@ -1061,6 +1067,24 @@ local key_bindings = {
     key    = 'Enter',
     mods   = 'SHIFT',
     action = act.SendString '\x1b\r',
+  },
+  -- CTRL+SHIFT+A → copia al portapapeles el scrollback entero del pane
+  -- (§3, hasta 1 M filas) y avisa 2 s en el status derecho de la tab bar.
+  -- Usa líneas lógicas: una línea que WezTerm partió por el ancho del pane
+  -- se copia entera, sin saltos espurios (`get_lines_as_text` devuelve
+  -- filas físicas y rompía las rutas largas de ninja). Con 1 M filas la UI
+  -- se congela ~1-2 s mientras extrae el texto.
+  {
+    key    = 'a',
+    mods   = 'CTRL|SHIFT',
+    action = wezterm.action_callback(function(window, pane)
+      local rows = pane:get_dimensions().scrollback_rows
+      window:copy_to_clipboard(pane:get_logical_lines_as_text(rows), 'Clipboard')
+      window:set_right_status(' ✓ Scrollback copiado ')
+      wezterm.time.call_after(2, function()
+        window:set_right_status('')
+      end)
+    end),
   },
 }
 

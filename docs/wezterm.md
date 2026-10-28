@@ -47,6 +47,7 @@ shell integration vía OSC-7/133).
 | `CTRL+SUPER+N` | AI Mode (4 paneles Claude) | macOS, Linux |
 | `CTRL+SHIFT+R` | Recargar configuración sin reiniciar | Todas |
 | `CTRL+SHIFT+L` | Mostrar / ocultar debug overlay | Todas |
+| `CTRL+SHIFT+A` | Copiar al portapapeles todo el scrollback del pane (hasta 1 M filas) | Todas |
 | `Click derecho` | Copia si hay selección, pega si no | Todas |
 
 > En Windows usamos `CTRL+ALT+N` para AI Mode porque `WIN+N` colisiona con el
