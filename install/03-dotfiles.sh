@@ -22,19 +22,19 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../dotfiles" && pwd)"
 DOTFILES_CONFIG="$(dirname "${BASH_SOURCE[0]}")/03-dotfiles.json"
 
 if [[ ! -d "$DOTFILES_DIR" ]]; then
-  ux_phase_begin "${PHASE_NUM:-3}" "${PHASE_TOTAL:-5}" "Dotfiles"
+  ux_phase_begin "${PHASE_NUM:-3}" "${PHASE_TOTAL:-4}" "Dotfiles"
   ux_error "directorio de dotfiles no encontrado: $DOTFILES_DIR"
   ux_phase_end fail
   exit 2
 fi
 if ! command -v jq &>/dev/null; then
-  ux_phase_begin "${PHASE_NUM:-3}" "${PHASE_TOTAL:-5}" "Dotfiles"
+  ux_phase_begin "${PHASE_NUM:-3}" "${PHASE_TOTAL:-4}" "Dotfiles"
   ux_error "jq es requerido pero no está instalado"
   ux_phase_end fail
   exit 2
 fi
 if [[ ! -f "$DOTFILES_CONFIG" ]]; then
-  ux_phase_begin "${PHASE_NUM:-3}" "${PHASE_TOTAL:-5}" "Dotfiles"
+  ux_phase_begin "${PHASE_NUM:-3}" "${PHASE_TOTAL:-4}" "Dotfiles"
   ux_error "configuración no encontrada: $DOTFILES_CONFIG"
   ux_phase_end fail
   exit 2

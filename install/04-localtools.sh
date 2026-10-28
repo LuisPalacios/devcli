@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Fase 05 — Scripts auxiliares en ~/bin (05-localtools.json) + nano + check
+# Fase 04 — Scripts auxiliares en ~/bin (04-localtools.json) + nano + check
 # de Nerd Fonts.
 #
 # Códigos de salida: 0=ok, 1=warn, 2=fail.
@@ -17,7 +17,7 @@ ux_init
 [[ $IS_ROOT == false ]] && check_sudo_access
 
 FILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../files" && pwd)"
-LOCAL_TOOLS_CONFIG="$(dirname "${BASH_SOURCE[0]}")/05-localtools.json"
+LOCAL_TOOLS_CONFIG="$(dirname "${BASH_SOURCE[0]}")/04-localtools.json"
 
 ensure_directory "$BIN_DIR"
 

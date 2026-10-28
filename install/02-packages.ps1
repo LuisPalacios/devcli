@@ -16,7 +16,7 @@ Set-StrictMode -Version Latest
 Initialize-Ux
 
 if (-not (Test-Scoop)) {
-    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 2)) -Total ([int]($env:PHASE_TOTAL ?? 5)) -Title 'Herramientas de productividad'
+    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 2)) -Total ([int]($env:PHASE_TOTAL ?? 4)) -Title 'Herramientas de productividad'
     Write-UxError -Message 'scoop no funciona — abortando fase'
     Complete-UxPhase -Status fail
     exit 2
@@ -47,7 +47,7 @@ $installOne = {
 
 $phaseRc = Invoke-PhaseItems `
     -Num   ([int]($env:PHASE_NUM ?? 2)) `
-    -Total ([int]($env:PHASE_TOTAL ?? 5)) `
+    -Total ([int]($env:PHASE_TOTAL ?? 4)) `
     -Title 'Herramientas de productividad' `
     -Items $packageTools `
     -InstallScript $installOne

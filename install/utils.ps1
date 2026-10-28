@@ -909,7 +909,7 @@ function _Finalize-UxPhase {
 #       -Items $tools `
 #       -InstallScript { param($t) Install-Tool -ToolName $t.name -ToolsRegistry $allTools }
 # Internal: extract a friendly label from a JSON item. Tries .name (tools.json),
-# .file (dotfiles), .binary (gitfiles); falls back to ToString().
+# .file (dotfiles); falls back to ToString().
 function _Get-UxItemLabel {
     param($Item)
     if (-not $Item) { return '' }

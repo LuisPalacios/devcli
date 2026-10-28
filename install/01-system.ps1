@@ -17,7 +17,7 @@ Initialize-Ux
 
 # Crear ~/bin y añadirlo al PATH del usuario.
 if (-not (New-DirectoryIfNotExists $Global:BIN_DIR)) {
-    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 1)) -Total ([int]($env:PHASE_TOTAL ?? 5)) -Title 'Sistema base'
+    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 1)) -Total ([int]($env:PHASE_TOTAL ?? 4)) -Title 'Sistema base'
     Write-UxError -Message "no se pudo crear $($Global:BIN_DIR)"
     Complete-UxPhase -Status fail
     exit 2
@@ -26,7 +26,7 @@ Update-UserPath $Global:BIN_DIR
 
 # Scoop es prerrequisito (lo instala bootstrap.ps1, pero verificamos).
 if (-not (Test-Scoop)) {
-    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 1)) -Total ([int]($env:PHASE_TOTAL ?? 5)) -Title 'Sistema base'
+    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 1)) -Total ([int]($env:PHASE_TOTAL ?? 4)) -Title 'Sistema base'
     Write-UxError -Message 'scoop no funciona — bootstrap deberá reintentarse'
     Complete-UxPhase -Status fail
     exit 2
@@ -46,7 +46,7 @@ $installOne = {
 
 $phaseRc = Invoke-PhaseItems `
     -Num   ([int]($env:PHASE_NUM ?? 1)) `
-    -Total ([int]($env:PHASE_TOTAL ?? 5)) `
+    -Total ([int]($env:PHASE_TOTAL ?? 4)) `
     -Title 'Sistema base' `
     -Items $systemTools `
     -InstallScript $installOne

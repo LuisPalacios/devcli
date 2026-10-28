@@ -272,7 +272,7 @@ method_github_binary() {
 #     $HOME/Library/Fonts)
 #   - system_profiler (macOS)
 # Devuelve 0 si está instalada, 1 si no. Compartido por method_github_zip
-# (utils.sh) y _nerd_fonts_present (05-localtools.sh) — ambos hacían
+# (utils.sh) y _nerd_fonts_present (04-localtools.sh) — ambos hacían
 # detecciones casi idénticas con drift menor.
 _nerd_font_installed() {
   local name="${NERD_FONT_NAME:-FiraCode}"

@@ -74,7 +74,7 @@ Síntoma: el bootstrap acaba con "Instalación completada con avisos" y una
 lista de fallos como:
 
 ```
-[2/5] Herramientas de productividad         WARN  3s   14 ok, 1 fallido
+[2/4] Herramientas de productividad         WARN  3s   14 ok, 1 fallido
       ⚠  kubectl: apt-get falló
 ```
 

@@ -48,22 +48,20 @@ bootstrap.{sh|ps1}
   └─ install/01-system.{sh|ps1} ← Base system: permissions, ~/bin directory
   └─ install/02-packages.{sh|ps1} ← Package manager tools (apt/brew/scoop)
   └─ install/03-dotfiles.{sh|ps1} ← Copy shell configs to $HOME
-  └─ install/04-gitfiles.{sh|ps1} ← Clone external Git utility repos
-  └─ install/05-localtools.{sh|ps1} ← Local scripts + Nerd Font install
+  └─ install/04-localtools.{sh|ps1} ← Local scripts + Nerd Font install
 ```
 
 Each phase has paired `.sh` (Unix) and `.ps1` (Windows) implementations. Phase scripts source `env` + `utils` at the top.
 
 ### Configuration-Driven
 
-Phases 01–05 read JSON config files that declare *what* to install; the scripts implement *how*:
+Phases 01–04 read JSON config files that declare *what* to install; the scripts implement *how*:
 
 | Config | Purpose |
 |--------|---------|
 | `install/tools.json` | **Single source of truth** for all installable tools (tags, methods, platforms, profiles) |
 | `install/03-dotfiles.json` | Dotfile → destination mappings (platform-filtered) |
-| `install/04-gitfiles.json` | External Git repos to clone |
-| `install/05-localtools.json` | Local helper scripts to install (platform-filtered) |
+| `install/04-localtools.json` | Local helper scripts to install (platform-filtered) |
 
 `tools.json` has a `"profiles"` section (`minimal`, `dev`, `full`) mapping to tag arrays. Each tool declares an optional `"phase"` field (`"system"` for phase 01, ausente o `"tools"` para phase 02), tags (`core`, `dev`, `k8s`, `win`) for profile-based selection, and per-platform install methods. Profiles only filter `02-packages`; `01-system` siempre instala las herramientas con `phase: "system"` independientemente del profile. `nerd-fonts` es un caso especial: `auto_install: false` y se instala vía trigger desde el post_install de `lsd` (no aparece en ningún profile).
 

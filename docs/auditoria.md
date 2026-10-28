@@ -7,7 +7,7 @@ scripts cortos.
 
 ## Vista general
 
-`bootstrap.{sh,ps1}` clona el repo a `~/.devcli` y ejecuta cinco fases en
+`bootstrap.{sh,ps1}` clona el repo a `~/.devcli` y ejecuta cuatro fases en
 orden. Cada fase es un script independiente con un código de salida (`0` ok,
 `1` warning, `2` fail). El bootstrap suma los resultados y muestra el
 resumen final.
@@ -18,17 +18,15 @@ resumen final.
 | 01 | [`install/01-system.sh`](../install/01-system.sh) | [`install/01-system.ps1`](../install/01-system.ps1) | Paquetes base (`git`, `curl`, `zsh`, `jq`, `oh-my-posh`, ...) y configuración de locale en Linux nativo. |
 | 02 | [`install/02-packages.sh`](../install/02-packages.sh) | [`install/02-packages.ps1`](../install/02-packages.ps1) | Herramientas CLI según el perfil (`fzf`, `bat`, `lsd`, `ripgrep`, `fd`, ...). |
 | 03 | [`install/03-dotfiles.sh`](../install/03-dotfiles.sh) | [`install/03-dotfiles.ps1`](../install/03-dotfiles.ps1) | Copia los dotfiles a `$HOME` (`.zshrc`, `.tmux.conf`, prompt, ...). |
-| 04 | [`install/04-gitfiles.sh`](../install/04-gitfiles.sh) | [`install/04-gitfiles.ps1`](../install/04-gitfiles.ps1) | Descarga binarios desde GitHub Releases (gitbox, etc.). |
-| 05 | [`install/05-localtools.sh`](../install/05-localtools.sh) | [`install/05-localtools.ps1`](../install/05-localtools.ps1) | Copia los scripts auxiliares a `~/bin` (`e`, `s`, `confcat`, `nerd-setup`, `nerd-verify`). |
+| 04 | [`install/04-localtools.sh`](../install/04-localtools.sh) | [`install/04-localtools.ps1`](../install/04-localtools.ps1) | Copia los scripts auxiliares a `~/bin` (`e`, `s`, `confcat`, `nerd-setup`, `nerd-verify`). |
 
-## Las cuatro fuentes de verdad
+## Las tres fuentes de verdad
 
 | JSON | Para qué |
 |------|----------|
 | [`install/tools.json`](../install/tools.json) | Catálogo único de herramientas. Cada entrada declara `phase` (`"system"` para fase 01, ausente o `"tools"` para fase 02), `tags` (filtros del profile en fase 02), métodos por plataforma (`apt` / `brew` / `scoop` / `winget` / `curl-sh` / `github-deb` / `github-binary`), y opcionalmente `pre_install` / `post_install`. La sección `profiles` mapea `minimal` / `dev` / `full` a una lista de tags. |
 | [`install/03-dotfiles.json`](../install/03-dotfiles.json) | Dotfiles a copiar: `file` (origen en `dotfiles/`), `dst` (ruta relativa a `$HOME`), `platforms`. |
-| [`install/04-gitfiles.json`](../install/04-gitfiles.json) | Binarios de GitHub Releases: `repo`, `binary`, `assets` (mapa por arquitectura). |
-| [`install/05-localtools.json`](../install/05-localtools.json) | Scripts auxiliares en `files/bin/` que se copian a `~/bin`. |
+| [`install/04-localtools.json`](../install/04-localtools.json) | Scripts auxiliares en `files/bin/` que se copian a `~/bin`. |
 
 Si quieres añadir, quitar o customizar herramientas, **edita el JSON**. Los
 scripts no necesitan tocarse.

@@ -24,13 +24,13 @@ $dotfilesConfig = Join-Path $PSScriptRoot '03-dotfiles.json'
 
 # Validaciones de configuración
 if (-not (Test-Path $dotfilesDir)) {
-    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 3)) -Total ([int]($env:PHASE_TOTAL ?? 5)) -Title 'Dotfiles'
+    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 3)) -Total ([int]($env:PHASE_TOTAL ?? 4)) -Title 'Dotfiles'
     Write-UxError -Message "directorio de dotfiles no encontrado: $dotfilesDir"
     Complete-UxPhase -Status fail
     exit 2
 }
 if (-not (Test-Path $dotfilesConfig)) {
-    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 3)) -Total ([int]($env:PHASE_TOTAL ?? 5)) -Title 'Dotfiles'
+    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 3)) -Total ([int]($env:PHASE_TOTAL ?? 4)) -Title 'Dotfiles'
     Write-UxError -Message "configuración no encontrada: $dotfilesConfig"
     Complete-UxPhase -Status fail
     exit 2
@@ -165,7 +165,7 @@ $installOne = {
 # Ejecutar la fase
 $phaseRc = Invoke-PhaseItems `
     -Num   ([int]($env:PHASE_NUM ?? 3)) `
-    -Total ([int]($env:PHASE_TOTAL ?? 5)) `
+    -Total ([int]($env:PHASE_TOTAL ?? 4)) `
     -Title 'Dotfiles' `
     -Items $dotfiles `
     -InstallScript $installOne

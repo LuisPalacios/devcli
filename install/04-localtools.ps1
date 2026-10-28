@@ -1,6 +1,6 @@
 #Requires -Version 7.0
 #
-# Fase 05 — Scripts auxiliares en ~/bin (05-localtools.json) en Windows.
+# Fase 04 — Scripts auxiliares en ~/bin (04-localtools.json) en Windows.
 #
 # Códigos de salida: 0=ok, 1=warn, 2=fail.
 
@@ -16,20 +16,20 @@ Set-StrictMode -Version Latest
 Initialize-Ux
 
 if (-not (New-DirectoryIfNotExists $Global:BIN_DIR)) {
-    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 5)) -Total ([int]($env:PHASE_TOTAL ?? 5)) -Title 'Herramientas locales'
+    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 4)) -Total ([int]($env:PHASE_TOTAL ?? 4)) -Title 'Herramientas locales'
     Write-UxError -Message "no se pudo crear $($Global:BIN_DIR)"
     Complete-UxPhase -Status fail
     exit 2
 }
 
 if (-not (Test-Path $Global:FILES_DIR)) {
-    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 5)) -Total ([int]($env:PHASE_TOTAL ?? 5)) -Title 'Herramientas locales'
+    Start-UxPhase -Num ([int]($env:PHASE_NUM ?? 4)) -Total ([int]($env:PHASE_TOTAL ?? 4)) -Title 'Herramientas locales'
     Write-UxError -Message "directorio fuente no encontrado: $($Global:FILES_DIR)"
     Complete-UxPhase -Status fail
     exit 2
 }
 
-$localToolsConfig = Join-Path $PSScriptRoot '05-localtools.json'
+$localToolsConfig = Join-Path $PSScriptRoot '04-localtools.json'
 $allTools = Get-ConfigFromJson -JsonPath $localToolsConfig -PropertyName 'tools'
 $tools = @($allTools | Where-Object { $_.platforms -contains 'windows' })
 
@@ -73,8 +73,8 @@ $installOne = {
 }
 
 $phaseRc = Invoke-PhaseItems `
-    -Num   ([int]($env:PHASE_NUM ?? 5)) `
-    -Total ([int]($env:PHASE_TOTAL ?? 5)) `
+    -Num   ([int]($env:PHASE_NUM ?? 4)) `
+    -Total ([int]($env:PHASE_TOTAL ?? 4)) `
     -Title 'Herramientas locales' `
     -Items $tools `
     -InstallScript $installOne

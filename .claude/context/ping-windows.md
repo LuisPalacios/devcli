@@ -25,7 +25,7 @@ It replaced the delegation to `wsl.exe -e ping` (commit `c42e236`), which cold-s
 
 | Piece | Role |
 | --- | --- |
-| `files/bin/devcli-ping.ps1` | The whole ping. Deployed to `~/bin` by phase 05 (`install/05-localtools.json`, `windows`) |
+| `files/bin/devcli-ping.ps1` | The whole ping. Deployed to `~/bin` by phase 04 (`install/04-localtools.json`, `windows`) |
 | `dotfiles/win.gitbash.bashrc` | `ping()` → `pwsh.exe -NoProfile -File ~/bin/devcli-ping.ps1 "$@"` (~0.25 s pwsh start-up). If `pwsh.exe` or the script is missing: one-line warning on stderr, then `ping.exe "$@"` |
 | `dotfiles/Microsoft.PowerShell_profile.ps1` | `function ping` → `& ~/bin/devcli-ping.ps1 @args`, in-process (no start-up cost). Same missing-script fallback |
 | `dotfiles/cmd_aliases.cmd` | `doskey ping=pwsh -NoProfile -File "%USERPROFILE%\bin\devcli-ping.ps1" $*`. Doskey macros only exist at an interactive prompt; `.bat` files keep seeing `ping.exe` |
@@ -73,7 +73,7 @@ The phase scripts read from `$env:SETUP_DIR` (default `~/.devcli`, a clone of th
 ```powershell
 $env:SETUP_DIR = '<path to the working copy>'
 pwsh -NoProfile -File "$env:SETUP_DIR\install\03-dotfiles.ps1"
-pwsh -NoProfile -File "$env:SETUP_DIR\install\05-localtools.ps1"
+pwsh -NoProfile -File "$env:SETUP_DIR\install\04-localtools.ps1"
 ```
 
 ## How to verify
