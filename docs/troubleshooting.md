@@ -129,6 +129,29 @@ mínimo y reactivar trozos progresivamente. devcli usa Oh-My-Posh, que
 generalmente es ágil pero puede ser lento si tu repositorio tiene cientos de
 miles de archivos.
 
+## `text file busy: oh-my-posh` al abrir zsh
+
+Síntoma: cada shell nueva muestra `~/.zshrc:NNN: text file busy: oh-my-posh`
+y arranca sin prompt.
+
+Causa: un `oh-my-posh upgrade --auto` se quedó colgado con el binario abierto
+para escritura, y mientras siga vivo nadie puede ejecutarlo. El tema de devcli
+ya no activa la autoactualización (`upgrade.auto: false`); sólo avisa cuando
+hay versión nueva (`notice`). Tus máquinas recogen el tema nuevo en el primer
+arranque de zsh tras un día.
+
+Cómo arreglarlo si te pasa:
+
+```bash
+pgrep -af 'oh-my-posh upgrade'          # ¿hay un upgrade vivo?
+pkill -f 'oh-my-posh upgrade --auto'    # mátalo
+oh-my-posh version                      # si falla, reinstala:
+curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/bin
+```
+
+Para actualizar oh-my-posh a mano cuando el prompt lo avise:
+`oh-my-posh upgrade` (Linux/macOS/WSL2) o `scoop update oh-my-posh` (Windows).
+
 ## Quiero forzar una descarga limpia del repo
 
 Por defecto devcli hace `git fetch + git reset --hard` (rápido). Si quieres
