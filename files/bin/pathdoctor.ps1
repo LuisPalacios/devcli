@@ -126,17 +126,49 @@ function Get-RawPathArray {
     }
 }
 
+function Send-EnvironmentChange {
+    # WM_SETTINGCHANGE hace que Explorer relea el entorno y que los procesos
+    # nuevos hereden el cambio sin necesidad de logoff.
+    if (-not ('PathDoctor.NativeMethods' -as [type])) {
+        Add-Type -Namespace PathDoctor -Name NativeMethods -MemberDefinition @'
+[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);
+'@
+    }
+    $HWND_BROADCAST   = [IntPtr]0xFFFF
+    $WM_SETTINGCHANGE = 0x001A
+    $SMTO_ABORTIFHUNG = 0x0002
+    $result = [UIntPtr]::Zero
+    $sent = [PathDoctor.NativeMethods]::SendMessageTimeout($HWND_BROADCAST, $WM_SETTINGCHANGE, [UIntPtr]::Zero,
+                                                           'Environment', $SMTO_ABORTIFHUNG, 5000, [ref]$result)
+    if ($sent -eq [IntPtr]::Zero) {
+        Out-Line 'Aviso: WM_SETTINGCHANGE no se ha podido emitir; los procesos nuevos pueden no ver el cambio hasta el próximo logon.' Yellow
+    }
+}
+
 function Set-RawPathString {
     param(
         [ValidateSet('Machine','User')][string]$Scope,
         [AllowEmptyString()][string]$Value
     )
-    # SetEnvironmentVariable escribe REG_EXPAND_SZ porque el nombre 'Path'
-    # está en la lista expandible del BCL, y emite WM_SETTINGCHANGE para que
-    # los procesos nuevos hereden el cambio sin necesidad de logoff.
-    $target = if ($Scope -eq 'Machine') { [EnvironmentVariableTarget]::Machine }
-              else                      { [EnvironmentVariableTarget]::User }
-    [Environment]::SetEnvironmentVariable('Path', $Value, $target)
+    # Escribimos en el registro con REG_EXPAND_SZ explícito porque
+    # [Environment]::SetEnvironmentVariable escribe REG_SZ, y entonces las
+    # rutas con %SystemRoot% no se expanden. Al no pasar por esa API, el
+    # WM_SETTINGCHANGE no se emite solo y hay que enviarlo a mano.
+    $hive = if ($Scope -eq 'Machine') { [Microsoft.Win32.Registry]::LocalMachine }
+            else                       { [Microsoft.Win32.Registry]::CurrentUser }
+    $key = $hive.OpenSubKey($RegSubKey[$Scope], $true)
+    if (-not $key) { throw "No existe la clave del registro: $($RegSubKey[$Scope])" }
+    try {
+        $key.SetValue('Path', $Value, [Microsoft.Win32.RegistryValueKind]::ExpandString)
+        $kind = $key.GetValueKind('Path')
+        if ($kind -ne [Microsoft.Win32.RegistryValueKind]::ExpandString) {
+            throw "Path ha quedado como $kind en vez de ExpandString."
+        }
+    } finally {
+        $key.Close()
+    }
+    Send-EnvironmentChange
 }
 
 # --- Normalización para detección de duplicados --------------------------- #
@@ -265,7 +297,7 @@ function Export-PathToFile {
     $lines = [System.Collections.Generic.List[string]]::new()
     $lines.Add("# pathdoctor export — $now — $env:COMPUTERNAME")
     $lines.Add("# Format: <S|U> <space> <entry as stored in the registry>")
-    $lines.Add("# Inline annotations after '  # ' (e.g. [DUP #2 of #9; MISSING]) are stripped on import.")
+    $lines.Add("# Trailing annotations '  # [...]' (e.g. '  # [DUP #2 of #9; MISSING]') are stripped on import.")
     $lines.Add("# Lines starting with # and blank lines are ignored on import.")
     foreach ($e in $a.Entries) {
         $line = "$($e.Scope) $($e.Text)"
@@ -305,8 +337,9 @@ function Read-PathManifest {
         $line = $raw.Trim()
         if (-not $line) { continue }
         if ($line.StartsWith('#')) { continue }
-        # Quita la anotación inline (' # [...]') que -Export añade.
-        $line = $line -replace '\s+#.*$', ''
+        # Quita sólo la anotación final ('  # [...]') que -Export añade: una
+        # ruta puede contener ' #' y no hay que cortarla.
+        $line = $line -replace '  # \[[^\]]*\]$', ''
         if ($line -match '^([SU])\s+(.+?)\s*$') {
             $scope = $matches[1]; $text = $matches[2]
             if ($scope -eq 'S') { $sys.Add($text) } else { $usr.Add($text) }
