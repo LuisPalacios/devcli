@@ -1,4 +1,12 @@
-#Requires -Version 7.0
+# Sin `#Requires -Version 7.0`: este script debe arrancar en Windows PowerShell 5.1
+# para instalar PowerShell 7 y relanzarse (ver Invoke-BootstrapInPwsh7), así que
+# no puede usar sintaxis exclusiva de 7.
+#
+# Sin BOM: rompería `iex (irm ...)`, porque U+FEFF queda delante de [CmdletBinding()].
+# Por tanto, ejecutado como fichero, 5.1 lo lee como ANSI. Dos reglas para el código:
+#   - Nada de raya (U+2014) en cadenas: en ANSI incluye el byte de una comilla y
+#     rompe el parseo. Compruébalo con Parser::ParseFile en 5.1.
+#   - Los mensajes del camino de 5.1 van sin acentos para no salir corruptos.
 
 [CmdletBinding()]
 param(
@@ -22,6 +30,7 @@ Set-StrictMode -Version Latest
 # Variables básicas para bootstrap
 $REPO_URL = "https://github.com/LuisPalacios/devcli.git"
 $BRANCH = "main"
+$BOOTSTRAP_URL = "https://raw.githubusercontent.com/LuisPalacios/devcli/$BRANCH/bootstrap.ps1"
 $CURRENT_USER = $env:USERNAME
 $SETUP_DIR = "$env:USERPROFILE\.devcli"
 
@@ -99,7 +108,7 @@ IDIOMAS SOPORTADOS:
 
 REQUISITOS:
   - Windows 11 (recomendado) o Windows 10
-  - PowerShell 5.1 o superior
+  - PowerShell 7 o superior (desde 5.1 se instala con winget y se relanza solo)
   - winget disponible
 "@
     Write-Host $helpText
@@ -176,7 +185,7 @@ function Install-WingetPrereq {
             if ($ManualHint) { $msg += " $ManualHint" }
             Write-Error $msg -ErrorAction Stop
         }
-        Write-Log "⚠️ $Name no está instalado y winget no está operativo — saltando. Se reintentará en 02-packages si procede."
+        Write-Log "⚠️ $Name no está instalado y winget no está operativo, saltando. Se reintentará en 02-packages si procede."
         return
     }
 
@@ -189,13 +198,81 @@ function Install-WingetPrereq {
         } elseif ($Critical) {
             Write-Error "❌ No se pudo instalar $Name automáticamente" -ErrorAction Stop
         } else {
-            Write-Log "⚠️ $Name no pudo instalarse — continuando (no es crítico para bootstrap)."
+            Write-Log "⚠️ $Name no pudo instalarse, continuando (no es crítico para bootstrap)."
         }
     } catch {
         if ($Critical) {
             Write-Error "❌ Error instalando ${Name}: $_" -ErrorAction Stop
         }
-        Write-Log "⚠️ Error instalando ${Name}: $_ — continuando (no es crítico para bootstrap)."
+        Write-Log "⚠️ Error instalando ${Name}: $_, continuando (no es crítico para bootstrap)."
+    }
+}
+
+# Devuelve la ruta de un pwsh 7+ que funcione de verdad, o $null. Lo ejecuta en
+# lugar de mirar si existe: un alias AppX roto está en el PATH pero no arranca.
+function Find-Pwsh7 {
+    $candidates = @(Get-Command pwsh -CommandType Application -ErrorAction SilentlyContinue | ForEach-Object { $_.Source })
+    $candidates += Join-Path $env:ProgramFiles 'PowerShell\7\pwsh.exe'
+    foreach ($candidate in $candidates) {
+        try {
+            $major = & $candidate -NoLogo -NoProfile -NonInteractive -Command '$PSVersionTable.PSVersion.Major' 2>$null
+            if ($LASTEXITCODE -eq 0 -and [int]"$major" -ge 7) { return $candidate }
+        }
+        catch {
+            continue
+        }
+    }
+    return $null
+}
+
+# Relanza este bootstrap en PowerShell 7, instalándolo con winget si falta.
+# Termina con throw y no con exit: bajo `iex` un exit cerraría la ventana del
+# usuario y se llevaría el mensaje de error.
+function Invoke-BootstrapInPwsh7 {
+    param(
+        [string]$ScriptPath,
+        [string[]]$ForwardArgs
+    )
+    $manualHint = "Instala PowerShell 7 a mano (https://aka.ms/powershell-release?tag=stable), abre pwsh y vuelve a ejecutar el bootstrap."
+
+    Write-Log "devcli necesita PowerShell 7 y se ha arrancado en PowerShell $($PSVersionTable.PSVersion)."
+    $pwsh = Find-Pwsh7
+    if (-not $pwsh) {
+        if (-not (Test-WingetFunctional)) {
+            throw "Falta PowerShell 7 y winget no funciona. $manualHint"
+        }
+        Write-Log "Instalando PowerShell 7 con winget (puede pedir permisos de administrador)..."
+        & winget install --id Microsoft.PowerShell --exact --source winget --silent --accept-package-agreements --accept-source-agreements
+        $wingetRc = $LASTEXITCODE
+        $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+        $pwsh = Find-Pwsh7
+        if (-not $pwsh) {
+            throw "No se pudo instalar PowerShell 7 (salida de winget: $wingetRc). $manualHint"
+        }
+    }
+
+    $tempScript = $null
+    try {
+        if (-not $ScriptPath) {
+            # Con iex no hay fichero que reejecutar: se descarga otra vez.
+            $tempScript = Join-Path $env:TEMP "devcli-bootstrap-$([guid]::NewGuid()).ps1"
+            try {
+                Invoke-WebRequest -Uri $BOOTSTRAP_URL -OutFile $tempScript -UseBasicParsing
+            }
+            catch {
+                throw "No se pudo descargar $BOOTSTRAP_URL para relanzar el bootstrap: $($_.Exception.Message). $manualHint"
+            }
+            $ScriptPath = $tempScript
+        }
+
+        Write-Log "Relanzando el bootstrap en PowerShell 7 ($pwsh)..."
+        & $pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File $ScriptPath @ForwardArgs
+        if ($LASTEXITCODE -ne 0) {
+            throw "El bootstrap en PowerShell 7 ha fallado (salida: $LASTEXITCODE)."
+        }
+    }
+    finally {
+        if ($tempScript) { Remove-Item $tempScript -Force -ErrorAction SilentlyContinue }
     }
 }
 
@@ -240,17 +317,6 @@ function Test-Prerequisites {
             }
             else {
                 Write-Log "✅ Scoop instalado correctamente"
-
-                # Agregar bucket extras (silencioso si ya estaba)
-                try {
-                    $buckets = scoop bucket list | ForEach-Object { $_.Split()[0] }
-                    if ('extras' -notin $buckets) {
-                        scoop bucket add extras *>$null
-                    }
-                }
-                catch {
-                    Write-Warning "⚠️  Error al añadir el bucket extras: $_"
-                }
             }
         }
         catch {
@@ -258,7 +324,7 @@ function Test-Prerequisites {
         }
     }
 
-    # Verificar y agregar bucket extras si scoop ya estaba instalado (silencioso si ya está)
+    # Verificar y agregar bucket extras (silencioso si ya está)
     if (Get-Command scoop -ErrorAction SilentlyContinue) {
         $hasBucketExtras = (scoop bucket list 2>$null) | Where-Object { $_.Name -eq "extras" }
         if (-not $hasBucketExtras) {
@@ -308,7 +374,7 @@ function main {
                 git -C $SETUP_DIR reset --hard "origin/$BRANCH" --quiet 2>$null
             }
             if (-not $fetchOk -or $LASTEXITCODE -ne 0) {
-                Write-Log "Actualización del repo falló — descargando desde cero..."
+                Write-Log "Actualización del repo falló, descargando desde cero..."
                 Invoke-FreshClone
             }
         }
@@ -369,6 +435,20 @@ function main {
             Restore-OriginalDirectory
         }
     }
+}
+
+# En 5.1 las fases no parsean: hay que pasar a PowerShell 7 antes de tocar nada.
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    # El fichero de este código, o vacío bajo iex. $PSCommandPath no sirve: si iex se
+    # llama desde otro script, apunta a ese script y se relanzaría el script equivocado.
+    $selfPath = ${function:Invoke-BootstrapInPwsh7}.File
+
+    $forwardArgs = @('-Lang', $Lang, '-Profile', $Profile)
+    if ($Reclone) { $forwardArgs += '-Reclone' }
+    if ($VerbosePreference -ne 'SilentlyContinue') { $forwardArgs += '-Verbose' }
+
+    Invoke-BootstrapInPwsh7 -ScriptPath $selfPath -ForwardArgs $forwardArgs
+    return
 }
 
 # Ejecutar función principal con manejo robusto

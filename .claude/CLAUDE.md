@@ -103,7 +103,7 @@ To add a new tool: add an entry to `tools.json`. The phase scripts handle the re
 - **Idempotent**: all operations check before acting (e.g., `command_exists` before install)
 - **Bash**: `set -euo pipefail`, logging via `log()` / `error()` / `success()` / `warning()`
 - **Bash 3.2 compat is mandatory** (macOS ships Bash 3.2). NO `mapfile`, NO `declare -A`, NO `local -n`. Use `while read`, parallel arrays + lookup helpers, and eval-based array copy.
-- **PowerShell**: `#Requires -Version 7.0`, PascalCase functions, `Write-Log` for output
+- **PowerShell**: `#Requires -Version 7.0`, PascalCase functions, `Write-Log` for output. Exception: `bootstrap.ps1` must parse and start in 5.1 to relaunch itself in `pwsh` (no `#Requires`, no BOM because it breaks `iex (irm ...)`; rules in its header)
 - **Platform branching**: `case "${OS_TYPE}"` in Bash, conditional blocks in PowerShell
 - **Package managers**: apt (Debian/Ubuntu), brew (macOS), scoop + winget (Windows)
 - **Line endings**: `.sh`/`.zsh` → LF; `.ps1`/`.bat`/`.cmd` → CRLF (enforced by `.gitattributes`)

@@ -14,7 +14,7 @@ resumen final.
 
 | Fase | Script (Linux/macOS/WSL2) | Script (Windows) | Qué hace |
 |------|---------------------------|------------------|----------|
-| Bootstrap | [`bootstrap.sh`](../bootstrap.sh) | [`bootstrap.ps1`](../bootstrap.ps1) | Clona/actualiza el repo, lanza las fases, contabiliza el resultado. |
+| Bootstrap | [`bootstrap.sh`](../bootstrap.sh) | [`bootstrap.ps1`](../bootstrap.ps1) | Clona/actualiza el repo, lanza las fases, contabiliza el resultado. En Windows PowerShell 5.1, antes de nada, instala PowerShell 7 con `winget` si falta y se relanza en `pwsh`; bajo `iex` vuelve a descargarse de `raw.githubusercontent.com` a un temporal que borra al terminar. |
 | 01 | [`install/01-system.sh`](../install/01-system.sh) | [`install/01-system.ps1`](../install/01-system.ps1) | Paquetes base (`git`, `curl`, `zsh`, `jq`, `oh-my-posh`, ...) y configuración de locale en Linux nativo. |
 | 02 | [`install/02-packages.sh`](../install/02-packages.sh) | [`install/02-packages.ps1`](../install/02-packages.ps1) | Herramientas CLI según el perfil (`fzf`, `bat`, `lsd`, `ripgrep`, `fd`, ...). |
 | 03 | [`install/03-dotfiles.sh`](../install/03-dotfiles.sh) | [`install/03-dotfiles.ps1`](../install/03-dotfiles.ps1) | Copia los dotfiles a `$HOME` (`.zshrc`, `.tmux.conf`, prompt, ...). |

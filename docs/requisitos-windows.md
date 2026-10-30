@@ -4,8 +4,13 @@ devcli soporta **Windows 10 y 11**, tanto x64 como ARM64.
 
 ## Lo que necesitas
 
-- **PowerShell 7** o superior. La versión que viene con Windows (5.1) no vale.
-  - Descarga: [GitHub releases](https://github.com/PowerShell/PowerShell/releases)
+- **PowerShell 7** o superior. La versión que viene con Windows (5.1) no vale
+  para las fases de instalación, pero sí para arrancar: si lanzas el bootstrap
+  desde 5.1, instala PowerShell 7 con `winget` (id `Microsoft.PowerShell`) si
+  falta y se relanza solo en `pwsh`, conservando `-Lang`, `-Profile`, `-Reclone`
+  y `-Verbose`. Si no puede instalarlo o relanzarse, para con un mensaje antes
+  de tocar nada más.
+  - Instalación manual: [GitHub releases](https://github.com/PowerShell/PowerShell/releases)
     o desde Microsoft Store buscando "PowerShell".
   - Compruébalo con `pwsh --version`.
 
@@ -65,7 +70,8 @@ Cómo arreglarlo (cualquiera de estas funciona):
 
 devcli detecta este caso y, si winget no funciona, salta los pasos que
 dependen de él. La instalación continúa con los que sí pueden hacerse vía
-scoop.
+scoop. La excepción es PowerShell 7: si arrancas desde 5.1, no está instalado
+y winget no funciona, el bootstrap para y te pide instalarlo a mano.
 
 > 💡 Si abres una sesión SSH a una máquina Windows, `winget` y otros AppX
 > aliases NO se activan en sesiones no interactivas. Esto es por diseño de
