@@ -44,6 +44,8 @@ Teclado de PC, con las teclas en el sitio físico de las del Mac:
 
 **AltGr** y **Ctrl derecho** no se tocan: AltGr sigue escribiendo lo que lleva impreso.
 
+Sirve para cualquier teclado de PC, de sobremesa o el del portátil, porque junto al espacio el orden es siempre el mismo: … Win, Alt, espacio. En los portátiles la tecla **Fn** suele ir entre Ctrl y Win (en el Mac, fn está en la esquina); la gestiona el propio teclado y la capa no la toca. Los teclados con rótulos de los dos sistemas (por ejemplo «Opt/Start» y «Cmd/Alt») encajan tal cual.
+
 Hay dos capas, y la segunda es un **contrato entre dos ficheros**:
 
 1. **Global (todas las apps)**, en PowerToys: Cmd+letra hace Ctrl+letra, etc. No necesita WezTerm.

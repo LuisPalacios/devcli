@@ -50,6 +50,26 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
   [docs/wezterm.md](docs/wezterm.md).
 - **Personaliza tu Shell** en Linux, macOS o WSL2/Git-Bash (Windows). Echa un ojo a los ficheros [zshrc.local.example](./dotfiles/zshrc.local.example) y [bashrc.local.example](./dotfiles/bashrc.local.example)
 
+## ¿Vienes del Mac? Tu teclado viaja contigo
+
+En Windows 11, devcli puede convertir el teclado del PC en el de un Mac. Quien siempre ha trabajado en Mac se sienta delante de un equipo con **Windows 11 + devcli + PowerToys + custom keys** y sus manos hacen lo de siempre: Cmd+C copia, Cmd+Q cierra la app, Option+2 escribe `@`, Option+← salta de palabra en palabra y, dentro de WezTerm, tiene los atajos de iTerm2 (Cmd+T, Cmd+D, Cmd+Option+flechas…).
+
+La correspondencia es **por posición física**, así que vale igual para el teclado de un portátil que para uno de sobremesa:
+
+| En el Mac | En el teclado del PC |
+|---|---|
+| Cmd | Alt izquierdo, el que está junto al espacio |
+| Option | Win, el siguiente hacia la izquierda |
+| Control | Ctrl |
+
+Es opcional: añade `-k on` (Git Bash) o `-CustomKeys on` (PowerShell) la primera vez y los siguientes bootstraps lo recuerdan.
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -k on
+```
+
+Detalles, mapa completo y limitaciones en [docs/teclado-mac.md](docs/teclado-mac.md).
+
 ## Documentación
 
 | Guía | De qué va |
@@ -61,7 +81,7 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 | [Requisitos Linux/macOS](docs/requisitos-unix.md) | Linux Debian/Ubuntu, macOS con Homebrew, WSL2. `sudo` sin contraseña. |
 | [Troubleshooting](docs/troubleshooting.md) | Iconos rotos, fallos de instalación de una herramienta concreta, antivirus, modo verbose, log file. |
 | [Auditoria](docs/auditoria.md) | Para auditar el bootstrap antes de ejecutarlo: fases, JSONs, contrato de errores. |
-| [Atajos estilo Mac](docs/teclado-mac.md) | *(Windows, opcional)* Teclado de PC con los atajos del Mac y de iTerm2, vía PowerToys + WezTerm (`-CustomKeys on`). |
+| [Atajos estilo Mac](docs/teclado-mac.md) | *(Windows, opcional)* Teclado de PC (sobremesa o portátil) con los atajos del Mac y de iTerm2, vía PowerToys + WezTerm (`-k on` / `-CustomKeys on`). |
 | [Desinstalar](docs/desinstalar.md) | Cómo dar marcha atrás: qué tocó devcli y cómo revertirlo. |
 
 ## Licencia
