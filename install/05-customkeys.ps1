@@ -207,6 +207,15 @@ function Confirm-PowerToysSettings {
         return
     }
     $s = Get-Content $general -Raw | ConvertFrom-Json -AsHashtable
+
+    # Sin elevación, Windows no deja a PowerToys tocar el teclado cuando la
+    # ventana activa es de administrador (terminal admin, Administrador de
+    # tareas, instaladores): ahí la capa no funciona. Activarla necesita
+    # permisos de administrador y UAC, así que se pide al usuario.
+    if (-not ($s.ContainsKey('run_elevated') -and $s.run_elevated)) {
+        Add-Warn 'PowerToys no corre como administrador: en ventanas de administrador la capa no funciona. Actívalo en PowerToys → General → «Ejecutar siempre como administrador» (docs/teclado-mac.md)'
+    }
+
     $startupOk = ($s.ContainsKey('startup') -and $s.startup)
     $kmOk = (-not $s.ContainsKey('enabled')) -or (-not $s.enabled.ContainsKey('Keyboard Manager')) -or $s.enabled['Keyboard Manager']
     if ($startupOk -and $kmOk) { return }

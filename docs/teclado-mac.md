@@ -25,12 +25,24 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/boo
 
 La elección se guarda en `~/.config/devcli/state.json`. La fase **05 · Atajos de teclado** del bootstrap hace el trabajo:
 
-1. **PowerToys.** Si no está, lo instala con `winget install Microsoft.PowerToys --scope user` (sin permisos de administrador). Comprueba que arranca con Windows y que Keyboard Manager está encendido. No toca la opción «ejecutar como administrador»: si la tienes, se queda.
+1. **PowerToys.** Si no está, lo instala con `winget install Microsoft.PowerToys --scope user` (sin permisos de administrador). Comprueba que arranca con Windows y que Keyboard Manager está encendido. Si no corre como administrador te avisa en cada bootstrap hasta que lo actives (ver «PowerToys como administrador»).
 2. **La pareja de ficheros**, con copia de seguridad en `~/.config/devcli/backups/custom-keys-<fecha>/`:
    - `dotfiles/custom_keys.lua` → `~/.config/wezterm/custom_keys.lua`
    - `dotfiles/custom_keys.powertoys.json` → `%LOCALAPPDATA%\Microsoft\PowerToys\Keyboard Manager\<perfil activo>.json`
 3. **Atajo del editor** de Keyboard Manager: pasa de Win+Shift+Q a **Win+Ctrl+Shift+Q** (ver «Editor de PowerToys»).
 4. **Recarga** PowerToys para que lea el mapa. Si cambió el atajo del editor lo reinicia (con su tarea de autoarranque, así que conserva «ejecutar como administrador»). Si no puede, el resumen final te pide que lo reinicies tú.
+
+## PowerToys como administrador (recomendado)
+
+Sin él, la capa **no funciona cuando la ventana activa es de administrador**: PowerShell o Terminal como administrador, el Administrador de tareas, regedit, instaladores… Windows no deja que un programa normal toque el teclado de una ventana elevada. Con él, funciona en todas partes.
+
+devcli no puede activarlo por ti (hace falta ser administrador y aceptar el aviso de Windows), así que una vez:
+
+1. Abre **PowerToys** (icono de la bandeja) → **General**.
+2. Activa **Ejecutar siempre como administrador** (*Always run as administrator*).
+3. Pulsa **Reiniciar PowerToys como administrador** y acepta el aviso de Windows.
+
+Desde entonces arranca elevado con Windows sin volver a preguntar, y el bootstrap deja de avisarte. Necesitas una cuenta con permisos de administrador; con una cuenta estándar la capa funciona igual, salvo en las ventanas de administrador.
 
 ## Cómo funciona
 
@@ -126,6 +138,7 @@ Siguen funcionando los atajos propios de devcli: CTRL+SHIFT+A copia todo el hist
 - **Paneles iguales.** WezTerm no puede mover un divisor que tiene paneles ya divididos a los dos lados. Con 5 o más columnas creadas en cierto orden, o mezclando divisiones de columnas en varios sitios, puede quedar desigual (en algún caso extremo, un panel muy estrecho). Dividir siempre desde el último panel da columnas iguales.
 - **Cmd+W** espera tu respuesta hasta 60 segundos; si tardas más, los paneles no se igualan. Cerrar con `exit` tampoco los iguala.
 - Alguna vez se ha visto que los atajos dejan de convertirse y sólo lo arregla reiniciar Windows (causa desconocida).
+- **Sin PowerToys como administrador**, los atajos no actúan en ventanas de administrador (ver «PowerToys como administrador»).
 - **Logi Options+** (teclados Logitech) puede tragarse combinaciones de Win+flecha antes de que lleguen a PowerToys: Option+→ deja el teclado «capturado» hasta pulsar Esc. Si no usas sus funciones extra, ciérralo y quítalo del arranque.
 - **Apps con atajos traducidos**: Cmd+letra hace exactamente Ctrl+letra, y algunas apps cambian Ctrl+letra según el idioma. En el Bloc de notas en español, por ejemplo, Ctrl+A es Abrir y Ctrl+E Seleccionar todo, así que Cmd+A abre un fichero.
 - **WezTerm en Windows no reconoce F21–F24** (las recibe como código crudo, VK 132–135). `custom_keys.lua` duplica esos atajos con `raw:132`…`raw:135`; si editas el fichero y añades atajos con F21–F24, hazlo con la función `with_raw_twins` o no funcionarán.
@@ -153,7 +166,7 @@ Ver [desinstalar.md](desinstalar.md#atajos-estilo-mac-custom_keys).
 - **Opt-in y recordado.** El mapa cambia lo que hacen Alt y Win: no puede llegar a nadie sin pedirlo. Una vez activado, los bootstraps siguientes lo mantienen y traen las mejoras sin repetir el parámetro.
 - **No pisar personalizaciones.** Un fichero «custom» que se sobrescribe en cada bootstrap no sirve. devcli guarda el hash de lo que desplegó y sólo escribe si el destino no existe, si sigue igual o si nunca lo desplegó él (en ese caso, con copia de seguridad).
 - **Generador en PowerShell y JSON commiteado.** devcli no exige Python en Windows. El generador tiene las tablas legibles arriba y valida el mapa (sin duplicados y sin tocar AltGr: el código 18, «cualquier Alt», también coincide con AltGr). Lo que se despliega es el JSON generado, revisable en cada commit.
-- **PowerToys sólo con la capa**, instalado por usuario: no hace falta ser administrador. La elevación se deja como esté: hace falta para que los atajos actúen en ventanas de administrador, pero un usuario estándar no puede activarla.
+- **PowerToys sólo con la capa**, instalado por usuario: no hace falta ser administrador para instalarlo. La elevación se recomienda (sin ella los atajos no actúan en ventanas de administrador) y se pide en cada bootstrap, pero no se activa sola: necesita administrador y el aviso de Windows, y un usuario estándar no puede activarla.
 - **Nombres en pareja:** `custom_keys.lua` y `custom_keys.powertoys.json`.
 - **Sólo Windows.** En macOS Cmd ya es SUPER en WezTerm; el gancho de `wezterm.lua` funciona en los tres sistemas, pero el `custom_keys.lua` de serie no hace nada fuera de Windows.
 - **Símbolos según la disposición**, porque sus códigos de tecla son los del teclado español ISO.
@@ -174,6 +187,7 @@ Una tecla sólo cuenta como probada cuando la pulsas.
 - [ ] Option+Borrar borra una palabra
 - [ ] Cmd+Tab cambia de app y Cmd+Q cierra el Bloc de notas
 - [ ] La tecla Windows sola abre el menú Inicio
+- [ ] Con PowerToys como administrador, en un PowerShell abierto como administrador Cmd+C y Cmd+V copian y pegan
 
 **En WezTerm**
 

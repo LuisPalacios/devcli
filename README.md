@@ -62,7 +62,7 @@ La correspondencia es **por posición física**, así que vale igual para el tec
 | Option | Win, el siguiente hacia la izquierda |
 | Control | Ctrl |
 
-Es opcional: añade `-k on` (Git Bash) o `-CustomKeys on` (PowerShell) la primera vez y los siguientes bootstraps lo recuerdan.
+Es opcional: añade `-k on` (Git Bash) o `-CustomKeys on` (PowerShell) la primera vez y los siguientes bootstraps lo recuerdan. Después, activa una vez **PowerToys → General → Ejecutar siempre como administrador**; sin eso la capa no funciona en ventanas de administrador, y el bootstrap te lo recordará.
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -k on
