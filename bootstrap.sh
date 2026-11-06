@@ -27,6 +27,7 @@ OPCIONES:
   -p, --profile PROFILE  Perfil de instalación: minimal, dev, full (defecto: full)
   -r, --reclone          Forzar descarga limpia del repo (borra ~/.devcli y vuelve a clonar)
   -v, --verbose          Mostrar todo el output bruto de las herramientas (apt, scoop, curl…)
+  -k, --custom-keys MODO Atajos estilo Mac: on, off, force (sólo Windows, desde Git Bash)
   -h, --help             Mostrar esta ayuda
 
 PERFILES:
@@ -56,11 +57,27 @@ SETUP_LANG="es_ES.UTF-8"  # Valor por defecto
 DEVCLI_PROFILE="${DEVCLI_PROFILE:-full}"  # Valor por defecto
 DEVCLI_RECLONE="${DEVCLI_RECLONE:-0}"
 DEVCLI_VERBOSE="${DEVCLI_VERBOSE:-0}"
+LANG_GIVEN=0
+CUSTOM_KEYS=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
+    -l|--lang|-k|--custom-keys|-p|--profile)
+      if [[ $# -lt 2 ]]; then
+        echo "Error: $1 necesita un valor"
+        echo "Usa -h o --help para ver las opciones disponibles"
+        exit 1
+      fi
+      ;;
+  esac
+  case $1 in
     -l|--lang)
       SETUP_LANG="$2"
+      LANG_GIVEN=1
+      shift 2
+      ;;
+    -k|--custom-keys)
+      CUSTOM_KEYS="$2"
       shift 2
       ;;
     -p|--profile)
@@ -94,6 +111,45 @@ if [[ ! "$SETUP_LANG" =~ ^[a-z]{2}_[A-Z]{2}\.UTF-8$ ]]; then
   exit 1
 fi
 
+# Se validan aquí porque en Windows acaban dentro de un comando de PowerShell.
+case "$DEVCLI_PROFILE" in
+  minimal|dev|full) ;;
+  *) echo "Error: perfil inválido '$DEVCLI_PROFILE' (minimal, dev, full)"; exit 1 ;;
+esac
+case "$CUSTOM_KEYS" in
+  ""|on|off|force) ;;
+  *) echo "Error: -k admite on, off o force (recibido: '$CUSTOM_KEYS')"; exit 1 ;;
+esac
+
+# Git Bash: delega en bootstrap.ps1 (PowerShell 7) traduciendo las opciones.
+#
+# bootstrap.ps1 se descarga del commit exacto de main, no de main: la CDN de
+# raw.githubusercontent.com guarda cada URL hasta 5 minutos y un parámetro
+# ?query no la salta, así que justo después de un push «main» puede servir la
+# versión anterior. git ls-remote pregunta a GitHub directamente; si falla se
+# usa main como antes.
+delegate_to_pwsh() {
+  local ref sha url ps_args
+  sha="$(GIT_TERMINAL_PROMPT=0 timeout 20 git ls-remote "$REPO_URL" "refs/heads/$BRANCH" 2>/dev/null | cut -f1)" || sha=""
+  if [[ "$sha" =~ ^[0-9a-f]{40}$ ]]; then ref="$sha"; else ref="$BRANCH"; fi
+  url="https://raw.githubusercontent.com/LuisPalacios/devcli/$ref/bootstrap.ps1"
+
+  ps_args="-Profile $DEVCLI_PROFILE"
+  if [[ "$LANG_GIVEN" == 1 ]]; then
+    local ps_lang="${SETUP_LANG%%.*}"   # es_ES.UTF-8 → es_ES
+    ps_args="$ps_args -Lang ${ps_lang/_/-}"   # → es-ES
+  fi
+  [[ "$DEVCLI_RECLONE" == 1 ]] && ps_args="$ps_args -Reclone"
+  [[ "$DEVCLI_VERBOSE" == 1 ]] && ps_args="$ps_args -Verbose"
+  [[ -n "$CUSTOM_KEYS" ]] && ps_args="$ps_args -CustomKeys $CUSTOM_KEYS"
+
+  # Limpiar variables MSYS2 que pueden interferir con git.exe en PowerShell
+  unset MSYSTEM MINGW_PREFIX MSYSTEM_PREFIX MSYSTEM_CHOST MSYSTEM_CTYPE
+  unset ORIGINAL_PATH ORIGINAL_TEMP ORIGINAL_TMP
+  # Como scriptblock y no con iex, para que los parámetros se enlacen de verdad.
+  exec pwsh -NoProfile -Command "& ([scriptblock]::Create((Invoke-RestMethod '$url'))) $ps_args"
+}
+
 # Detección básica de sistema operativo (sin env.sh)
 detect_os_type() {
   if [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
@@ -106,10 +162,7 @@ detect_os_type() {
       exit 1
     fi
     echo "Detectado Git Bash — delegando a PowerShell 7..."
-    # Limpiar variables MSYS2 que pueden interferir con git.exe en PowerShell
-    unset MSYSTEM MINGW_PREFIX MSYSTEM_PREFIX MSYSTEM_CHOST MSYSTEM_CTYPE
-    unset ORIGINAL_PATH ORIGINAL_TEMP ORIGINAL_TMP
-    exec pwsh -NoProfile -Command 'iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")'
+    delegate_to_pwsh
   elif [[ "$OSTYPE" == darwin* ]]; then
     OS_TYPE="macos"
   elif [[ "$OSTYPE" == linux* ]]; then
@@ -132,6 +185,10 @@ detect_root_user() {
 # Ejecutar detección
 detect_os_type
 detect_root_user
+
+if [[ -n "$CUSTOM_KEYS" ]]; then
+  echo "Aviso: -k/--custom-keys sólo aplica en Windows; se ignora."
+fi
 
 # `sudo bash bootstrap.sh` sin cambiar HOME (macOS, o sudoers con env_keep)
 # instalaría como root dentro del home de otro usuario: ficheros de root en

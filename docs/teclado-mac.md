@@ -17,6 +17,12 @@ iex "& {`$(irm https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootst
 iex "& {`$(irm https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1)} -CustomKeys force"
 ```
 
+Desde Git Bash, lo mismo con `-k` (`on`, `off` o `force`):
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -k on
+```
+
 La elección se guarda en `~/.config/devcli/state.json`. La fase **05 · Atajos de teclado** del bootstrap hace el trabajo:
 
 1. **PowerToys.** Si no está, lo instala con `winget install Microsoft.PowerToys --scope user` (sin permisos de administrador). Comprueba que arranca con Windows y que Keyboard Manager está encendido. No toca la opción «ejecutar como administrador»: si la tienes, se queda.
