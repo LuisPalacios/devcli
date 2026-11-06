@@ -18,6 +18,7 @@
 --   §6  Funcionalidad: Window state — recuerda tamaño + maximizado; centra la primera ventana
 --   §7  Key bindings                — registro de atajos a distintas funcionalidades (mods OS-aware)
 --   §8  Mouse bindings              — copy/paste con click derecho estilo Windows Terminal
+--   §9  Personalización externa     — carga opcional de custom_keys.lua (tus propios atajos)
 --
 -- Docs asociados (en el repo devcli del autor):
 --   • https://github.com/LuisPalacios/devcli  — home del proyecto
@@ -32,6 +33,10 @@
 --
 -- Knobs que querrás adaptar a tu gusto. Edita este bloque y reinicia
 -- WezTerm (o pulsa CTRL+SHIFT+R) para que los cambios surtan efecto.
+--
+-- ¿Atajos propios? No edites este fichero: créalos en custom_keys.lua,
+-- junto a este, y se cargan al final (§9). Este fichero es igual en
+-- todas las máquinas y devcli lo reescribe en cada instalación.
 
 local CUSTOMIZE = {
   -- Argumentos extra que se inyectan en CADA pane que lance `claude` en
@@ -1146,6 +1151,53 @@ config.mouse_bindings = {
     end),
   },
 }
+
+
+-- ─── §9  Personalización externa: custom_keys ──────────────────────────────
+--
+-- Ranura para tus propios atajos (o cualquier ajuste) sin tocar este
+-- fichero, que es idéntico en todas las máquinas.
+--
+-- Contrato: si existe <config_dir>/custom_keys.lua (en la misma carpeta
+-- que este wezterm.lua), debe ser un módulo Lua que devuelva una tabla con
+-- una función apply(config). Se llama aquí, al final, cuando config.keys y
+-- config.mouse_bindings ya están montados, así que puede añadir o cambiar
+-- lo que quiera. Ejemplo mínimo:
+--
+--   local wezterm = require 'wezterm'
+--   local M = {}
+--   function M.apply(config)
+--     table.insert(config.keys, { key = 'F1', action = wezterm.action.ShowLauncher })
+--   end
+--   return M
+--
+-- Sin el fichero no pasa nada. Si falla al cargarse o en apply(), el error
+-- sale en el overlay de depuración (CTRL+SHIFT+L) y el resto de la config
+-- sigue funcionando: un fallo ahí nunca devuelve WezTerm a la config de
+-- fábrica.
+--
+-- devcli trae uno de serie para Windows (bootstrap.ps1 -CustomKeys on): la
+-- mitad WezTerm de la capa de atajos estilo Mac/iTerm2 de PowerToys. Puedes
+-- editarlo, sustituirlo o vaciarlo; devcli no lo pisa si lo has cambiado.
+
+-- Se carga por ruta (loadfile) y no con require: package.path no siempre
+-- apunta a config_dir (p.ej. con `wezterm --config-file`).
+local CUSTOM_KEYS_FILE = wezterm.config_dir .. '/custom_keys.lua'
+if file_exists(CUSTOM_KEYS_FILE) then
+  local chunk, load_err = loadfile(CUSTOM_KEYS_FILE)
+  local ok, mod = false, load_err
+  if chunk then ok, mod = pcall(chunk) end
+  if not ok then
+    wezterm.log_error('custom_keys.lua no se pudo cargar: ' .. tostring(mod))
+  elseif type(mod) ~= 'table' or type(mod.apply) ~= 'function' then
+    wezterm.log_error('custom_keys.lua debe devolver una tabla con apply(config)')
+  else
+    local applied, err = pcall(mod.apply, config)
+    if not applied then
+      wezterm.log_error('custom_keys.lua falló en apply(config): ' .. tostring(err))
+    end
+  end
+end
 
 
 return config

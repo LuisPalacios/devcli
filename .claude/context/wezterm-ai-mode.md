@@ -6,8 +6,9 @@
 
 | Path | What it is |
 | --- | --- |
-| `dotfiles/wezterm.lua` | The super-config (~750 lines, sectioned §1-§8). **Repo is the single source of truth — edit here, never edit `~/.config/wezterm/wezterm.lua` directly.** |
+| `dotfiles/wezterm.lua` | The super-config (~750 lines, sectioned §0-§9). **Repo is the single source of truth — edit here, never edit `~/.config/wezterm/wezterm.lua` directly.** |
 | `~/.config/wezterm/wezterm.lua` | Deployment artifact written by `install/03-dotfiles.{sh,ps1}` from `dotfiles/wezterm.lua`. Treat as read-only. |
+| `dotfiles/custom_keys.lua` | Default `custom_keys` module loaded by §9 (Windows-only Mac/iTerm2-style layer paired with PowerToys). Deployed by `install/05-customkeys.ps1`, not `03-dotfiles`. See `.claude/context/custom-keys.md`. |
 | `dotfiles/wezterm.sh` | Vendored verbatim from `tmp/wezterm/assets/shell-integration/wezterm.sh`. WezTerm's published OSC-7 + OSC-133 helper. |
 | `~/.config/wezterm/window_state.json` | Runtime state (pixel size + maximized). NOT in git. Created/updated by the §6 `window-resized` handler. |
 | `install/tools.json` | WezTerm install entry (`scoop` Win, `brew --cask` mac, `github-deb` Linux; tag `dev`). |
@@ -35,6 +36,7 @@
 | §6 | Feature: Window state persistence | `STATE_FILE = wezterm.config_dir .. '/window_state.json'`, `read_window_state()`, `write_window_state()`, `apply_saved_size_to(mux_window)`. `window-resized` handler saves size + maximized (skips AI Mode windows by checking `ai_mode_windows`). `gui-startup` restores size, then **centers the first window** on the main screen via `wezterm.gui.screens().main`, then maximizes if the saved state was maximized. |
 | §7 | Key bindings | OS-aware AI Mode modifier (`CTRL+ALT+N` Win, `CTRL+SUPER+N` mac/Linux). `CTRL+SHIFT+E` (theme picker, all OSes). `CTRL+SHIFT+A` copies the whole scrollback to the clipboard via `get_logical_lines_as_text` (not `get_lines_as_text`, which returns physical rows and splits wrapped lines) + 2 s right-status toast. `SHIFT+Enter` → `ESC CR` (newline in Claude Code). Windows-only: `CTRL+SHIFT+T` (shell picker), `CTRL+ALT+T` (same-shell tab). |
 | §8 | Mouse bindings | Right-click: copy if selection exists, paste otherwise (Windows Terminal style). |
+| §9 | External customization: `custom_keys` | Last thing before `return config`. If `<config_dir>/custom_keys.lua` exists it is loaded with `loadfile` (NOT `require`: with `--config-file`, `package.path` still points at `~/.config/wezterm`) and must return a table with `apply(config)`; load/shape/apply errors go to `wezterm.log_error` and the rest of the config survives. No file → silent no-op. Keep it last so modules can extend `config.keys`/`mouse_bindings`. Details: `.claude/context/custom-keys.md`. |
 
 ## Architecture: AI Mode
 

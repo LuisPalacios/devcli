@@ -241,7 +241,30 @@ mensajes de error relacionados con `find_claude_bin` o `open_ai_mode`.
 La configuración completa de WezTerm está en `~/.config/wezterm/wezterm.lua`
 después de la instalación. Es un fichero único (~750 líneas), partido en
 secciones bien marcadas (§1 helpers, §2 shell choice, §3 appearance, §4 AI
-Mode, §5 shell picker, §6 window state, §7 keys, §8 mouse).
+Mode, §5 shell picker, §6 window state, §7 keys, §8 mouse, §9 custom_keys).
+
+### Tus propios atajos: `custom_keys.lua`
+
+`wezterm.lua` es igual en todas las máquinas, así que tus atajos van en otro
+fichero: `~/.config/wezterm/custom_keys.lua`. Si existe, `wezterm.lua` lo
+carga al final (§9). El contrato es devolver una tabla con una función
+`apply(config)`, que se llama cuando `config.keys` ya está montado:
+
+```lua
+local wezterm = require 'wezterm'
+local M = {}
+function M.apply(config)
+  table.insert(config.keys, { key = 'F1', action = wezterm.action.ShowLauncher })
+end
+return M
+```
+
+- Sin el fichero no pasa nada.
+- Si tiene un error, sale en el overlay de depuración (`CTRL+SHIFT+L`) y el
+  resto de la configuración sigue funcionando.
+- En Windows, `bootstrap.ps1 -CustomKeys on` instala uno de serie: la mitad
+  WezTerm de los [atajos estilo Mac](teclado-mac.md). devcli no lo pisa si lo
+  editas.
 
 > ⚠️ Si haces cambios directamente en `~/.config/wezterm/wezterm.lua`, el
 > próximo bootstrap los sobrescribe. Si quieres customizar permanentemente,
