@@ -269,6 +269,15 @@ engancha como autorun de CMD.
 Pulsa `Espacio` sobre un archivo en el explorador y te lo previsualiza sin
 abrirlo. Como en macOS. Soporta imágenes, PDFs, vídeos, código, JSON, etc.
 
+### [`PowerToys`](https://learn.microsoft.com/windows/powertoys/) — sólo con `-CustomKeys on`
+
+No forma parte de ningún perfil. Se instala (por usuario, con `winget`) sólo
+si activas los [atajos estilo Mac](teclado-mac.md) con
+`bootstrap.ps1 -CustomKeys on`: su Keyboard Manager es quien convierte Cmd
+(Alt izquierdo) en Ctrl en todas las apps, y en F13–F24 dentro de WezTerm.
+Si ya lo tenías instalado, devcli lo respeta tal cual, incluida la opción de
+ejecutarlo como administrador.
+
 ## Base — siempre instaladas
 
 Estas no aparecen en los perfiles porque son la infraestructura mínima que

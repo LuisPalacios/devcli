@@ -8,7 +8,7 @@ scripts cortos.
 ## Vista general
 
 `bootstrap.{sh,ps1}` clona el repo a `~/.devcli` y ejecuta cuatro fases en
-orden. Cada fase es un script independiente con un código de salida (`0` ok,
+orden (cinco en Windows). Cada fase es un script independiente con un código de salida (`0` ok,
 `1` warning, `2` fail). El bootstrap suma los resultados y muestra el
 resumen final.
 
@@ -19,6 +19,7 @@ resumen final.
 | 02 | [`install/02-packages.sh`](../install/02-packages.sh) | [`install/02-packages.ps1`](../install/02-packages.ps1) | Herramientas CLI según el perfil (`fzf`, `bat`, `lsd`, `ripgrep`, `fd`, ...). |
 | 03 | [`install/03-dotfiles.sh`](../install/03-dotfiles.sh) | [`install/03-dotfiles.ps1`](../install/03-dotfiles.ps1) | Copia los dotfiles a `$HOME` (`.zshrc`, `.tmux.conf`, prompt, ...). |
 | 04 | [`install/04-localtools.sh`](../install/04-localtools.sh) | [`install/04-localtools.ps1`](../install/04-localtools.ps1) | Copia los scripts auxiliares a `~/bin` (`e`, `s`, `confcat`, `nerd-setup`, `nerd-verify`). |
+| 05 | — | [`install/05-customkeys.ps1`](../install/05-customkeys.ps1) | Sólo con `-CustomKeys on`: instala PowerToys si falta, despliega `custom_keys.lua` y el mapa de Keyboard Manager sin pisar tus ediciones (copia de seguridad en `~/.config/devcli/backups/`), y recarga PowerToys. Sin la opción, no toca nada. Ver [teclado-mac.md](teclado-mac.md). |
 
 ## Las tres fuentes de verdad
 

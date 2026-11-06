@@ -20,6 +20,12 @@ param(
     [Parameter()]
     [switch]$Reclone,
 
+    # Capa de atajos estilo Mac (PowerToys + WezTerm). Se recuerda entre
+    # ejecuciones; sin el parametro se mantiene lo ultimo elegido.
+    [Parameter()]
+    [ValidateSet("on", "off", "force")]
+    [string]$CustomKeys,
+
     [Parameter()]
     [switch]$Help
 )
@@ -84,6 +90,10 @@ OPCIONES:
   -Lang LOCALE          Configurar idioma (ej: en-US, es-ES)
   -Profile PROFILE      Perfil de instalación: minimal, dev, full (defecto: full)
   -Reclone              Forzar descarga limpia del repo (borra ~/.devcli y vuelve a clonar)
+  -CustomKeys on|off|force
+                        Atajos de teclado estilo Mac (PowerToys + WezTerm). Se recuerda
+                        entre ejecuciones. force reescribe aunque los hayas editado.
+                        Ver docs/teclado-mac.md
   -Verbose              Mostrar todo el output bruto de las herramientas (scoop, winget, curl…)
   -Help                 Mostrar esta ayuda
 
@@ -387,6 +397,7 @@ function main {
         $env:DEVCLI_PROFILE = $Profile
         $env:SETUP_DIR = $SETUP_DIR
         $env:CURRENT_USER = $CURRENT_USER
+        $env:DEVCLI_CUSTOM_KEYS = $CustomKeys
 
         # Puente entre el -Verbose común de PS y la capa UX (lee $env:DEVCLI_VERBOSE).
         $env:DEVCLI_VERBOSE = if ($VerbosePreference -ne 'SilentlyContinue') { '1' } else { '0' }
@@ -445,6 +456,7 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
 
     $forwardArgs = @('-Lang', $Lang, '-Profile', $Profile)
     if ($Reclone) { $forwardArgs += '-Reclone' }
+    if ($CustomKeys) { $forwardArgs += @('-CustomKeys', $CustomKeys) }
     if ($VerbosePreference -ne 'SilentlyContinue') { $forwardArgs += '-Verbose' }
 
     Invoke-BootstrapInPwsh7 -ScriptPath $selfPath -ForwardArgs $forwardArgs

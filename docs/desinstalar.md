@@ -71,6 +71,26 @@ Windows:
 Remove-Item -Recurse -Force "$env:USERPROFILE\.devcli"
 ```
 
+### Atajos estilo Mac (`custom_keys`)
+
+Sólo si activaste `bootstrap.ps1 -CustomKeys on` (Windows). Ver
+[teclado-mac.md](teclado-mac.md).
+
+1. Que los siguientes bootstraps no los apliquen: `bootstrap.ps1 -CustomKeys off`.
+   Esto **no** deshace nada por sí solo.
+2. **Mapa de PowerToys:** abre el editor de Keyboard Manager
+   (Win+Ctrl+Shift+Q) y borra los atajos, o restaura tu mapa anterior desde
+   `~/.config/devcli/backups/custom-keys-<fecha>/` (`keyboard-manager-default.json`
+   → `%LOCALAPPDATA%\Microsoft\PowerToys\Keyboard Manager\default.json`, con
+   el editor cerrado) y reinicia PowerToys. Para deshacerlo del todo, apaga
+   Keyboard Manager en PowerToys.
+3. **Atajo del editor:** la copia `keyboard-manager-settings.json` de esa
+   carpeta tiene el original (Win+Shift+Q), o cámbialo en PowerToys →
+   Keyboard Manager.
+4. **WezTerm:** borra `%USERPROFILE%\.config\wezterm\custom_keys.lua`.
+5. **PowerToys** (si lo instaló devcli): `winget uninstall Microsoft.PowerToys`.
+6. Opcional: borra `%USERPROFILE%\.config\devcli\` (estado y copias de seguridad).
+
 ### La shell por defecto
 
 En Linux / WSL2, devcli cambia tu shell por defecto a `zsh` con
@@ -130,7 +150,8 @@ Para tu tranquilidad:
 - No ha modificado nada de root salvo `/etc/locale.gen` y `/etc/nanorc` (en
   Linux nativo).
 - No ha tocado `/etc/passwd` salvo el `chsh` arriba.
-- No ha instalado servicios systemd, demonios, ni nada que arranque en boot.
+- No ha instalado servicios systemd, demonios, ni nada que arranque en boot
+  (salvo PowerToys en Windows, y sólo si activaste `-CustomKeys on`).
 - No ha modificado tu `.gitconfig`, claves SSH, ni configuración de
   aplicaciones (navegadores, IDEs, etc.).
 

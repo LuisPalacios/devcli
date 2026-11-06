@@ -61,6 +61,7 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 | [Requisitos Linux/macOS](docs/requisitos-unix.md) | Linux Debian/Ubuntu, macOS con Homebrew, WSL2. `sudo` sin contraseña. |
 | [Troubleshooting](docs/troubleshooting.md) | Iconos rotos, fallos de instalación de una herramienta concreta, antivirus, modo verbose, log file. |
 | [Auditoria](docs/auditoria.md) | Para auditar el bootstrap antes de ejecutarlo: fases, JSONs, contrato de errores. |
+| [Atajos estilo Mac](docs/teclado-mac.md) | *(Windows, opcional)* Teclado de PC con los atajos del Mac y de iTerm2, vía PowerToys + WezTerm (`-CustomKeys on`). |
 | [Desinstalar](docs/desinstalar.md) | Cómo dar marcha atrás: qué tocó devcli y cómo revertirlo. |
 
 ## Licencia

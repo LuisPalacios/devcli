@@ -175,7 +175,10 @@ function Install-WingetPackage {
         [Parameter(Mandatory)]
         [string]$PackageId,
 
-        [string]$Name = $PackageId
+        [string]$Name = $PackageId,
+
+        # Argumentos extra para `winget install` (p.ej. '--scope', 'user').
+        [string[]]$ExtraArgs = @()
     )
 
     if (-not (Test-WingetFunctional)) {
@@ -194,7 +197,7 @@ function Install-WingetPackage {
         $tmpOut = [System.IO.Path]::GetTempFileName()
         $tmpErr = [System.IO.Path]::GetTempFileName()
         $process = Start-Process -FilePath 'winget' `
-            -ArgumentList @('install', $PackageId, '--silent', '--accept-package-agreements', '--accept-source-agreements') `
+            -ArgumentList (@('install', $PackageId, '--silent', '--accept-package-agreements', '--accept-source-agreements') + $ExtraArgs) `
             -Wait -PassThru -NoNewWindow `
             -RedirectStandardOutput $tmpOut -RedirectStandardError $tmpErr
 
@@ -1010,5 +1013,35 @@ function Show-UxSummary {
         Write-Host ("(p.ej. {0}CLAUDE_EXTRA_ARGS{1} — viene con" -f $c.Dim, $c.Reset)
         Write-Host ("{0}--allow-dangerously-skip-permissions{1} activado por defecto)." -f `
             $c.Dim, $c.Reset)
+    }
+
+    # Atajos de teclado (fase 05-customkeys). La fase deja su resultado en
+    # $env:DEVCLI_CUSTOMKEYS_*; sin ella (Unix) no se muestra nada.
+    $ckStatus = $env:DEVCLI_CUSTOMKEYS_STATUS
+    if ($ckStatus -eq 'off') {
+        Write-Host ''
+        Write-Host ("{0}Atajos estilo Mac:{1} desactivados. Para probarlos: {2}bootstrap.ps1 -CustomKeys on{3}" -f `
+            $c.Bold, $c.Reset, $c.Dim, $c.Reset)
+        Write-Host ("(PowerToys + WezTerm; detalles en {0}docs/teclado-mac.md{1})." -f $c.Dim, $c.Reset)
+    }
+    elseif ($ckStatus -eq 'on') {
+        Write-Host ''
+        Write-Host ("{0}Atajos estilo Mac:{1} custom_keys.lua {2}{3}{4} · mapa de PowerToys {2}{5}{4}" -f `
+            $c.Bold, $c.Reset, $c.Dim, $env:DEVCLI_CUSTOMKEYS_LUA, $c.Reset, $env:DEVCLI_CUSTOMKEYS_MAP)
+        if ($env:DEVCLI_CUSTOMKEYS_NOTES) {
+            foreach ($note in $env:DEVCLI_CUSTOMKEYS_NOTES.Split('|')) { Write-Host "  · $note" }
+        }
+        if ($env:DEVCLI_CUSTOMKEYS_SYMBOLS -ne 'es') {
+            Write-Host '  · Símbolos con Option omitidos: tu teclado no es español de España.'
+        }
+        if ($env:DEVCLI_CUSTOMKEYS_BACKUP) {
+            Write-Host ("  · Copia de seguridad: {0}{1}{2}" -f $c.Dim, $env:DEVCLI_CUSTOMKEYS_BACKUP, $c.Reset)
+        }
+        if ($env:DEVCLI_CUSTOMKEYS_RESTART -eq '1') {
+            Write-Host ("  · {0}Reinicia PowerToys{1} (bandeja → Salir, y ábrelo) para aplicar los cambios." -f `
+                $c.Yellow, $c.Reset)
+        }
+        Write-Host ("  · Editor de Keyboard Manager: {0}Win+Ctrl+Shift+Q{1}. Mientras está abierto no funciona ningún atajo." -f `
+            $c.Bold, $c.Reset)
     }
 }
