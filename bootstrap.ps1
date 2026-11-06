@@ -22,9 +22,12 @@ param(
 
     # Capa de atajos estilo Mac (PowerToys + WezTerm). Se recuerda entre
     # ejecuciones; sin el parametro se mantiene lo ultimo elegido.
+    # "" en el ValidateSet y como valor por defecto: con `iex (irm ...)` el
+    # param() se ejecuta como declaraciones de variable y el valor inicial se
+    # valida; sin "" falla antes de arrancar.
     [Parameter()]
-    [ValidateSet("on", "off", "force")]
-    [string]$CustomKeys,
+    [ValidateSet("", "on", "off", "force")]
+    [string]$CustomKeys = "",
 
     [Parameter()]
     [switch]$Help
