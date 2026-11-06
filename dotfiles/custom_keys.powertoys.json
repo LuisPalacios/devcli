@@ -1,0 +1,997 @@
+{
+  "remapKeys": {
+    "inProcess": []
+  },
+  "remapKeysToText": {
+    "inProcess": []
+  },
+  "remapShortcuts": {
+    "global": [
+      {
+        "originalKeys": "164;65",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;65"
+      },
+      {
+        "originalKeys": "164;160;65",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;65"
+      },
+      {
+        "originalKeys": "164;66",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;66"
+      },
+      {
+        "originalKeys": "164;160;66",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;66"
+      },
+      {
+        "originalKeys": "164;67",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;67"
+      },
+      {
+        "originalKeys": "164;160;67",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;67"
+      },
+      {
+        "originalKeys": "164;68",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;68"
+      },
+      {
+        "originalKeys": "164;160;68",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;68"
+      },
+      {
+        "originalKeys": "164;69",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;69"
+      },
+      {
+        "originalKeys": "164;160;69",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;69"
+      },
+      {
+        "originalKeys": "164;70",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;70"
+      },
+      {
+        "originalKeys": "164;160;70",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;70"
+      },
+      {
+        "originalKeys": "164;71",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;71"
+      },
+      {
+        "originalKeys": "164;160;71",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;71"
+      },
+      {
+        "originalKeys": "164;72",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "91;40"
+      },
+      {
+        "originalKeys": "164;160;72",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;72"
+      },
+      {
+        "originalKeys": "164;73",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;73"
+      },
+      {
+        "originalKeys": "164;160;73",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;73"
+      },
+      {
+        "originalKeys": "164;74",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;74"
+      },
+      {
+        "originalKeys": "164;160;74",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;74"
+      },
+      {
+        "originalKeys": "164;75",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;75"
+      },
+      {
+        "originalKeys": "164;160;75",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;75"
+      },
+      {
+        "originalKeys": "164;76",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;76"
+      },
+      {
+        "originalKeys": "164;160;76",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;76"
+      },
+      {
+        "originalKeys": "164;77",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "91;40"
+      },
+      {
+        "originalKeys": "164;160;77",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;77"
+      },
+      {
+        "originalKeys": "164;78",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;78"
+      },
+      {
+        "originalKeys": "164;160;78",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;78"
+      },
+      {
+        "originalKeys": "164;79",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;79"
+      },
+      {
+        "originalKeys": "164;160;79",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;79"
+      },
+      {
+        "originalKeys": "164;80",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;80"
+      },
+      {
+        "originalKeys": "164;160;80",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;80"
+      },
+      {
+        "originalKeys": "164;81",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "164;115"
+      },
+      {
+        "originalKeys": "164;160;81",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;81"
+      },
+      {
+        "originalKeys": "164;82",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;82"
+      },
+      {
+        "originalKeys": "164;160;82",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;82"
+      },
+      {
+        "originalKeys": "164;83",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;83"
+      },
+      {
+        "originalKeys": "164;160;83",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;83"
+      },
+      {
+        "originalKeys": "164;84",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;84"
+      },
+      {
+        "originalKeys": "164;160;84",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;84"
+      },
+      {
+        "originalKeys": "164;85",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;85"
+      },
+      {
+        "originalKeys": "164;160;85",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;85"
+      },
+      {
+        "originalKeys": "164;86",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;86"
+      },
+      {
+        "originalKeys": "164;160;86",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;86"
+      },
+      {
+        "originalKeys": "164;87",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;87"
+      },
+      {
+        "originalKeys": "164;160;87",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;87"
+      },
+      {
+        "originalKeys": "164;88",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;88"
+      },
+      {
+        "originalKeys": "164;160;88",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;88"
+      },
+      {
+        "originalKeys": "164;89",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;89"
+      },
+      {
+        "originalKeys": "164;160;89",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;89"
+      },
+      {
+        "originalKeys": "164;90",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;90"
+      },
+      {
+        "originalKeys": "164;160;90",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;89"
+      },
+      {
+        "originalKeys": "164;48",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;48"
+      },
+      {
+        "originalKeys": "164;49",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;49"
+      },
+      {
+        "originalKeys": "164;50",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;50"
+      },
+      {
+        "originalKeys": "164;51",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;51"
+      },
+      {
+        "originalKeys": "164;52",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;52"
+      },
+      {
+        "originalKeys": "164;53",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;53"
+      },
+      {
+        "originalKeys": "164;54",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;54"
+      },
+      {
+        "originalKeys": "164;55",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;55"
+      },
+      {
+        "originalKeys": "164;56",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;56"
+      },
+      {
+        "originalKeys": "164;57",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;57"
+      },
+      {
+        "originalKeys": "164;187",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;187"
+      },
+      {
+        "originalKeys": "164;189",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;189"
+      },
+      {
+        "originalKeys": "164;188",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;188"
+      },
+      {
+        "originalKeys": "164;160;51",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "91;44"
+      },
+      {
+        "originalKeys": "164;160;52",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "91;160;83"
+      },
+      {
+        "originalKeys": "164;37",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "36"
+      },
+      {
+        "originalKeys": "164;39",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "35"
+      },
+      {
+        "originalKeys": "164;38",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;36"
+      },
+      {
+        "originalKeys": "164;40",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;35"
+      },
+      {
+        "originalKeys": "164;160;37",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;36"
+      },
+      {
+        "originalKeys": "164;160;39",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;35"
+      },
+      {
+        "originalKeys": "164;160;38",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;36"
+      },
+      {
+        "originalKeys": "164;160;40",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;35"
+      },
+      {
+        "originalKeys": "91;37",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;37"
+      },
+      {
+        "originalKeys": "91;39",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;39"
+      },
+      {
+        "originalKeys": "91;160;37",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;37"
+      },
+      {
+        "originalKeys": "91;160;39",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;160;39"
+      },
+      {
+        "originalKeys": "91;8",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "162;8"
+      },
+      {
+        "originalKeys": "91;49",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;49"
+      },
+      {
+        "originalKeys": "91;50",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;50"
+      },
+      {
+        "originalKeys": "91;51",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;51"
+      },
+      {
+        "originalKeys": "91;52",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;52"
+      },
+      {
+        "originalKeys": "91;54",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;54"
+      },
+      {
+        "originalKeys": "91;69",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;69"
+      },
+      {
+        "originalKeys": "91;186",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;186"
+      },
+      {
+        "originalKeys": "91;187",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;187"
+      },
+      {
+        "originalKeys": "91;222",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;222"
+      },
+      {
+        "originalKeys": "91;191",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;191"
+      },
+      {
+        "originalKeys": "91;220",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;220"
+      },
+      {
+        "originalKeys": "91;192",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "165;52"
+      }
+    ],
+    "appSpecific": [
+      {
+        "originalKeys": "164;67",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "124",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;86",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "125",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;84",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "126",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;87",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "127",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;78",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "128",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;68",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "129",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;68",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "130",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;70",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "131",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;71",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "132",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;71",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "133",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;75",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "134",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;65",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;124",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;81",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;125",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;37",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;126",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;39",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;127",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;38",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;128",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;40",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;129",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;91;37",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;130",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;91;39",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;131",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;91;38",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;132",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;91;40",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;133",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;91;186",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;134",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;91;187",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "160;135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;65",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;66",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;66",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;67",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;69",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;69",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;70",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;72",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;73",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;73",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;74",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;74",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;75",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;76",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;76",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;77",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;78",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;79",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;79",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;80",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;80",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;81",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;82",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;82",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;83",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;83",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;84",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;85",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;85",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;86",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;87",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;88",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;88",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;89",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;89",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;90",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;160;90",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      },
+      {
+        "originalKeys": "164;188",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "135",
+        "targetApp": "wezterm-gui"
+      }
+    ]
+  },
+  "remapShortcutsToText": {
+    "global": [],
+    "appSpecific": []
+  }
+}
