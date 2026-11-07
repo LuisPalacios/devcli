@@ -10,7 +10,7 @@
 | --- | --- |
 | `dotfiles/wezterm.lua` §9 | Generic, cross-platform hook. If `<config_dir>/custom_keys.lua` exists: `loadfile` + `pcall(chunk)` + check it returns a table with `apply`, then `pcall(mod.apply, config)`. Any failure → `wezterm.log_error`, config stays alive. Runs last (after §7/§8) so it can extend `config.keys`. |
 | `dotfiles/custom_keys.lua` | Default module (Windows-only behaviour): F13–F24 / Shift+F13–F24 action table, keys that arrive unchanged (Alt+Enter, Ctrl+Alt+arrows, Alt+Home/End/PgUp/PgDn, Ctrl+1–9, Ctrl++/−/0), pane equalizer (`M.split`, `M.close`), `search_mode` F21/F22. `apply` is a no-op outside Windows. |
-| `dotfiles/custom_keys.powertoys.json` | GENERATED Keyboard Manager map (153 shortcuts: 92 global, 61 `targetApp: wezterm-gui`). Never hand-edit; regenerate. |
+| `dotfiles/custom_keys.powertoys.json` | GENERATED Keyboard Manager map (155 shortcuts: 94 global, 61 `targetApp: wezterm-gui`). Never hand-edit; regenerate. |
 | `install/build-custom-keys.ps1` | Generator (PS7). Tables `Get-GlobalRemaps` / `Get-TerminalRemaps`, `Test-RemapList` (no duplicate key sets; VK 165 AltGr and VK 18 any-Alt forbidden as source), fixed renderer (2-space, LF, no BOM). `-Check` exits 1 if the JSON is stale or the map invalid. |
 | `install/05-customkeys.ps1` | Windows-only phase (no `.sh` twin; `bootstrap.sh` globs `[0-9][0-9]-*.sh`). Params let you point it at scratch dirs: `-StateFile -BackupRoot -WezTermDir -PowerToysDataDir -NoPowerToysProcess`. |
 | `bootstrap.ps1` | `-CustomKeys on|off|force` → `$env:DEVCLI_CUSTOM_KEYS`; forwarded on the 5.1 → pwsh relaunch. |
@@ -35,7 +35,7 @@ VK codes: LWin 91, LShift 160, LCtrl 162, LAlt 164, RAlt/AltGr 165, F13–F24 = 
 - **Editor shortcut**: `properties.EditorShortcut = {win,ctrl,alt:false,shift,code:81,key:""}` edited as JSON (the key may not exist on a stock install). Only read at PowerToys start → needs a restart.
 - **Editor open** (`PowerToys.KeyboardManagerEditorUI` WinUI3 or classic `PowerToys.KeyboardManagerEditor`) → warn, skip map + shortcut (the `.lua` is still deployed).
 - **Reload**: map only → `EventWaitHandle.OpenExisting('PowerToys_KeyboardManager_Event_Settings').Set()` (verified: openable from a non-elevated process even when PowerToys runs elevated). Shortcut changed → stop + start via the `\PowerToys\Autorun for <user>` task (keeps elevation without UAC) or the exe. Verified on PowerToys 0.102 running elevated: a non-elevated bootstrap COULD stop it, and the autorun task brought it back elevated. If stopping ever fails → `DEVCLI_CUSTOMKEYS_RESTART=1` and the summary asks the user to restart it.
-- **D8 symbols**: included only if `HKCU:\Keyboard Layout\Preload\1` (resolved through `Substitutes`) is `0000040a`/`00000c0a`; otherwise global entries whose target starts with `165;` are dropped (92 → 80) and the JSON is re-rendered with `ConvertTo-Json` (hash is of what was written, so still idempotent).
+- **D8 symbols**: included only if `HKCU:\Keyboard Layout\Preload\1` (resolved through `Substitutes`) is `0000040a`/`00000c0a`; otherwise global entries whose target starts with `165;` are dropped (94 → 82) and the JSON is re-rendered with `ConvertTo-Json` (hash is of what was written, so still idempotent).
 - **D6**: `custom_keys.lua` deploys only on Windows (phase 05), not via `03-dotfiles.json`.
 
 ## Testing

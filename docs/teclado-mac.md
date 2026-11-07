@@ -78,12 +78,15 @@ Por eso las dos mitades viven juntas en el repo: con PowerToys y sin el `.lua`, 
 | Cmd+Tab | Alt+Tab | Cambiar de app (de fábrica) |
 | Cmd+Shift+3 | Alt+Shift+3 | Captura de pantalla completa |
 | Cmd+Shift+4 | Alt+Shift+4 | Captura de una zona |
+| Cmd+º / Cmd+Option+º | Alt+º / Win+Alt+º | Escritorio virtual siguiente / anterior (Win+Ctrl+→ / Win+Ctrl+←) |
 | Cmd+← / → | Alt+flecha | Inicio / fin de línea |
 | Cmd+↑ / ↓ | Alt+flecha | Inicio / fin del documento |
 | Cmd+Shift+flecha | Alt+Shift+flecha | Lo mismo, seleccionando |
 | Option+← / → | Win+flecha | Palabra a palabra |
 | Option+Shift+← / → | Win+Shift+flecha | Palabra a palabra, seleccionando |
 | Option+Borrar | Win+Retroceso | Borra la palabra anterior |
+
+Para los escritorios virtuales se eligen Cmd+º y Cmd+Option+º, y no los Ctrl+← / Ctrl+→ del Mac, porque se hacen con una mano y no pisan el salto de palabra de Windows: el pulgar izquierdo pulsa Alt (o Win y Alt a la vez) y el meñique la º. Con Shift harían falta tres dedos. La º es la tecla a la izquierda del 1 en el teclado español ISO (VK 220). El botón «Vista de tareas» de la barra de tareas queda de respaldo.
 
 ## Símbolos (sólo teclado español de España)
 
@@ -187,6 +190,7 @@ Una tecla sólo cuenta como probada cuando la pulsas.
 - [ ] Option+Borrar borra una palabra
 - [ ] Cmd+Tab cambia de app y Cmd+Q cierra el Bloc de notas
 - [ ] La tecla Windows sola abre el menú Inicio
+- [ ] Con dos escritorios virtuales, Cmd+º pasa al siguiente y Cmd+Option+º vuelve al anterior
 - [ ] Con PowerToys como administrador, en un PowerShell abierto como administrador Cmd+C y Cmd+V copian y pegan
 
 **En WezTerm**
@@ -194,6 +198,7 @@ Una tecla sólo cuenta como probada cuando la pulsas.
 - [ ] Escribe `ping -t localhost`: Cmd+C no lo para y Control+C sí
 - [ ] Selecciona texto con el ratón, Cmd+C lo copia y Cmd+V lo pega
 - [ ] Option+2 escribe `@`
+- [ ] Cmd+º y Cmd+Option+º cambian de escritorio virtual también con WezTerm en primer plano
 - [ ] Cmd+T abre pestaña, Cmd+→ cambia de pestaña y Cmd+1 vuelve a la primera
 - [ ] Cmd+D divide a la derecha, Cmd+Shift+D divide hacia abajo
 - [ ] Cmd+Option+flechas mueve entre paneles

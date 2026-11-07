@@ -410,6 +410,18 @@
         "newRemapKeys": "91;160;83"
       },
       {
+        "originalKeys": "164;220",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "91;162;39"
+      },
+      {
+        "originalKeys": "164;91;220",
+        "exactMatch": true,
+        "operationType": 0,
+        "newRemapKeys": "91;162;37"
+      },
+      {
         "originalKeys": "164;37",
         "exactMatch": true,
         "operationType": 0,

@@ -64,6 +64,10 @@ function Get-GlobalRemaps {
     # Capturas de pantalla.
     $r.Add((Map ($CMD, $LSHIFT, (K '3')) ($LWIN, $PRINT_SCREEN)))
     $r.Add((Map ($CMD, $LSHIFT, (K '4')) ($LWIN, $LSHIFT, (K 'S'))))
+    # Escritorios virtuales con una mano (º, a la izquierda del 1): el pulgar
+    # izquierdo pulsa Alt, o Win+Alt a la vez, y el meñique la º.
+    $r.Add((Map ($CMD, $KEY_ORDINAL)          ($LWIN, $LCTRL, $RIGHT)))   # escritorio siguiente
+    $r.Add((Map ($CMD, $OPTION, $KEY_ORDINAL) ($LWIN, $LCTRL, $LEFT)))    # escritorio anterior
     # Cmd+flechas: bordes de línea y de documento; con Shift, seleccionan.
     $r.Add((Map ($CMD, $LEFT)  ($HOME_)))
     $r.Add((Map ($CMD, $RIGHT) ($END_)))
