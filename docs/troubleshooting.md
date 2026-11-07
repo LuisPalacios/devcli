@@ -57,6 +57,15 @@ irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1" -
 Funcionalmente es idéntico, pero los AVs no lo detectan como sospechoso
 porque no es el patrón "descarga y ejecuta en una línea".
 
+Si es **Microsoft Defender** en Windows PowerShell 5.1 («This script contains
+malicious content and has been blocked by your antivirus software»,
+`VirTool:PowerShell/MaleficAms.W`), lanza el bootstrap desde **Git Bash**, que
+hace lo mismo:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
+```
+
 Más detalles en [requisitos-windows.md](requisitos-windows.md).
 
 ## winget devuelve "Acceso denegado" (Windows)

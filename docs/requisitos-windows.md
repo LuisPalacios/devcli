@@ -52,6 +52,18 @@ irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1" -
 
 Funcionalmente es idéntico, pero el antivirus suele dejarlo pasar.
 
+**Alternativa: desde Git Bash.** Microsoft Defender también ha bloqueado
+`iex (irm ...)` en Windows PowerShell 5.1 («This script contains malicious
+content and has been blocked by your antivirus software»,
+`VirTool:PowerShell/MaleficAms.W`). Si tienes Git Bash, lanza el bootstrap
+desde ahí; el resultado es el mismo:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
+```
+
+Admite las mismas opciones en formato corto (`-p`, `-l`, `-r`, `-k`).
+
 ## Problema común: winget da "Acceso denegado"
 
 En equipos provisionados recientemente (especialmente Windows 11 ARM o

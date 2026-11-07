@@ -34,7 +34,7 @@ iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.p
 ```
 
 > En el caso de Windows tu antivirus podria bloquear el comando anterior. Si es así, bloquea el comando, prueba la
-> [instalación en dos pasos](docs/requisitos-windows.md#si-tu-antivirus-bloquea-el-bootstrap). </br>
+> [instalación en dos pasos](docs/requisitos-windows.md#si-tu-antivirus-bloquea-el-bootstrap) o lanza el comando de Git Bash de arriba, que hace lo mismo. </br>
 > Mira opciones adicionales con `--help` y detalle de cada perfil en [docs/perfiles.md](docs/perfiles.md). </br>
 > Las herramientas que se instalan están en [docs/herramientas.md](docs/herramientas.md).
 
