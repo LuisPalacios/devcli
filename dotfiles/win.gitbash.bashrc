@@ -266,6 +266,28 @@ ping() {
 }
 
 # =============================================================================
+# SCRIPTS DE POWERSHELL DE ~/bin COMO COMANDOS
+# =============================================================================
+#
+# En PowerShell basta con escribir `pathdoctor`; en bash un .ps1 no se puede
+# ejecutar. Por cada ~/bin/<nombre>.ps1 se define una función <nombre> que lo
+# lanza con pwsh -NoProfile y le pasa los argumentos. No tapa builtins,
+# palabras clave, alias ni funciones (compgen, sin recorrer el PATH: con
+# command -v costaba ~3 ms por script), ni devcli-ping (ya es `ping`). A un
+# ejecutable del PATH con el mismo nombre sí lo tapa, igual que en PowerShell,
+# donde ~/bin va delante. Un script nuevo aparece al abrir otra shell.
+if command -v pwsh.exe >/dev/null 2>&1; then
+    for __ps1 in "$HOME"/bin/*.ps1; do
+        [ -f "$__ps1" ] || continue
+        __name=${__ps1##*/}; __name=${__name%.ps1}
+        case "$__name" in devcli-ping|*[!A-Za-z0-9_.-]*) continue ;; esac
+        compgen -b -k -a -A function -X "!$__name" -- "$__name" >/dev/null && continue
+        eval "${__name}() { pwsh.exe -NoProfile -File \"\$HOME/bin/${__name}.ps1\" \"\$@\"; }"
+    done
+    unset __ps1 __name
+fi
+
+# =============================================================================
 # COMANDOS DE WINDOWS CON BANDERAS /x
 # =============================================================================
 #
