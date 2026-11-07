@@ -39,6 +39,10 @@
     {
       "name": "devcli-ping.ps1",
       "platforms": ["windows"]
+    },
+    {
+      "name": "DespiertaPantalla.ps1",
+      "platforms": ["windows"]
     }
   ]
 }
