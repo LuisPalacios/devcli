@@ -4,7 +4,7 @@
 # micro-movimiento del ratón. Útil antes de entrar por RustDesk: ejecútalo
 # por SSH en el equipo remoto y la imagen deja de llegar en negro.
 #
-# Uso: DespiertaPantalla (PowerShell 7) · pwsh -File ~/bin/DespiertaPantalla.ps1 (bash)
+# Uso: DespiertaPantalla (PowerShell 7) · pwsh -NoProfile -File ~/bin/DespiertaPantalla.ps1 (bash)
 
 Add-Type -TypeDefinition @'
 using System.Runtime.InteropServices;

@@ -253,7 +253,11 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
 # - Personaliza el prompt con configuración avanzada desde ~/.oh-my-posh.json
 # - Sobrescribe la función global `prompt`, lo cual rompe el hook de zoxide
 #   si no se corrige a continuación
+# - Si pwsh se abre desde Git Bash hereda OSTYPE=cygwin (lo exporta el init de
+#   oh-my-posh para bash) y oh-my-posh genera rutas /c/... que PowerShell no
+#   encuentra. PowerShell nunca es Cygwin: se quita antes del init.
 if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
+    Remove-Item Env:OSTYPE -ErrorAction SilentlyContinue
     if ($IsTTY) {
     Write-Host "Inicializando oh-my-posh..." -ForegroundColor Cyan
     oh-my-posh init pwsh --config ~/.oh-my-posh.json | Invoke-Expression
