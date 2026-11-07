@@ -363,8 +363,9 @@ function Set-TaskbarAndStartMenu {
     # Quitar widgets del taskbar
     Set-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" "TaskbarDa" 0
 
-    # Quitar Task View del taskbar
-    Set-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" "ShowTaskViewButton" 0
+    # Mostrar Vista de tareas en el taskbar: respaldo de los atajos de
+    # escritorio virtual (Win+Ctrl+←/→, o Cmd+º en la capa de atajos estilo Mac)
+    Set-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" "ShowTaskViewButton" 1
 
     # Quitar Meet Now del taskbar
     Set-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" "TaskbarMn" 0
