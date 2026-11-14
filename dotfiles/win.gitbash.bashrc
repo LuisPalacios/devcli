@@ -237,6 +237,9 @@ alias more='less'
 # Claude Code permitir no necesitar confirmaciones de permisos
 alias claude='claude --allow-dangerously-skip-permissions'
 
+# Codex CLI sin aprobaciones ni sandbox (equivale a --dangerously-bypass-approvals-and-sandbox)
+alias codex='codex --yolo'
+
 # =============================================================================
 # PING ESTILO LINUX
 # =============================================================================
