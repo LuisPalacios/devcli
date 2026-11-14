@@ -331,6 +331,44 @@ function cd {
     }
 }
 
+# -----------------------------------------------------------------------------
+# Autocompletado de 'cd': directorios locales + directorios de zoxide
+# -----------------------------------------------------------------------------
+# - Tab sólo ofrece directorios (nunca ficheros) de la ruta que se escribe.
+# - Si lo escrito es una palabra suelta (sin \ ni /), añade detrás los
+#   directorios de zoxide que casan con ella: `cd browser<Tab>` ofrece la ruta
+#   completa de sumwall.browser aunque no estés en su padre.
+# - Con Tab = MenuComplete (ver PSReadLine más abajo) se elige en un menú.
+Register-ArgumentCompleter -CommandName cd -ParameterName Path -ScriptBlock {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+
+    $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+
+    # 1) Directorios locales (el completador de rutas de PowerShell ya maneja
+    #    ~, unidades, comillas y rutas relativas; nos quedamos con carpetas)
+    [System.Management.Automation.CompletionCompleters]::CompleteFilename($wordToComplete) |
+        Where-Object { $_.ResultType -eq 'ProviderContainer' } |
+        ForEach-Object {
+            # ToolTip = ruta absoluta (CompletionText puede ser relativo)
+            $null = $seen.Add($_.ToolTip.TrimEnd('\'))
+            $_
+        }
+
+    # 2) zoxide: sólo para palabras sueltas (si hay separador, es una ruta)
+    $word = $wordToComplete.Trim("'", '"')
+    if ($word -and $word -notmatch '[\\/:]' -and (Get-Command zoxide -CommandType Application -ErrorAction SilentlyContinue)) {
+        $here = (Get-Location).ProviderPath
+        zoxide query --list --exclude $here -- $word 2>$null |
+            Select-Object -First 20 |
+            ForEach-Object {
+                if ($seen.Add($_)) {
+                    $text = if ($_ -match '[\s''`$&(){};,]') { "'" + ($_ -replace "'", "''") + "'" } else { $_ }
+                    [System.Management.Automation.CompletionResult]::new($text, $_, 'ProviderContainer', "zoxide: $_")
+                }
+            }
+    }
+}
+
 # =============================================================================
 # CONFIGURACIÓN AVANZADA DE PSREADLINE - PREDICCIÓN INTELIGENTE
 # =============================================================================
@@ -350,6 +388,10 @@ if ($IsTTY -and (Get-Module -ListAvailable -Name PSReadLine)) {
         Set-PSReadLineOption -PredictionSource HistoryAndPlugin
         Set-PSReadLineOption -PredictionViewStyle ListView
         Set-PSReadLineOption -EditMode Windows
+        # Tab abre un menú navegable con flechas (como zsh) en vez de rotar
+        # entre opciones con pulsaciones sucesivas. Shift+Tab sigue rotando
+        # hacia atrás (TabCompletePrevious) por defecto.
+        Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
     } catch {
         # Fallback (raro): mantener la shell utilizable incluso si algo se escapa
         Set-PSReadLineOption -PredictionSource History

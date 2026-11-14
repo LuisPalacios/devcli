@@ -384,6 +384,14 @@ export KUBECONFIG="${HOME}/kubeconfig"
 # que cambia $PWD (incluido `autocd`, que pasa por la función `cd`).
 if command -v zoxide >/dev/null 2>&1; then
     eval "$(zoxide init bash --cmd cd --hook none)"
+    # zoxide 0.10.0 para Windows genera `cygpath -w "\builtin pwd -L"` (sin
+    # `$(...)`): pasa el texto literal en vez de la ruta, `zoxide add` falla
+    # con «not a directory» y Git Bash no aprende ningún directorio. Corregido
+    # en upstream (sin release aún); esta redefinición es idéntica a la buena
+    # y no estorba cuando llegue la versión arreglada.
+    __zoxide_pwd() {
+        \command cygpath -w "$(\builtin pwd -L)"
+    }
     __devcli_zoxide_cd() {
         builtin cd -- "$@" || return
         # No dejar que un fallo de "zoxide add" (mero housekeeping en segundo
@@ -400,8 +408,18 @@ fi
 # CONFIGURACIÓN DE FZF (BÚSQUEDA DIFUSA)
 # =============================================================================
 
-# Ctrl+R: búsqueda en historial, Ctrl+T: búsqueda de archivos, Alt+C: cd a directorio
-command -v fzf >/dev/null 2>&1 && eval "$(fzf --bash 2>/dev/null)"
+# Ctrl+R: búsqueda en historial · Ctrl+T: selector de directorios (cd)
+#
+# fzf trae el selector de directorios en Alt+C, pero Alt izquierdo está
+# reservado para Cmd en la capa custom_keys (PowerToys convierte Alt+C en
+# Ctrl+C antes de que llegue a la shell). Ctrl+T pasa a ser ese selector y
+# se pierde el buscador de archivos original de fzf (no se usa). La macro
+# reenvía la tecla al widget que fzf define en `\ec`, así sobrevive a los
+# cambios internos de fzf entre versiones.
+if command -v fzf >/dev/null 2>&1; then
+    eval "$(fzf --bash 2>/dev/null)"
+    bind -m emacs-standard '"\C-t": "\ec"'
+fi
 
 # Integración WezTerm — emite OSC 7 (CWD) y OSC 133 (prompt semántico)
 # para que AI Mode y la barra de pestañas conozcan el directorio activo.
