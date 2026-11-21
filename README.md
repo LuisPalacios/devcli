@@ -92,6 +92,7 @@ Detalles, mapa completo y limitaciones en [docs/teclado-mac.md](docs/teclado-mac
 | [Auditoria](docs/auditoria.md) | Para auditar el bootstrap antes de ejecutarlo: fases, JSONs, contrato de errores. |
 | [Atajos estilo Mac](docs/teclado-mac.md) | *(Windows, opcional)* Teclado de PC (sobremesa o portátil) con los atajos del Mac y de iTerm2, vía PowerToys + WezTerm (`-k on` / `-CustomKeys on`). |
 | [Desinstalar](docs/desinstalar.md) | Cómo dar marcha atrás: qué tocó devcli y cómo revertirlo. |
+| [Deuda técnica](docs/deuda-tecnica.md) | Lo que se sabe que falta o está mal y aún no se ha arreglado. |
 
 ## Licencia
 
