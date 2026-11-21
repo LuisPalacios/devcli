@@ -213,6 +213,17 @@ sustituye los binarios por los verificados, pero no borra esos restos: las
 órdenes del paso 7 sí. Mientras quede `uv-receipt.json`, `uv self update`
 puede cambiar la versión fijada.
 
+El instalador antiguo de pnpm también dejó los atajos `pn`, `pnpx` y `pnx`
+en `~/.local/share/pnpm/bin/` y una copia de pnpm instalada como paquete
+global (aparece en `pnpm ls -g`, en `~/.local/share/pnpm/global/`). Puedes
+dejarlos: cada atajo ejecuta el `pnpm` de su misma carpeta, que ahora es el
+enlace al verificado, así que usan la versión fijada, y esa copia global ya
+no la ejecuta nadie. **No la quites con `pnpm rm -g pnpm`**: pnpm borraría
+también los atajos y, probablemente, el enlace `pnpm`. Si aun así quieres
+quitarla, vuelve a ejecutar el bootstrap después, que recrea el enlace pero
+no los atajos. `~/.local/share/pnpm/store/` es el almacén de paquetes que
+usan tus proyectos: no lo borres para esto.
+
 **Fuera de `$HOME`** (además de lo que instalan los paquetes):
 
 - Las fuentes y claves de la tabla de repositorios.
