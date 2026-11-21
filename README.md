@@ -27,7 +27,7 @@ Este proyecto realiza cambios significativos en tu sistema, entre los que se inc
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
 ```
 
-**En un servidor, siempre el perfil `server`** (Linux Debian y derivados): sólo paquetes del repositorio oficial de la distribución y los dotfiles, sin repositorios de terceros, sin descargas fuera de `apt` y sin tocar `/etc`. Simula primero con `-n`:
+**En un servidor, siempre el perfil `server`** (Linux Debian y derivados): el mismo entorno de shell, con paquetes del repositorio oficial de la distribución y sólo tres binarios verificados (`oh-my-posh`, `uv`, `pnpm`: versión fija y suma sha256 comprobada); sin repositorios de terceros, sin `curl | sh` y sin tocar `/etc`. Simula primero con `-n`:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -p server -n

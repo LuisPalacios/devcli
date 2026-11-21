@@ -40,45 +40,55 @@ se borra de aquí.
 ## Seguridad de la cadena de suministro (perfiles `minimal`, `dev`, `full`)
 
 El perfil `server` no tiene ninguno de estos problemas: no añade
-repositorios ni descarga nada fuera de apt.
+repositorios y lo único que descarga fuera de apt son los tres binarios
+verificados (versión fija y sha256 comprobada).
 
 ### Repositorio azlux con versión de Debian fija y clave sin comprobar
 
 - **Dónde:** `setup_azlux_repo` en `install/utils.sh`.
-- **Qué pasa:** la línea de fuentes lleva `bookworm` fijo, así que en otras
-  versiones de Debian o en Ubuntu se instalan paquetes de bookworm. La clave
-  se descarga con `curl -s` sin `-f`: si la descarga falla, se escribe una
-  clave vacía o una página de error sin que nadie se entere.
-- **Arreglo:** tomar el codename de `/etc/os-release` (o quitar el
-  repositorio si `gping` ya está en el repositorio oficial de la
-  distribución) y usar `curl -fsSL` con comprobación del resultado.
+- **Qué pasa:** mitigado: sólo se añade si `gping` no está en el
+  repositorio oficial (por ejemplo, Debian 12 o Ubuntu 22.04); en Debian 13
+  ya no. Cuando se usa, la línea de fuentes lleva `bookworm` fijo, así que en
+  Ubuntu se instalan paquetes de bookworm, y la clave se descarga con
+  `curl -s` sin `-f`: si la descarga falla, se escribe una clave vacía o una
+  página de error sin que nadie se entere.
+- **Arreglo:** tomar el codename de `/etc/os-release` y usar `curl -fsSL`
+  con comprobación del resultado.
 
 ### Repositorio de gierens por `http`
 
 - **Dónde:** `setup_gierens_repo` en `install/utils.sh`.
-- **Qué pasa:** `http://deb.gierens.de`. Va firmado, así que no se pueden
-  colar paquetes, pero el tráfico no va cifrado (se ve qué se instala y se
-  puede retener una actualización).
-- **Arreglo:** `https` si el repositorio lo ofrece, o usar `eza` del
-  repositorio oficial donde ya exista.
+- **Qué pasa:** mitigado: sólo se añade si `eza` no está en el repositorio
+  oficial (por ejemplo, Debian 12 o Ubuntu 22.04). Cuando se usa,
+  `http://deb.gierens.de`: va firmado, así que no se pueden colar paquetes,
+  pero el tráfico no va cifrado (se ve qué se instala y se puede retener una
+  actualización).
+- **Arreglo:** `https` si el repositorio lo ofrece.
 
 ### Descargas sin verificación de integridad
 
-- **Dónde:** `method_github_deb`, `method_github_binary`, `method_curl_sh` y
+- **Dónde:** `method_github_deb`, `method_github_binary` y
   `method_github_zip` en `install/utils.sh`.
 - **Qué pasa:**
-  - `lsd` y `wezterm` se descargan como `.deb` de GitHub y se instalan con
-    `sudo dpkg -i` sin comprobar suma ni firma; al no venir de un
-    repositorio, nunca se actualizan.
-  - `mkcert` se descarga con `curl -JLo` sin `-f`: un error HTTP acaba
-    guardado como si fuera el binario.
-  - `oh-my-posh`, `pnpm` y `uv` se instalan con `curl … | sh` sin versión
-    fija ni verificación. Los instaladores de `pnpm` y `uv` además añaden
-    líneas a `~/.bashrc` y `~/.profile`.
+  - `wezterm`, y `lsd` donde no está en el repositorio oficial, se
+    descargan como `.deb` de GitHub y se instalan con `sudo dpkg -i` sin
+    comprobar suma ni firma; al no venir de un repositorio, nunca se
+    actualizan.
+  - `mkcert` se descarga con `curl -JLo` sin `-f` y sin versión fija
+    (`latest`): un error HTTP acaba guardado como si fuera el binario.
   - La Nerd Font se descarga sin comprobar suma.
-- **Arreglo:** fijar versiones y comprobar `sha256` publicado por cada
-  proyecto; `curl -f` en todas las descargas; preferir el paquete del
-  repositorio oficial cuando exista.
+- **Arreglo:** pasarlas al método `verified-binary` (versión fija y sha256
+  en `tools.json`), como `oh-my-posh`, `uv` y `pnpm`; para los `.deb`,
+  comprobar la suma antes del `dpkg -i`.
+
+### macOS sigue instalando `oh-my-posh` y `uv` con `curl … | sh`
+
+- **Dónde:** entradas `macos` de `oh-my-posh` y `uv` en `install/tools.json`.
+- **Qué pasa:** en Linux y WSL2 ya son binarios verificados; en macOS se
+  dejó como estaba (método `curl-sh`, sin versión fija; el instalador de uv
+  edita los ficheros de arranque de la shell).
+- **Arreglo:** Homebrew (`brew install oh-my-posh uv`), o `verified-binary`
+  con los artefactos `darwin` de cada release.
 
 ## Detalles menores
 

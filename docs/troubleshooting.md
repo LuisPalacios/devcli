@@ -155,11 +155,15 @@ Cómo arreglarlo si te pasa:
 pgrep -af 'oh-my-posh upgrade'          # ¿hay un upgrade vivo?
 pkill -f 'oh-my-posh upgrade --auto'    # mátalo
 oh-my-posh version                      # si falla, reinstala:
-curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/bin
+rm -f ~/bin/oh-my-posh && bash ~/.devcli/bootstrap.sh   # Linux/WSL2 (con tu -p)
+curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/bin   # macOS
 ```
 
-Para actualizar oh-my-posh a mano cuando el prompt lo avise:
-`oh-my-posh upgrade` (Linux/macOS/WSL2) o `scoop update oh-my-posh` (Windows).
+En Linux y WSL2, oh-my-posh es un binario verificado con versión fija: no
+avisa de versiones nuevas ni se actualiza solo, y subir de versión es un
+cambio en `install/tools.json` (ver [perfiles.md](perfiles.md#binarios-verificados-oh-my-posh-uv-y-pnpm)).
+En macOS, `oh-my-posh upgrade` cuando el prompt lo avise; en Windows,
+`scoop update oh-my-posh`.
 
 ## Quiero forzar una descarga limpia del repo
 

@@ -19,8 +19,7 @@
     {
       "file": "oh-my-posh.json",
       "dst": ".oh-my-posh.json",
-      "platforms": ["linux", "macos", "wsl2", "windows"],
-      "skip_profiles": ["server"]
+      "platforms": ["linux", "macos", "wsl2", "windows"]
     },
     {
       "file": "win.gitbash.bashrc",

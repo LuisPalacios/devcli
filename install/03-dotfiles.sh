@@ -152,13 +152,42 @@ elif ! dry_run_active && [[ "${DEVCLI_PROFILE:-}" != "server" ]] && command -v z
   esac
 fi
 
+# Post-fase (Linux/WSL2): marcador que le dice al .zshrc que no descargue el
+# tema del prompt al abrir sesión. Lo crea el perfil server (en un servidor,
+# nada de tráfico saliente ni contenido remoto en cada login: el tema lo
+# acaba de copiar esta fase); el resto de perfiles lo quita si lo hubiera.
+NO_THEME_DOWNLOAD_MARKER="$HOME/.config/devcli/sin-descarga-tema"
+marker_failed=0
+case "${OS_TYPE:-}" in
+  linux|wsl2)
+    if [[ "${DEVCLI_PROFILE:-}" == "server" ]]; then
+      if [[ ! -f "$NO_THEME_DOWNLOAD_MARKER" ]]; then
+        if dry_run_active; then
+          dry_note home "$(_tilde "$NO_THEME_DOWNLOAD_MARKER") (el .zshrc no descarga el tema del prompt al abrir sesión)"
+        elif ! { mkdir -p "$(dirname "$NO_THEME_DOWNLOAD_MARKER")" &&
+          printf '%s\n' "# Creado por devcli (perfil server): el .zshrc no descarga ~/.oh-my-posh.json al abrir sesión." \
+            >"$NO_THEME_DOWNLOAD_MARKER"; }; then
+          ux_warn "no se pudo crear $(_tilde "$NO_THEME_DOWNLOAD_MARKER")"
+          marker_failed=1
+        fi
+      fi
+    elif [[ -f "$NO_THEME_DOWNLOAD_MARKER" ]]; then
+      if dry_run_active; then
+        dry_note home "$(_tilde "$NO_THEME_DOWNLOAD_MARKER") se borraría (perfil ${DEVCLI_PROFILE:-full}: el .zshrc vuelve a actualizar el tema)"
+      else
+        rm -f "$NO_THEME_DOWNLOAD_MARKER" || marker_failed=1
+      fi
+    fi
+    ;;
+esac
+
 # Post-fase: Claude Code nunca firma como coautor (ver ensure_claude_attribution).
 claude_failed=0
 ensure_claude_attribution || claude_failed=1
 
 # Si el chsh o el ajuste de Claude Code fallaron pero las copias fueron OK,
 # devolvemos warn (1).
-if [[ $((chsh_failed + claude_failed)) -gt 0 ]] && [[ $phase_rc -eq 0 ]]; then
+if [[ $((chsh_failed + claude_failed + marker_failed)) -gt 0 ]] && [[ $phase_rc -eq 0 ]]; then
   exit 1
 fi
 exit $phase_rc

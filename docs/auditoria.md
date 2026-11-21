@@ -25,11 +25,15 @@ resumen final.
 
 Mismas fases, con otro alcance (ver [perfiles.md](perfiles.md#el-perfil-server-en-detalle)):
 prerrequisitos y fases 01-02 sólo con `apt-get --no-install-recommends` de la
-lista etiquetada `server` en `tools.json`; sin locale (01), sin `chsh` (03),
-sin `/etc/nanorc` ni aviso de fuentes (04); y en 03/04 no se despliega lo
-marcado con `"skip_profiles": ["server"]` en sus JSON. Además `install_tool`
-(`utils.sh`) rechaza en este perfil cualquier método que no sea `apt` y
-cualquier `pre_install`/`post_install`, diga lo que diga el JSON.
+lista etiquetada `server` en `tools.json`, comprobando antes que cada paquete
+esté en el repositorio oficial (si no, se omite con aviso), más los tres
+binarios verificados (`oh-my-posh`, `uv`, `pnpm`); sin locale (01), sin
+`chsh` (03), sin `/etc/nanorc` ni aviso de fuentes (04); y en 03/04 no se
+despliega lo marcado con `"skip_profiles": ["server"]` en sus JSON. Además
+`install_tool` (`utils.sh`) rechaza en este perfil cualquier método que no
+sea `apt` y cualquier `pre_install`/`post_install`, diga lo que diga el JSON,
+salvo las excepciones escritas con nombre (`DEVCLI_SERVER_VERIFIED_TOOLS` y
+`DEVCLI_SERVER_HOOKS`).
 
 ## Simulación
 
@@ -45,7 +49,7 @@ la propia máquina antes de ejecutarlo.
 
 | JSON | Para qué |
 |------|----------|
-| [`install/tools.json`](../install/tools.json) | Catálogo único de herramientas. Cada entrada declara `phase` (`"system"` para fase 01, ausente o `"tools"` para fase 02), `tags` (filtros del profile en fase 02), métodos por plataforma (`apt` / `brew` / `scoop` / `winget` / `curl-sh` / `github-deb` / `github-binary`), y opcionalmente `pre_install` / `post_install`. La sección `profiles` mapea `minimal` / `dev` / `full` a una lista de tags. |
+| [`install/tools.json`](../install/tools.json) | Catálogo único de herramientas. Cada entrada declara `phase` (`"system"` para fase 01, ausente o `"tools"` para fase 02), `tags` (filtros del profile en fase 02), métodos por plataforma (`apt` / `brew` / `scoop` / `winget` / `curl-sh` / `github-deb` / `github-binary` / `verified-binary`, este último con versión fija y sha256 por arquitectura), opcionalmente `pre_install` / `post_install` y, en bloques `apt` de Linux, un `fallback` que sólo se usa si el paquete no está en el repositorio oficial. La sección `profiles` mapea `minimal` / `dev` / `full` a una lista de tags. |
 | [`install/03-dotfiles.json`](../install/03-dotfiles.json) | Dotfiles a copiar: `file` (origen en `dotfiles/`), `dst` (ruta relativa a `$HOME`), `platforms`. |
 | [`install/04-localtools.json`](../install/04-localtools.json) | Scripts auxiliares en `files/bin/` que se copian a `~/bin`. |
 

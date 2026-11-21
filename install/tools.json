@@ -3,12 +3,17 @@
     "_": "Schema notes for this file. Top-level `_doc` is invisible to consumers (jq y Get-ConfigFromJson sólo iteran .profiles y .tools[]).",
     "phase": "Routing por fase. 'system' = phase 01 (siempre se instala, ignora profile). Ausente o 'tools' = phase 02 (filtrado por profile + tags). El antiguo tag 'system' fue migrado a este campo en el follow-up #1.",
     "tags_vs_phase": "tags se usa SÓLO para selección por profile en phase 02 (core/dev/k8s/win). Las herramientas con phase=system no necesitan tags. Las herramientas de phase 02 deben tener al menos un tag, EXCEPTO las que tienen auto_install:false (caso `nerd-fonts`, instalada vía trigger desde el post_install de `lsd`).",
-    "server": "Perfil `server` (sólo Linux/WSL2). Tag 'server' = lista base; 'server-diag' = grupo de diagnóstico que sólo entra con --diag. Excepción a la regla anterior: en el perfil server la fase 01 NO instala todas las phase=system, sólo las que llevan el tag 'server'. Una herramienta con tag server/server-diag debe usar method=apt sin pre_install ni post_install: install_tool bloquea cualquier otra cosa en este perfil.",
+    "server": "Perfil `server` (sólo Linux/WSL2). Criterio: de dónde viene el software y cómo se verifica, no cuánto. Tag 'server' = lista base; 'server-diag' = grupo de diagnóstico que sólo entra con --diag. En server la fase 01 sólo instala las phase=system con tag 'server'. Toda herramienta con tag server debe usar method=apt sin hooks; install_tool comprueba además en ejecución que el paquete esté en el repositorio oficial (si no, la omite con aviso). Excepciones con nombre en utils.sh: DEVCLI_SERVER_VERIFIED_TOOLS (oh-my-posh, uv, pnpm por verified-binary) y DEVCLI_SERVER_HOOKS (enlaces ~/bin/bat y ~/bin/fd). Un hook con skip_profiles ['server'] no se ejecuta en server ni cuenta para la barrera.",
+    "fallback": "Opcional en un bloque apt de Linux/WSL2: bloque alternativo (repositorio de terceros vía pre_install, o github-deb) que SÓLO se usa en perfiles personales y SÓLO si el paquete no está en el repositorio oficial de la distribución. Nunca en server.",
+    "verified_binary": "method=verified-binary: versión fija + sha256 por arquitectura (assets.amd64/arm64), descarga con curl -f de la release oficial, comprobación antes de instalar, destinos dentro de $HOME, sin ejecutar el instalador del proyecto. Subir de versión = cambiar version y las sumas (ver docs/perfiles.md). Si una de estas herramientas llega al repositorio oficial de la distribución, pasar su entrada a apt.",
     "check_cmd": "Campo opcional dentro del bloque por plataforma. Hook de idempotencia para los métodos Bash sin package manager (curl-sh, github-deb, github-binary): si `command_exists check_cmd` o $BIN_DIR/$check_cmd es ejecutable, el handler skip-ea la instalación y se usa también como verificación post-install. apt/brew/scoop/winget no lo usan (su idempotencia va por package manager). github-zip tampoco (detección de fonts es especial). Contrato unificado en follow-up #2.",
     "fields_read_by_bash_only": [
       "cask (method=brew, macOS-only en práctica)",
       "pre_install platform-level (action=repo, p.ej. azlux/kubernetes/eza)",
-      "tag_prefix (method=github-deb; default 'v', '' para wezterm)"
+      "tag_prefix (method=github-deb; default 'v', '' para wezterm)",
+      "fallback (method=apt en Linux/WSL2)",
+      "skip_profiles en hooks",
+      "verified-binary: version, url, assets, archive, install, bin, version_args, configure_args"
     ],
     "fields_read_by_powershell_only": [],
     "fields_documented_but_unused": [
@@ -76,9 +81,30 @@
     {
       "name": "oh-my-posh",
       "phase": "system",
-      "linux":   { "method": "curl-sh", "url": "https://ohmyposh.dev/install.sh", "args": "-d ${BIN_DIR}", "check_cmd": "oh-my-posh" },
+      "tags": ["server"],
+      "linux":   {
+        "method": "verified-binary", "version": "33.0.0",
+        "url": "https://github.com/JanDeDobbeleer/oh-my-posh/releases/download/v${version}/${file}",
+        "assets": {
+          "amd64": { "file": "posh-linux-amd64", "sha256": "64e1a53310af1a0f9e0afd0217b5e6b7eb0218ce2e6f0fe592b7d6d594cf4cdf" },
+          "arm64": { "file": "posh-linux-arm64", "sha256": "b3c3a6266cf93d658e6bdbd135f5f53b82779404c4de89bb366bc2b4139ae87c" }
+        },
+        "install": [{ "from": "${file}", "to": "${BIN_DIR}/oh-my-posh" }],
+        "bin": "${BIN_DIR}/oh-my-posh", "version_args": "version",
+        "configure_args": [["disable", "notice"], ["disable", "upgrade"]]
+      },
       "macos":   { "method": "curl-sh", "url": "https://ohmyposh.dev/install.sh", "args": "-d ${BIN_DIR}", "check_cmd": "oh-my-posh" },
-      "wsl2":    { "method": "curl-sh", "url": "https://ohmyposh.dev/install.sh", "args": "-d ${BIN_DIR}", "check_cmd": "oh-my-posh" },
+      "wsl2":    {
+        "method": "verified-binary", "version": "33.0.0",
+        "url": "https://github.com/JanDeDobbeleer/oh-my-posh/releases/download/v${version}/${file}",
+        "assets": {
+          "amd64": { "file": "posh-linux-amd64", "sha256": "64e1a53310af1a0f9e0afd0217b5e6b7eb0218ce2e6f0fe592b7d6d594cf4cdf" },
+          "arm64": { "file": "posh-linux-arm64", "sha256": "b3c3a6266cf93d658e6bdbd135f5f53b82779404c4de89bb366bc2b4139ae87c" }
+        },
+        "install": [{ "from": "${file}", "to": "${BIN_DIR}/oh-my-posh" }],
+        "bin": "${BIN_DIR}/oh-my-posh", "version_args": "version",
+        "configure_args": [["disable", "notice"], ["disable", "upgrade"]]
+      },
       "windows": { "method": "scoop", "package": "oh-my-posh" }
     },
     {
@@ -98,7 +124,7 @@
     },
     {
       "name": "zoxide",
-      "tags": ["core"],
+      "tags": ["core", "server"],
       "linux":   { "method": "apt", "package": "zoxide" },
       "macos":   { "method": "brew", "package": "zoxide" },
       "wsl2":    { "method": "apt", "package": "zoxide" },
@@ -106,7 +132,7 @@
     },
     {
       "name": "fzf",
-      "tags": ["core"],
+      "tags": ["core", "server"],
       "linux":   { "method": "apt", "package": "fzf" },
       "macos":   { "method": "brew", "package": "fzf" },
       "wsl2":    { "method": "apt", "package": "fzf" },
@@ -129,7 +155,7 @@
     },
     {
       "name": "bat",
-      "tags": ["core"],
+      "tags": ["core", "server"],
       "linux":   { "method": "apt", "package": "bat" },
       "macos":   { "method": "brew", "package": "bat" },
       "wsl2":    { "method": "apt", "package": "bat" },
@@ -139,7 +165,7 @@
     },
     {
       "name": "fd",
-      "tags": ["core"],
+      "tags": ["core", "server"],
       "linux":   { "method": "apt", "package": "fd-find" },
       "macos":   { "method": "brew", "package": "fd" },
       "wsl2":    { "method": "apt", "package": "fd-find" },
@@ -158,55 +184,103 @@
     },
     {
       "name": "tree",
-      "tags": ["core"],
+      "tags": ["core", "server"],
       "linux":   { "method": "apt", "package": "tree" },
       "macos":   { "method": "brew", "package": "tree" },
       "wsl2":    { "method": "apt", "package": "tree" }
     },
     {
       "name": "eza",
-      "tags": ["core"],
-      "linux":   { "method": "apt", "package": "eza", "pre_install": [{ "action": "repo", "type": "eza" }] },
+      "tags": ["core", "server"],
+      "linux":   { "method": "apt", "package": "eza", "fallback": { "method": "apt", "package": "eza", "pre_install": [{ "action": "repo", "type": "eza" }] } },
       "macos":   { "method": "brew", "package": "eza" },
-      "wsl2":    { "method": "apt", "package": "eza", "pre_install": [{ "action": "repo", "type": "eza" }] },
+      "wsl2":    { "method": "apt", "package": "eza", "fallback": { "method": "apt", "package": "eza", "pre_install": [{ "action": "repo", "type": "eza" }] } },
       "windows": { "method": "scoop", "package": "eza" },
       "post_install": [
-        { "action": "trigger", "tool": "nerd-fonts" }
+        { "action": "trigger", "tool": "nerd-fonts", "skip_profiles": ["server"] }
       ]
     },
     {
       "name": "lsd",
-      "tags": ["core"],
-      "linux":   { "method": "github-deb", "repo": "lsd-rs/lsd", "version": "1.1.5", "deb_pattern": "lsd_${version}_${arch}.deb", "check_cmd": "lsd" },
+      "tags": ["core", "server"],
+      "linux":   { "method": "apt", "package": "lsd", "fallback": { "method": "github-deb", "repo": "lsd-rs/lsd", "version": "1.1.5", "deb_pattern": "lsd_${version}_${arch}.deb", "check_cmd": "lsd" } },
       "macos":   { "method": "brew", "package": "lsd" },
-      "wsl2":    { "method": "github-deb", "repo": "lsd-rs/lsd", "version": "1.1.5", "deb_pattern": "lsd_${version}_${arch}.deb", "check_cmd": "lsd" },
+      "wsl2":    { "method": "apt", "package": "lsd", "fallback": { "method": "github-deb", "repo": "lsd-rs/lsd", "version": "1.1.5", "deb_pattern": "lsd_${version}_${arch}.deb", "check_cmd": "lsd" } },
       "windows": { "method": "scoop", "package": "lsd" },
       "post_install": [
-        { "action": "trigger", "tool": "nerd-fonts" }
+        { "action": "trigger", "tool": "nerd-fonts", "skip_profiles": ["server"] }
       ]
     },
     {
       "name": "pnpm",
-      "tags": ["dev"],
-      "linux":   { "method": "curl-sh", "url": "https://get.pnpm.io/install.sh", "bin_path": "${HOME}/.local/share/pnpm/bin", "check_cmd": "pnpm" },
+      "tags": ["dev", "server"],
+      "linux":   {
+        "method": "verified-binary", "version": "12.22.0", "archive": "tar.gz",
+        "url": "https://github.com/pnpm/pnpm/releases/download/v${version}/${file}",
+        "assets": {
+          "amd64": { "file": "pnpm-linux-x64.tar.gz", "sha256": "07ee196f91af1e21edb0c794401f4152932c74b0dba5d415dc4dbd5783f3c7af" },
+          "arm64": { "file": "pnpm-linux-arm64.tar.gz", "sha256": "22b23da8b00d12c2fdfc41b5533b65b467c7b178d93fdfe9128c491585dff1a4" }
+        },
+        "install": [
+          { "dir": ".", "to": "${HOME}/.local/share/pnpm/devcli-pnpm" },
+          { "link": "${HOME}/.local/share/pnpm/bin/pnpm", "target": "${HOME}/.local/share/pnpm/devcli-pnpm/pnpm" }
+        ],
+        "bin": "${HOME}/.local/share/pnpm/bin/pnpm", "version_args": "--version"
+      },
       "macos":   { "method": "brew", "package": "pnpm", "check_cmd": "pnpm" },
-      "wsl2":    { "method": "curl-sh", "url": "https://get.pnpm.io/install.sh", "bin_path": "${HOME}/.local/share/pnpm/bin", "check_cmd": "pnpm" },
+      "wsl2":    {
+        "method": "verified-binary", "version": "12.22.0", "archive": "tar.gz",
+        "url": "https://github.com/pnpm/pnpm/releases/download/v${version}/${file}",
+        "assets": {
+          "amd64": { "file": "pnpm-linux-x64.tar.gz", "sha256": "07ee196f91af1e21edb0c794401f4152932c74b0dba5d415dc4dbd5783f3c7af" },
+          "arm64": { "file": "pnpm-linux-arm64.tar.gz", "sha256": "22b23da8b00d12c2fdfc41b5533b65b467c7b178d93fdfe9128c491585dff1a4" }
+        },
+        "install": [
+          { "dir": ".", "to": "${HOME}/.local/share/pnpm/devcli-pnpm" },
+          { "link": "${HOME}/.local/share/pnpm/bin/pnpm", "target": "${HOME}/.local/share/pnpm/devcli-pnpm/pnpm" }
+        ],
+        "bin": "${HOME}/.local/share/pnpm/bin/pnpm", "version_args": "--version"
+      },
       "windows": { "method": "winget", "package": "pnpm.pnpm", "check_cmd": "pnpm" }
     },
     {
       "name": "uv",
-      "tags": ["dev"],
-      "linux":   { "method": "curl-sh", "url": "https://astral.sh/uv/install.sh", "bin_path": "${HOME}/.local/bin", "check_cmd": "uv" },
+      "tags": ["dev", "server"],
+      "linux":   {
+        "method": "verified-binary", "version": "0.13.9", "archive": "tar.gz",
+        "url": "https://github.com/astral-sh/uv/releases/download/${version}/${file}",
+        "assets": {
+          "amd64": { "file": "uv-x86_64-unknown-linux-gnu.tar.gz", "sha256": "a7fbaff2b9a271d85c1bdb540941090fd1ce011797b4abeb48e4dcd39c2471d5" },
+          "arm64": { "file": "uv-aarch64-unknown-linux-gnu.tar.gz", "sha256": "0797542018e541a9288855df555c8077eed06f7a47d206362030480e8ecc9f3d" }
+        },
+        "install": [
+          { "from": "*/uv", "to": "${HOME}/.local/bin/uv" },
+          { "from": "*/uvx", "to": "${HOME}/.local/bin/uvx" }
+        ],
+        "bin": "${HOME}/.local/bin/uv", "version_args": "--version"
+      },
       "macos":   { "method": "curl-sh", "url": "https://astral.sh/uv/install.sh", "bin_path": "${HOME}/.local/bin", "check_cmd": "uv" },
-      "wsl2":    { "method": "curl-sh", "url": "https://astral.sh/uv/install.sh", "bin_path": "${HOME}/.local/bin", "check_cmd": "uv" },
+      "wsl2":    {
+        "method": "verified-binary", "version": "0.13.9", "archive": "tar.gz",
+        "url": "https://github.com/astral-sh/uv/releases/download/${version}/${file}",
+        "assets": {
+          "amd64": { "file": "uv-x86_64-unknown-linux-gnu.tar.gz", "sha256": "a7fbaff2b9a271d85c1bdb540941090fd1ce011797b4abeb48e4dcd39c2471d5" },
+          "arm64": { "file": "uv-aarch64-unknown-linux-gnu.tar.gz", "sha256": "0797542018e541a9288855df555c8077eed06f7a47d206362030480e8ecc9f3d" }
+        },
+        "install": [
+          { "from": "*/uv", "to": "${HOME}/.local/bin/uv" },
+          { "from": "*/uvx", "to": "${HOME}/.local/bin/uvx" }
+        ],
+        "bin": "${HOME}/.local/bin/uv", "version_args": "--version"
+      },
       "windows": { "method": "scoop", "package": "main/uv" }
     },
     {
       "name": "gping",
-      "tags": ["core"],
-      "linux":   { "method": "apt", "package": "gping", "pre_install": [{ "action": "repo", "type": "azlux" }] },
+      "tags": ["core", "server"],
+      "linux":   { "method": "apt", "package": "gping", "fallback": { "method": "apt", "package": "gping", "pre_install": [{ "action": "repo", "type": "azlux" }] } },
       "macos":   { "method": "brew", "package": "gping" },
-      "wsl2":    { "method": "apt", "package": "gping", "pre_install": [{ "action": "repo", "type": "azlux" }] },
+      "wsl2":    { "method": "apt", "package": "gping", "fallback": { "method": "apt", "package": "gping", "pre_install": [{ "action": "repo", "type": "azlux" }] } },
       "windows": { "method": "scoop", "package": "gping" }
     },
     {

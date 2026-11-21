@@ -29,6 +29,8 @@ restáuralos desde tu backup según prefieras:
 - `~/.oh-my-posh.json`
 - `~/.config/wezterm/wezterm.lua`, `~/.config/wezterm/wezterm.sh`
 - `~/.nano/` (creado vacío)
+- `~/.config/devcli/sin-descarga-tema` (sólo Linux/WSL2 con el perfil
+  `server`: el `.zshrc` no descarga el tema del prompt al abrir sesión)
 
 **Windows:**
 - `%USERPROFILE%\.bashrc` (para Git Bash)
@@ -170,29 +172,46 @@ presente es, casi seguro, lo que dejó.
 | azlux | `/etc/apt/sources.list.d/azlux.list` | `/usr/share/keyrings/azlux.gpg` | minimal, dev, full | `gping` |
 | kubernetes | `/etc/apt/sources.list.d/kubernetes.list` | `/usr/share/keyrings/kubernetes-apt-keyring.gpg` | full | `kubectl` |
 
+gierens y azlux sólo se añaden ya si la distribución no trae `eza` o `gping`
+en su repositorio oficial (Debian 13 trae los dos); las ejecuciones
+anteriores los añadían siempre.
+
 **Paquetes del repositorio oficial de la distribución**:
 
 - Todos los perfiles: `git`, `curl`, `unzip`, `jq`, `wget`, `nano`, `zsh`.
 - minimal, dev, full: `htop`, `tmux`, `zoxide`, `fzf`, `bat`, `fd-find`,
-  `ripgrep`, `tree`, y `gpg` (para importar las claves de arriba).
+  `ripgrep`, `tree`, `eza`, `gping` y `lsd` si están en el oficial, y `gpg`
+  (para importar las claves de arriba).
 - dev, full: `libnss3-tools`.
 
 **Paquetes `.deb` descargados de GitHub e instalados con `dpkg -i`** (sin
 repositorio: nunca se actualizan):
 
-- `lsd` (minimal, dev, full) → `/usr/bin/lsd`.
+- `lsd` (minimal, dev, full, sólo si no está en el repositorio oficial; las
+  ejecuciones anteriores lo descargaban siempre) → `/usr/bin/lsd`.
 - `wezterm` (dev, full, sólo si había escritorio) → `/usr/bin/wezterm`.
 
 **Instalado fuera del gestor de paquetes, en `$HOME`**:
 
 | Qué | Cómo | Dónde |
 |---|---|---|
-| oh-my-posh | `curl https://ohmyposh.dev/install.sh \| bash` | `~/bin/oh-my-posh` (+ caché `~/.cache/oh-my-posh`) |
+| oh-my-posh | binario verificado (versión fija, sha256) | `~/bin/oh-my-posh` (+ caché `~/.cache/oh-my-posh`, donde quedan `disable notice` y `disable upgrade`) |
+| uv (dev, full) | binario verificado | `~/.local/bin/uv`, `~/.local/bin/uvx` (+ `~/.cache/uv` y `~/.local/share/uv` cuando lo usas) |
+| pnpm (dev, full) | binario verificado | `~/.local/share/pnpm/devcli-pnpm/` y el enlace `~/.local/share/pnpm/bin/pnpm` (+ `~/.local/state/pnpm`, `~/.cache/pnpm` cuando lo usas) |
 | FiraCode Nerd Font | zip de GitHub | `~/.local/share/fonts/FiraCodeNerdFont*.ttf`, `LICENSE`, `README.md` |
 | mkcert (dev, full) | binario de `dl.filippo.io` | `~/bin/mkcert` |
-| pnpm (dev, full) | `curl https://get.pnpm.io/install.sh \| sh` | `~/.local/share/pnpm`, `~/.local/state/pnpm`, `~/.cache/pnpm`; **añade un bloque `# pnpm … # pnpm end` a `~/.bashrc`** |
-| uv (dev, full) | `curl https://astral.sh/uv/install.sh \| sh` | `~/.local/bin/{uv,uvx,env,env.fish}`, `~/.config/uv/`, `~/.config/fish/conf.d/uv.env.fish`; **añade `. "$HOME/.local/bin/env"` a `~/.bashrc` y `~/.profile`** |
 | enlaces | `ln -s` | `~/bin/bat` → `batcat`, `~/bin/fd` → `fdfind` |
+
+Los tres binarios verificados ya **no tocan `~/.bashrc` ni `~/.profile`**.
+Las instalaciones anteriores los ponían con `curl … | sh`, y esos
+instaladores sí dejaron cosas: pnpm, un bloque `# pnpm … # pnpm end` en
+`~/.bashrc` y su instalación en `~/.local/share/pnpm`; uv, la línea
+`. "$HOME/.local/bin/env"` en `~/.bashrc` y `~/.profile`, más
+`~/.local/bin/{env,env.fish}`, `~/.config/uv/uv-receipt.json` y
+`~/.config/fish/conf.d/uv.env.fish`. Volver a ejecutar el bootstrap
+sustituye los binarios por los verificados, pero no borra esos restos: las
+órdenes del paso 7 sí. Mientras quede `uv-receipt.json`, `uv self update`
+puede cambiar la versión fijada.
 
 **Fuera de `$HOME`** (además de lo que instalan los paquetes):
 
@@ -259,7 +278,8 @@ rm -f ~/.local/bin/uv ~/.local/bin/uvx ~/.local/bin/env ~/.local/bin/env.fish
 rm -f ~/.config/fish/conf.d/uv.env.fish ~/.config/uv/uv-receipt.json
 rm -rf ~/.local/share/pnpm ~/.local/state/pnpm ~/.cache/pnpm
 rm -f ~/.local/share/fonts/FiraCodeNerdFont*.ttf ~/.local/share/fonts/LICENSE ~/.local/share/fonts/README.md
-# Líneas que añadieron los instaladores de pnpm y uv (míralas antes de borrar):
+# Líneas que añadieron los instaladores de pnpm y uv en instalaciones
+# anteriores (las nuevas no las añaden; míralas antes de borrar):
 grep -nE 'local/bin/env|PNPM_HOME|pnpm' ~/.bashrc ~/.profile ~/.bash_profile ~/.zshrc 2>/dev/null
 sed -i '/^# pnpm$/,/^# pnpm end$/d' ~/.bashrc
 sed -i '\|^\. "\$HOME/\.local/bin/env"$|d' ~/.bashrc ~/.profile
@@ -288,12 +308,27 @@ Después, cierra la sesión y vuelve a entrar. Notas:
 
 ### El perfil `server`
 
-Si usaste `-p server`, lo único que hay que retirar es lo de `$HOME`
-(`~/.zshrc`, `~/.zshrc.backup.*`, `~/.zshenv`, `~/.tmux.conf`, `~/bin/confcat`,
-`~/bin/s`, `~/.devcli/`) y, si quieres, los paquetes oficiales que instaló
-(`sudo apt-get purge -y vim tmux htop ripgrep zsh`, más `git curl jq
-ca-certificates` si no los tenías). No añade repositorios, claves ni nada
-fuera de apt, y no toca `/etc` ni tu shell de inicio.
+Si usaste `-p server`, no hay repositorios ni claves que quitar, ni nada en
+`/etc` ni en tu shell de inicio. Hay que retirar lo de `$HOME` y, si quieres,
+los paquetes oficiales que instaló:
+
+```bash
+# Binarios verificados y sus datos
+rm -f ~/bin/oh-my-posh ~/.local/bin/uv ~/.local/bin/uvx
+rm -rf ~/.cache/oh-my-posh ~/.local/share/pnpm ~/.local/state/pnpm ~/.cache/pnpm ~/.cache/uv ~/.local/share/uv
+# Enlaces, dotfiles, scripts, marcador y la copia del repo
+rm -f ~/bin/bat ~/bin/fd ~/bin/confcat ~/bin/s
+rm -f ~/.zshrc ~/.zshrc.backup.* ~/.zshenv ~/.tmux.conf ~/.oh-my-posh.json
+rm -f ~/.config/devcli/sin-descarga-tema
+rm -rf ~/.devcli
+rmdir --ignore-fail-on-non-empty ~/bin ~/.local/bin ~/.config/devcli
+# Paquetes oficiales (quita de la lista lo que ya tuvieras o uses)
+sudo apt-get purge -y vim tmux htop ripgrep zsh lsd eza zoxide fzf bat fd-find tree gping
+# Sólo si no los tenías antes: git curl jq ca-certificates
+sudo apt-get autoremove --purge -y
+```
+
+`~/.bashrc` y `~/.profile` no se tocan en este perfil.
 
 ## Si quieres una limpieza completa, en orden
 

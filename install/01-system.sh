@@ -28,8 +28,8 @@ ux_run -- update_package_manager >/dev/null 2>&1 || true
 TOOLS_JSON="$(dirname "${BASH_SOURCE[0]}")/tools.json"
 
 # Construir la lista de herramientas de phase=system aplicables al OS actual.
-# Perfil server: sólo las que llevan el tag "server" (el resto, p.ej.
-# oh-my-posh vía curl | bash, no entra).
+# Perfil server: sólo las que llevan el tag "server" (y install_tool aplica
+# además su barrera: repositorio oficial o binario verificado con nombre).
 # (Bash 3.2 compat: `while read` en vez de `mapfile`.)
 SYSTEM_FILTER='.tools[] | select(.phase == "system") | select(.[$os] != null)'
 if [[ "${DEVCLI_PROFILE:-}" == "server" ]]; then

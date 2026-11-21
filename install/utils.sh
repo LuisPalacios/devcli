@@ -197,10 +197,60 @@ _check_cmd_present() {
   return 1
 }
 
+# -------------------------------------------------------------------
+# Origen de los paquetes apt
+# -------------------------------------------------------------------
+# «Repositorio oficial» = las fuentes cuyo fichero Release declara uno de
+# estos orígenes (campo Origin, `o=` en `apt-cache policy`). Es el mismo
+# criterio que usa unattended-upgrades para las actualizaciones de seguridad.
+DEVCLI_APT_OFFICIAL_ORIGINS="Debian|Ubuntu|Raspbian"
+
+# ¿Hay índices de apt descargados? Sin ellos (`apt update` nunca ejecutado)
+# no se puede saber qué ofrece cada repositorio.
+_apt_has_lists() {
+  LC_ALL=C apt-cache policy 2>/dev/null | awk '$NF == "Packages" { found = 1 } END { exit !found }'
+}
+
+# Versión más alta de $1 disponible en el repositorio oficial, o nada (y
+# devuelve 1) si el paquete no está ahí. Cruza las fuentes de `apt-cache
+# policy` (con su `o=`) con la tabla de versiones del paquete, así que no
+# confunde un paquete oficial con el mismo nombre en un repositorio de
+# terceros ya configurado.
+_apt_official_version() {
+  local pkg="$1" ver
+  ver=$(awk -v origins="|${DEVCLI_APT_OFFICIAL_ORIGINS}|" '
+    # 1er fichero: fuentes y su origen.
+    FNR == NR {
+      if ($NF == "Packages" && $1 ~ /^-?[0-9]+$/) { key = $0; sub(/^ *-?[0-9]+ +/, "", key); next }
+      if (key != "" && $1 == "release") {
+        rel = $0; sub(/^ *release +/, "", rel)
+        n = split(rel, kv, ",")
+        for (i = 1; i <= n; i++) if (kv[i] ~ /^o=/) { o = substr(kv[i], 3); if (index(origins, "|" o "|")) off[key] = 1 }
+      }
+      key = ""
+      next
+    }
+    # 2º fichero: tabla de versiones del paquete (de mayor a menor).
+    /^ *Version table:/ { table = 1; next }
+    table && ($NF == "Packages" || $NF == "status") {
+      src = $0; sub(/^ *-?[0-9]+ +/, "", src)
+      if (cur != "" && (src in off)) { print cur; exit }
+      next
+    }
+    table { cur = ($1 == "***") ? $2 : $1 }
+  ' <(LC_ALL=C apt-cache policy 2>/dev/null) <(LC_ALL=C apt-cache policy "$pkg" 2>/dev/null))
+  [[ -n "$ver" ]] || return 1
+  printf '%s' "$ver"
+}
+
 # --- Method: apt ---
+# Si install_tool ha fijado _DEVCLI_APT_VERSION (versión del repositorio
+# oficial), se instala exactamente esa: aunque haya un repositorio de
+# terceros con una versión mayor, apt no la elige.
 method_apt() {
-  local pkg
+  local pkg spec
   pkg=$(_block_field "$1" .package)
+  spec="$pkg${_DEVCLI_APT_VERSION:+=$_DEVCLI_APT_VERSION}"
 
   if package_installed_apt "$pkg"; then
     dry_run_active && dry_note presente "$pkg"
@@ -211,7 +261,7 @@ method_apt() {
     if [[ -n "${_DEVCLI_APT_ORIGIN:-}" ]]; then
       dry_note apt-terceros "$pkg (repositorio ${_DEVCLI_APT_ORIGIN})"
     else
-      dry_note apt "$pkg"
+      dry_note apt "$pkg${_DEVCLI_APT_VERSION:+ ($_DEVCLI_APT_VERSION)}"
     fi
     return 0
   fi
@@ -219,14 +269,14 @@ method_apt() {
   # Perfil server: sin paquetes recomendados (menos superficie) y sin
   # preguntas de debconf (la salida va al log; una pregunta colgaría la fase).
   if [[ "${DEVCLI_PROFILE:-}" == "server" ]]; then
-    if ! ux_run_silent sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "$pkg"; then
+    if ! ux_run_silent sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "$spec"; then
       warning "$pkg: apt-get falló"
       return 1
     fi
     return 0
   fi
 
-  if ! ux_run_silent sudo apt install -y -qq "$pkg"; then
+  if ! ux_run_silent sudo apt install -y -qq "$spec"; then
     warning "$pkg: apt-get falló"
     return 1
   fi
@@ -404,6 +454,193 @@ method_github_binary() {
   return 0
 }
 
+# --- Method: verified-binary (versión fija + sha256 comprobada) ---
+#
+# Descarga el artefacto de una versión fijada desde las releases oficiales del
+# proyecto, comprueba su sha256 contra la guardada en tools.json y sólo
+# entonces lo instala en $HOME. Nunca ejecuta el instalador del proyecto: no
+# toca ~/.bashrc ni ~/.profile (el PATH lo pone dotfiles/zshrc). Campos:
+#
+#   version          versión fijada
+#   url              plantilla con ${version} y ${file}
+#   assets.<arch>    { file, sha256 } por arquitectura (amd64, arm64)
+#   archive          "tar.gz" o ausente (binario suelto)
+#   install[]        { from, to }    fichero (glob relativo al contenido) → ruta
+#                    { dir, to }     directorio entero (se sustituye)
+#                    { link, target } enlace simbólico
+#   bin              ruta del ejecutable instalado (comprobación de versión)
+#   version_args     argumentos que imprimen la versión (p. ej. "--version")
+#   configure_args[] órdenes del propio binario tras instalar (p. ej. apagar
+#                    avisos de versión); se repiten en cada ejecución
+#
+# Todo destino debe estar dentro de $HOME. Si la suma no coincide: se borra
+# lo descargado, no se instala nada, se avisa y se devuelve 1 (la fase sigue).
+
+# ¿Ruta segura para escribir o borrar? Dentro de $HOME y nunca $HOME mismo.
+_vb_home_path() {
+  [[ -n "${HOME:-}" && "$1" == "$HOME"/?* && "$1" != *"/../"* && "$1" != *"/.." ]]
+}
+
+# ¿$1 (ejecutable) informa de la versión $2? Args: bin, versión, version_args
+_vb_version_ok() {
+  local bin="$1" version="$2" vargs="$3" out
+  [[ -x "$bin" ]] || return 1
+  # shellcheck disable=SC2086
+  out=$("$bin" $vargs 2>/dev/null) || return 1
+  printf '%s\n' "$out" | tr -c 'A-Za-z0-9.+-' '\n' | sed 's/^v//' | grep -qxF "$version"
+}
+
+# Ejecuta configure_args sobre el binario instalado (o lo anota en simulación).
+_vb_configure() {
+  local block="$1" bin="$2" name="$3" line args
+  while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    args=()
+    while IFS= read -r a; do args+=("$a"); done < <(echo "$line" | jq -r '.[]')
+    if dry_run_active; then
+      dry_note home "$name ${args[*]} (ajuste local de la herramienta)"
+    elif ! ux_run_silent "$bin" "${args[@]}"; then
+      warning "$name: falló '$name ${args[*]}'"
+      return 1
+    fi
+  done < <(echo "$block" | jq -c '.configure_args[]?')
+  return 0
+}
+
+method_verified_binary() {
+  local block="$1" name="${2:-}" version url arch file sha256 archive bin vargs
+  version=$(_block_field "$block" .version)
+  archive=$(_block_field "$block" .archive)
+  vargs=$(_block_field "$block" .version_args --version)
+  bin=$(expand_vars "$(_block_field "$block" .bin)")
+  [[ -n "$name" ]] || name=$(basename "$bin")
+
+  if [[ -z "$version" || -z "$bin" ]] || ! _vb_home_path "$bin"; then
+    warning "$name: entrada verified-binary incompleta en tools.json (version/bin)"
+    return 1
+  fi
+
+  if _vb_version_ok "$bin" "$version" "$vargs"; then
+    dry_run_active && dry_note presente "$name $version"
+    _vb_configure "$block" "$bin" "$name"
+    return
+  fi
+
+  arch=$(detect_arch) || return 1
+  file=$(_block_field "$block" ".assets.${arch}.file")
+  sha256=$(_block_field "$block" ".assets.${arch}.sha256" | tr 'A-F' 'a-f')
+  if [[ -z "$file" || ! "$sha256" =~ ^[0-9a-f]{64}$ ]]; then
+    warning "$name: sin artefacto o sin sha256 para $arch en tools.json; no se instala"
+    return 1
+  fi
+  url=$(_block_field "$block" .url | sed "s|\${version}|$version|g; s|\${file}|$file|g")
+
+  # Destinos: todos dentro de $HOME (instalación sin privilegios).
+  local entries entry kind src dst
+  entries=$(echo "$block" | jq -c '.install[]?')
+  if [[ -z "$entries" ]]; then
+    warning "$name: verified-binary sin 'install' en tools.json"
+    return 1
+  fi
+  while IFS= read -r entry; do
+    dst=$(expand_vars "$(echo "$entry" | jq -r '.to // .link')")
+    if ! _vb_home_path "$dst"; then
+      warning "$name: destino fuera de \$HOME ($dst); no se instala"
+      return 1
+    fi
+  done <<< "$entries"
+
+  if dry_run_active; then
+    local dests
+    dests=$(echo "$entries" | while IFS= read -r entry; do
+      _tilde "$(expand_vars "$(echo "$entry" | jq -r '.to // .link')")"; echo
+    done | paste -sd ',' - | sed 's/,/, /g')
+    dry_note descarga "$name $version: $url (sha256 ${sha256:0:12}… comprobada antes de instalar)  → $dests"
+    _vb_configure "$block" "$bin" "$name"
+    return 0
+  fi
+
+  local tmpd
+  tmpd=$(mktemp -d "${TMPDIR:-/tmp}/devcli-vb.XXXXXX") || { warning "$name: no se pudo crear un directorio temporal"; return 1; }
+
+  if ! ux_run_silent curl -fsSL --proto '=https' --tlsv1.2 --retry 2 -o "$tmpd/$file" "$url"; then
+    rm -rf "$tmpd"
+    warning "$name $version: descarga falló ($url)"
+    return 1
+  fi
+
+  local actual
+  actual=$(sha256sum "$tmpd/$file" 2>/dev/null | cut -d' ' -f1)
+  if [[ "$actual" != "$sha256" ]]; then
+    rm -rf "$tmpd"
+    warning "$name $version: la suma sha256 NO coincide (esperada ${sha256:0:12}…, descargada ${actual:0:12}…); no se instala"
+    log "$name: sha256 esperada $sha256, obtenida $actual ($url)"
+    return 1
+  fi
+  log "$name $version: sha256 correcta ($sha256)"
+
+  # Contenido verificado → $tmpd/x
+  mkdir -p "$tmpd/x"
+  case "$archive" in
+    tar.gz)
+      if ! ux_run_silent tar -xzf "$tmpd/$file" -C "$tmpd/x" --no-same-owner; then
+        rm -rf "$tmpd"; warning "$name: no se pudo descomprimir $file"; return 1
+      fi
+      ;;
+    "") mv "$tmpd/$file" "$tmpd/x/$file" ;;
+    *) rm -rf "$tmpd"; warning "$name: formato '$archive' no soportado"; return 1 ;;
+  esac
+
+  local rc=0 matches
+  while IFS= read -r entry; do
+    kind=$(echo "$entry" | jq -r 'if has("link") then "link" elif has("dir") then "dir" else "file" end')
+    case "$kind" in
+      file)
+        dst=$(expand_vars "$(echo "$entry" | jq -r '.to')")
+        src=$(echo "$entry" | jq -r '.from' | sed "s|\${file}|$file|g")
+        # Glob relativo al contenido; debe resolver a exactamente un fichero.
+        # shellcheck disable=SC2206
+        matches=( "$tmpd"/x/$src )
+        if [[ ${#matches[@]} -ne 1 || ! -f "${matches[0]}" ]]; then
+          warning "$name: '$src' no está en el artefacto"; rc=1; break
+        fi
+        mkdir -p "$(dirname "$dst")" &&
+          cp -f "${matches[0]}" "$dst.devcli-tmp" &&
+          chmod 0755 "$dst.devcli-tmp" &&
+          mv -f "$dst.devcli-tmp" "$dst" || { rm -f "$dst.devcli-tmp"; warning "$name: no se pudo escribir $dst"; rc=1; break; }
+        ;;
+      dir)
+        dst=$(expand_vars "$(echo "$entry" | jq -r '.to')")
+        src=$(echo "$entry" | jq -r '.dir')
+        if [[ ! -d "$tmpd/x/$src" ]]; then
+          warning "$name: '$src' no está en el artefacto"; rc=1; break
+        fi
+        # _vb_home_path ya garantiza que $dst no está vacío ni es $HOME.
+        rm -rf "$dst.devcli-tmp"
+        mkdir -p "$(dirname "$dst")" &&
+          cp -a "$tmpd/x/$src" "$dst.devcli-tmp" &&
+          rm -rf "$dst" &&
+          mv "$dst.devcli-tmp" "$dst" || { rm -rf "$dst.devcli-tmp"; warning "$name: no se pudo escribir $dst"; rc=1; break; }
+        ;;
+      link)
+        dst=$(expand_vars "$(echo "$entry" | jq -r '.link')")
+        src=$(expand_vars "$(echo "$entry" | jq -r '.target')")
+        mkdir -p "$(dirname "$dst")" && ln -sfn "$src" "$dst" ||
+          { warning "$name: no se pudo crear el enlace $dst"; rc=1; break; }
+        ;;
+    esac
+  done <<< "$entries"
+  rm -rf "$tmpd"
+  [[ $rc -eq 0 ]] || return 1
+
+  if ! _vb_version_ok "$bin" "$version" "$vargs"; then
+    warning "$name: instalado pero '$(_tilde "$bin") $vargs' no informa de la versión $version"
+    return 1
+  fi
+  export PATH="$(dirname "$bin"):$PATH"
+  _vb_configure "$block" "$bin" "$name"
+}
+
 # Detecta si la Nerd Font configurada en NERD_FONT_NAME/NERD_FONT_FULL_NAME
 # está instalada vía cualquiera de los mecanismos estándar:
 #   - fc-list (Linux/macOS con fontconfig)
@@ -562,11 +799,27 @@ setup_kubernetes_repo() {
   sudo apt update -y -qq >/dev/null 2>&1
 }
 
+# --- Perfil server: excepciones con nombre a «sólo apt, sin hooks» ---
+# Binarios verificados (método verified-binary) que pueden entrar en server.
+DEVCLI_SERVER_VERIFIED_TOOLS="oh-my-posh uv pnpm"
+# Hooks permitidos en server, por herramienta y tal cual aparecen en
+# tools.json: sólo los enlaces ~/bin/bat → batcat y ~/bin/fd → fdfind
+# (escrituras en $HOME). Cualquier otro hook bloquea la herramienta.
+DEVCLI_SERVER_HOOKS='{
+  "bat": [{ "action": "symlink", "platforms": ["linux", "wsl2"], "from_cmd": "batcat", "to": "${BIN_DIR}/bat" }],
+  "fd":  [{ "action": "symlink", "platforms": ["linux", "wsl2"], "from_cmd": "fdfind", "to": "${BIN_DIR}/fd" }]
+}'
+
 # --- Hook executor ---
+# Un hook con "skip_profiles": [...] no se ejecuta en esos perfiles.
 execute_hook() {
   local hook_json="$1"
   local json_file="${2:-}"
   local action
+  if [[ -n "${DEVCLI_PROFILE:-}" ]] &&
+    echo "$hook_json" | jq -e --arg p "$DEVCLI_PROFILE" '(.skip_profiles // []) | index($p)' >/dev/null 2>&1; then
+    return 0
+  fi
   action=$(echo "$hook_json" | jq -r '.action')
 
   case "$action" in
@@ -640,17 +893,63 @@ install_tool() {
   method=$(echo "$platform_block" | jq -r '.method')
 
   # Perfil server: barrera independiente de lo que diga tools.json. Sólo apt
-  # (repositorio oficial) y sin hooks: un pre_install podría añadir un
-  # repositorio de terceros y un post_install descargar algo. Si alguien
-  # etiqueta mal una herramienta, falla en vez de instalarla.
+  # (y del repositorio oficial, ver más abajo) y sin hooks: un pre_install
+  # podría añadir un repositorio de terceros y un post_install descargar algo.
+  # Excepciones, escritas aquí con nombre y no por regla general:
+  #   - los binarios verificados de DEVCLI_SERVER_VERIFIED_TOOLS;
+  #   - los hooks exactos de DEVCLI_SERVER_HOOKS (enlaces en ~/bin);
+  #   - los hooks marcados "skip_profiles": ["server"], que aquí no se
+  #     ejecutan nunca.
+  # Una herramienta nueva con verified-binary o con hooks no entra sola: si
+  # alguien la etiqueta `server`, falla en vez de instalarla.
   if [[ "${DEVCLI_PROFILE:-}" == "server" ]]; then
-    local hook_count
-    hook_count=$(jq -r --arg name "$tool_name" --arg os "$OS_TYPE" \
-      '[.tools[] | select(.name == $name) | ((.[$os].pre_install // []) + (.[$os].post_install // []) + (.post_install // []))[]] | length' \
+    local bad_hooks method_ok=0
+    bad_hooks=$(jq -r --arg name "$tool_name" --arg os "$OS_TYPE" --argjson ok "$DEVCLI_SERVER_HOOKS" \
+      '[.tools[] | select(.name == $name) | ((.[$os].pre_install // []) + (.[$os].post_install // []) + (.post_install // []))[]
+        | select(((.skip_profiles // []) | index("server")) | not)
+        | select(. as $h | ($ok[$name] // []) | any(. == $h) | not)] | length' \
       "$json_file" 2>/dev/null)
-    if [[ "$method" != "apt" || "$hook_count" != "0" ]]; then
-      warning "$tool_name: bloqueado en el perfil server (sólo apt del repositorio oficial, sin hooks)"
+    [[ "$method" == "apt" ]] && method_ok=1
+    if [[ "$method" == "verified-binary" ]] && [[ " $DEVCLI_SERVER_VERIFIED_TOOLS " == *" $tool_name "* ]]; then
+      method_ok=1
+    fi
+    if [[ $method_ok -ne 1 || "$bad_hooks" != "0" ]]; then
+      warning "$tool_name: bloqueado en el perfil server (sólo apt del repositorio oficial, sin hooks, salvo las excepciones con nombre de utils.sh)"
       return 1
+    fi
+  fi
+
+  # Linux: el repositorio oficial de la distribución tiene preferencia.
+  #   - server: todo paquete apt debe estar en el oficial; si no, se omite
+  #     con aviso (nunca se añade un repositorio).
+  #   - resto de perfiles: si la entrada trae "fallback" (repositorio de
+  #     terceros o .deb de GitHub), sólo se usa cuando el paquete no está en
+  #     el oficial.
+  # En ambos casos se instala la versión del oficial (pkg=versión), aunque un
+  # repositorio de terceros ya configurado ofrezca otra mayor.
+  _DEVCLI_APT_VERSION=""
+  if [[ "$method" == "apt" ]]; then
+    local apt_pkg has_fallback official_ver=""
+    apt_pkg=$(echo "$platform_block" | jq -r '.package')
+    has_fallback=$(echo "$platform_block" | jq -r 'has("fallback")')
+    if { [[ "${DEVCLI_PROFILE:-}" == "server" ]] || [[ "$has_fallback" == "true" ]]; } &&
+      ! package_installed_apt "$apt_pkg"; then
+      if official_ver=$(_apt_official_version "$apt_pkg"); then
+        _DEVCLI_APT_VERSION="$official_ver"
+      elif dry_run_active && ! _apt_has_lists; then
+        dry_note aviso "sin índices de apt (falta 'apt update'): no se puede comprobar si $apt_pkg está en el repositorio oficial; se supone que sí"
+      elif [[ "${DEVCLI_PROFILE:-}" == "server" ]]; then
+        if dry_run_active; then
+          dry_note aviso "$apt_pkg: no está en el repositorio oficial de esta versión de la distribución; se omitiría (server no añade repositorios)"
+        else
+          warning "$apt_pkg: no está en el repositorio oficial de esta versión de la distribución; se omite (el perfil server no añade repositorios)"
+        fi
+        return 0
+      else
+        log "$apt_pkg: no está en el repositorio oficial; se usa el último recurso de tools.json"
+        platform_block=$(echo "$platform_block" | jq -c '.fallback')
+        method=$(echo "$platform_block" | jq -r '.method')
+      fi
     fi
   fi
 
@@ -679,6 +978,7 @@ install_tool() {
     github-deb)     method_github_deb "$platform_block" ;;
     github-binary)  method_github_binary "$platform_block" ;;
     github-zip)     method_github_zip "$platform_block" ;;
+    verified-binary) method_verified_binary "$platform_block" "$tool_name" ;;
     *)
       warning "Método desconocido: $method para $tool_name"
       return 1

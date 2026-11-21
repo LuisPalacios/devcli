@@ -5,7 +5,7 @@
 # Propósito: Configurar Zsh con herramientas modernas, navegación inteligente,
 #            prompt personalizado y compatibilidad multiplataforma
 # Compatible con: Linux, macOS, WSL2 en Windows 10/11
-# Dependencias: lsd, zoxide, oh-my-posh, git, tmux (opcional)
+# Dependencias: eza o lsd, zoxide, oh-my-posh, git, tmux (opcional)
 # =============================================================================
 
 # Fichero .zshrc de Linux Setup
@@ -35,6 +35,18 @@
 # Parametrización básica del usuario actual y localización
 SOY="$(id -un)"                    # Nombre del usuario actual
 export LANG="es_ES.UTF-8"          # Idioma por defecto (español España)
+# Linux: si ese locale no está generado (p.ej. en un servidor con el perfil
+# server, que no toca /etc/locale.gen), C.UTF-8. Sin él, zsh pinta '?' en
+# lugar de los iconos del prompt y otros programas avisan de que no pueden
+# fijar el locale.
+if [[ "$OSTYPE" == linux* ]] && command -v locale >/dev/null 2>&1; then
+  _devcli_locales="$(locale -a 2>/dev/null)"
+  if ! print -r -- "$_devcli_locales" | grep -Eqix "${LANG%%.*}\.utf-?8" &&
+    print -r -- "$_devcli_locales" | grep -Eqix 'C\.utf-?8'; then
+    export LANG="C.UTF-8"
+  fi
+  unset _devcli_locales
+fi
 
 # =============================================================================
 # DETECCIÓN AUTOMÁTICA DE ENTORNOS ESPECIALES
@@ -80,12 +92,16 @@ function parametriza_zsh_comun() {
   # CONFIGURACIÓN DE PNPM (INSTALADOR STANDALONE)
   # ---------------------------------------------------------------------------
 
-  # El instalador standalone de pnpm (get.pnpm.io) deja los binarios en
-  # $PNPM_HOME/bin y necesita PNPM_HOME exportado para los paquetes globales.
-  # Su bloque de PATH en el rc se pierde al desplegar este fichero, así que
-  # se define aquí. En macOS (brew) el directorio no existe y no hace nada.
+  # En Linux/WSL2 devcli deja pnpm (versión fija, suma comprobada) en
+  # $PNPM_HOME/bin, y ahí van también los paquetes globales; necesitan
+  # PNPM_HOME exportado. El PATH lo pone este fichero (devcli no toca
+  # ~/.bashrc ni ~/.profile). En macOS (brew) el directorio no existe y no
+  # hace nada.
   if [[ -d "${HOME}/.local/share/pnpm" ]]; then
     export PNPM_HOME="${HOME}/.local/share/pnpm"
+    # Sin el aviso diario de versión nueva (consulta al registro npm): subir
+    # de versión es un cambio en devcli (install/tools.json), no en la máquina.
+    [[ "$OSTYPE" == linux* ]] && export pnpm_config_update_notifier=false
   fi
 
   # ---------------------------------------------------------------------------
@@ -560,6 +576,8 @@ else
         path=(
           .                               # Directorio actual
           "${HOME}/bin"                   # Binarios personales
+          "${HOME}/.local/bin"            # uv, uvx
+          "${HOME}/.local/share/pnpm/bin" # pnpm
           $path                           # PATH heredado del sistema
         )
 
@@ -571,8 +589,8 @@ else
         path=(
           .                               # Directorio actual
           "${HOME}/bin"                   # Binarios personales
-          "${HOME}/.local/bin"            # Otros binarios personales
-          "${HOME}/.local/share/pnpm/bin" # PNPM (instalador standalone)
+          "${HOME}/.local/bin"            # Otros binarios personales (uv, uvx)
+          "${HOME}/.local/share/pnpm/bin" # pnpm
           "/usr/local/bin"                # Binarios instalados manualmente
           "/usr/local/sbin"               # Binarios de administración local
           $path                           # PATH heredado del sistema
@@ -630,8 +648,8 @@ export KUBECONFIG="${HOME}/kubeconfig"
 # Permite saltar rápidamente a directorios frecuentes con comandos cortos
 # Ejemplo: 'z doc' puede saltar a ~/Documents, 'z pro' a ~/Projects
 
-# Si zoxide no está instalado (p.ej. perfil server de devcli), se usa el cd
-# estándar sin avisar.
+# Si zoxide no está instalado (p.ej. una distribución que no lo trae en su
+# repositorio oficial), se usa el cd estándar sin avisar.
 if command -v zoxide >/dev/null 2>&1; then
   # Inicializar zoxide para zsh
   # Esto crea automáticamente los comandos: z, zi, y reemplaza cd con inteligencia
@@ -648,7 +666,7 @@ fi
 # - Tiempo de ejecución de comandos
 # - Estado de herramientas de desarrollo
 
-# Si Oh My Posh no está instalado (p.ej. perfil server de devcli), prompt
+# Si Oh My Posh no está instalado (p.ej. su descarga verificada falló), prompt
 # sencillo sin avisar (root ya tiene el suyo, definido más arriba).
 # Instalación: https://ohmyposh.dev/docs/installation/
 if ! command -v oh-my-posh >/dev/null 2>&1; then
@@ -696,8 +714,13 @@ else
   # DESCARGA Y ACTUALIZACIÓN AUTOMÁTICA DEL TEMA
   # ---------------------------------------------------------------------------
 
+  # Con el marcador que deja `bootstrap.sh -p server`, nunca se descarga: el
+  # tema lo despliega el bootstrap desde el repo y al abrir sesión no hay
+  # tráfico saliente ni contenido remoto.
+  if [[ -f "$HOME/.config/devcli/sin-descarga-tema" ]]; then
+    :
   # Si el archivo local no existe, descargarlo
-  if [[ ! -a $LOCAL_FILE ]]; then
+  elif [[ ! -a $LOCAL_FILE ]]; then
     curl --connect-timeout 2 --max-time 3 -LJs -o $LOCAL_FILE $REMOTE_FILE_URL
     touch $LOCAL_FILE
   else
@@ -809,14 +832,16 @@ fi
 # 1. Este archivo se ejecuta automáticamente al iniciar Zsh
 # 2. Detecta automáticamente el sistema operativo y se adapta
 # 3. Requiere las siguientes herramientas para funcionalidad completa:
-#    - lsd (listado moderno con iconos)
+#    - eza o lsd (listado moderno con iconos)
 #    - zoxide (navegación inteligente de directorios)
 #    - oh-my-posh (prompt personalizado)
 #    - tmux (opcional, para sesiones múltiples)
 # 4. Compatible con WSL2, macOS, y distribuciones Linux
-# 5. Si faltan herramientas (eza/lsd, zoxide, oh-my-posh), usa las órdenes
-#    estándar sin avisos: vale también para servidores (perfil server)
-# 6. El tema de Oh My Posh se actualiza automáticamente desde el repositorio
+# 5. Si falta alguna herramienta (eza/lsd, zoxide, oh-my-posh; p.ej. porque
+#    la distribución no la trae en su repositorio oficial), usa las órdenes
+#    estándar sin avisos
+# 6. El tema de Oh My Posh se actualiza automáticamente desde el repositorio,
+#    salvo con el marcador ~/.config/devcli/sin-descarga-tema (perfil server)
 # 7. Para personalizar, modifica las funciones y variables en este archivo
 # 8. Debug: Descomenta 'set -x' al principio para ver ejecución detallada
 # =============================================================================
