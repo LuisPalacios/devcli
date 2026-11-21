@@ -1,0 +1,98 @@
+# devcli
+
+![devcli](assets/old-hacker.jpg)
+
+He pasado años instalando sistemas operativos, y al terminar siempre tengo que dedicar otras dos horas extra para dejar el entorno CLI como me gusta. Hice este proyecto para hacerlo en 2 minutos y además tener una experiencia casi idéntica en **PowerShell, Git Bash, CMD** (Windows) y en **Linux, macOS y WSL2**.
+
+Mi terminal multiplataforma preferida — y la que recomiendo — es **[WezTerm](https://wezterm.org)**. La instalo desde aquí con una configuración a medida (selector de shells, AI Mode, persistencia de tamaño, selector de temas). Este terminal funciona de forma idéntica en Windows, macOS y Linux. Echa un ojo al  [Documento sobre Wezterm](docs/wezterm.md).
+
+> [!WARNING]
+> **Aviso Importante: Lee antes de hacer nada.**
+
+Este proyecto realiza cambios significativos en tu sistema, entre los que se incluyen: instalación de software de terceros, modificación de archivos de configuración en tu directorio `$HOME` y cambio de tu *shell* por defecto. **Úsalo bajo tu propia responsabilidad.**, este software se proporciona "tal cual", sin garantías. **Si no estás de acuerdo con estos cambios o no comprendes el código, por favor, no lo utilices.**
+
+**Recomendaciones antes de empezar:**
+
+1. **Haz una copia de seguridad:** Respalda tus archivos de configuración actuales de tu directorio `$HOME` antes de ejecutar cualquier script.
+2. **Audita el código:** Revisa el código fuente y el script de arranque. Lee detenidamente [`docs/auditoria.md`](docs/auditoria.md).
+3. **Adáptalo:** Si alguna configuración no te convence, haz un *fork* y personalízalo a tu gusto, eliminando lo que no necesites.
+
+## Instalación
+
+> Vamos al lío, pero antes comprueba que cumples los requisitos para [Windows](docs/requisitos-windows.md) o para [Linux/macOS](docs/requisitos-unix.md). Una vez listo, dependiendo de dónde estás, ejecuta lo siguiente:
+
+**Linux, macOS o WSL2/Git-Bash (Windows)**:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh)
+```
+
+**En un servidor, siempre el perfil `server`** (Linux Debian y derivados): sólo paquetes del repositorio oficial de la distribución y los dotfiles, sin repositorios de terceros, sin descargas fuera de `apt` y sin tocar `/etc`. Simula primero con `-n`:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -p server -n
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -p server
+```
+
+> Sin `-p`, en Linux nativo sólo se aplica el perfil completo si hay una sesión gráfica local; si no, pregunta (Enter = `server`) o, sin terminal, aplica `server`. Detalle en [docs/perfiles.md](docs/perfiles.md). Si ya lo ejecutaste con el perfil completo en un servidor, mira [cómo retirarlo](docs/desinstalar.md#qué-deja-el-perfil-completo-en-el-sistema-y-cómo-retirarlo).
+
+**PowerShell 7 en Windows 10/11**:
+
+```powershell
+iex (irm "https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.ps1")
+```
+
+> En el caso de Windows tu antivirus podria bloquear el comando anterior. Si es así, bloquea el comando, prueba la
+> [instalación en dos pasos](docs/requisitos-windows.md#si-tu-antivirus-bloquea-el-bootstrap) o lanza el comando de Git Bash de arriba, que hace lo mismo. </br>
+> Mira opciones adicionales con `--help` y detalle de cada perfil en [docs/perfiles.md](docs/perfiles.md). </br>
+> Las herramientas que se instalan están en [docs/herramientas.md](docs/herramientas.md).
+
+## Después de instalar
+
+- **Reinicia el terminal** para aplicar los cambios de PATH.
+- Si los iconos no salen bien (prueba con `ls`, que ahora va por `eza`), ejecuta `~/bin/nerd-setup.sh`
+  (Linux/macOS/WSL2) o `~/bin/nerd-setup.ps1` (Windows). Más en
+  [docs/troubleshooting.md](docs/troubleshooting.md).
+- **Abre WezTerm** (instalado con perfiles `dev`/`full`; en Linux sólo si hay
+  entorno de escritorio — en servidores headless se omite) — es la terminal
+  recomendada del proyecto. Atajos, selector de temas, AI Mode y demás en
+  [docs/wezterm.md](docs/wezterm.md).
+- **Personaliza tu Shell** en Linux, macOS o WSL2/Git-Bash (Windows). Echa un ojo a los ficheros [zshrc.local.example](./dotfiles/zshrc.local.example) y [bashrc.local.example](./dotfiles/bashrc.local.example)
+
+## ¿Vienes del Mac? Tu teclado viaja contigo
+
+En Windows 11, devcli puede convertir el teclado del PC en el de un Mac. Quien siempre ha trabajado en Mac se sienta delante de un equipo con **Windows 11 + devcli + PowerToys + custom keys** y sus manos hacen lo de siempre: Cmd+C copia, Cmd+Q cierra la app, Option+2 escribe `@`, Option+← salta de palabra en palabra y, dentro de WezTerm, tiene los atajos de iTerm2 (Cmd+T, Cmd+D, Cmd+Option+flechas…).
+
+La correspondencia es **por posición física**, así que vale igual para el teclado de un portátil que para uno de sobremesa:
+
+| En el Mac | En el teclado del PC |
+|---|---|
+| Cmd | Alt izquierdo, el que está junto al espacio |
+| Option | Win, el siguiente hacia la izquierda |
+| Control | Ctrl |
+
+Es opcional: añade `-k on` (Git Bash) o `-CustomKeys on` (PowerShell) la primera vez y los siguientes bootstraps lo recuerdan. Después, activa una vez **PowerToys → General → Ejecutar siempre como administrador**; sin eso la capa no funciona en ventanas de administrador, y el bootstrap te lo recordará.
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/LuisPalacios/devcli/main/bootstrap.sh) -k on
+```
+
+Detalles, mapa completo y limitaciones en [docs/teclado-mac.md](docs/teclado-mac.md).
+
+## Documentación
+
+| Guía | De qué va |
+|------|-----------|
+| [Perfiles](docs/perfiles.md) | Qué hay en cada perfil (incluido `server`), cuándo elegir cada uno y cómo simular con `-n`. |
+| [Herramientas](docs/herramientas.md) | Las herramientas CLI que se instalan, con ejemplos de uso. |
+| [WezTerm](docs/wezterm.md) | **Terminal recomendada**: Atajos, selector de shells, selector de temas, persistencia de tamaño. Incluye sección [AI Mode](docs/wezterm.md#ai-mode): cuatro paneles de Claude (opus + sonnet + haiku + shell) en una ventana, en un atajo. |
+| [Requisitos Windows](docs/requisitos-windows.md) | PowerShell 7, winget, scoop. Soluciones a "Acceso denegado" de winget y bloqueos del antivirus. |
+| [Requisitos Linux/macOS](docs/requisitos-unix.md) | Linux Debian/Ubuntu, macOS con Homebrew, WSL2. `sudo` sin contraseña. |
+| [Troubleshooting](docs/troubleshooting.md) | Iconos rotos, fallos de instalación de una herramienta concreta, antivirus, modo verbose, log file. |
+| [Auditoria](docs/auditoria.md) | Para auditar el bootstrap antes de ejecutarlo: fases, JSONs, contrato de errores. |
+| [Atajos estilo Mac](docs/teclado-mac.md) | *(Windows, opcional)* Teclado de PC (sobremesa o portátil) con los atajos del Mac y de iTerm2, vía PowerToys + WezTerm (`-k on` / `-CustomKeys on`). |
+| [Desinstalar](docs/desinstalar.md) | Cómo dar marcha atrás: qué tocó devcli y cómo revertirlo. |
+
+## Licencia
+
+[MIT](MIT)

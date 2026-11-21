@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+# dkmon — Docker/Compose monitor por labels (sin compose.yaml local)
+# Reqs: docker; (opcional) jq
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+USO:
+  dkmon <comando> [opciones]
+
+COMANDOS:
+  projects                 Lista proyectos (label com.docker.compose.project)
+  status|ps                Estado de contenedores (si NO -p: todos los proyectos)
+  health                   Healthcheck de contenedores del stack
+  logs                     Logs de contenedores del stack
+  events                   Stream de eventos Docker del stack
+  networks                 Redes del stack
+  volumes                  Volúmenes del stack (usar --size para tamaños)
+  labels                   Labels de contenedores (requiere jq)
+  top                      docker top de contenedores del stack
+
+OPCIONES:
+  -p, --project, --stack NAME     Nombre del stack/proyecto Compose
+  -s, --service NAME              Filtrar por servicio del stack
+  --since DURATION                Logs desde (e.g., 1h, 10m)
+  -t, --tail N                    Líneas de logs (default 200)
+  -f, --follow                    Seguir logs
+  --size                          (volumes) calcular tamaño con busybox du -sk
+  --json                          (status/labels) salida JSON si aplica
+  -h, --help                      Ayuda
+
+EJEMPLOS:
+  dkmon projects
+  dkmon status                          # TODOS los proyectos
+  dkmon status -p docker-gitea
+  dkmon logs -p docker-gitea -s gitea -f --since 1h
+  dkmon volumes -p docker-gitea --size
+EOF
+}
+
+need() { command -v "$1" >/dev/null 2>&1 || { echo "ERROR: falta '$1' en PATH" >&2; exit 1; }; }
+
+CMD="${1:-}"; [[ $# -gt 0 ]] && shift || true
+STACK=""; SERVICE=""; FOLLOW=0; TAIL=200; SINCE=""; WANT_JSON=0; WANT_SIZE=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -p|--project|--stack) STACK="${2:-}"; shift 2 ;;
+    -s|--service) SERVICE="${2:-}"; shift 2 ;;
+    -f|--follow) FOLLOW=1; shift ;;
+    -t|--tail) TAIL="${2:-}"; shift 2 ;;
+    --since) SINCE="${2:-}"; shift 2 ;;
+    --json) WANT_JSON=1; shift ;;
+    --size) WANT_SIZE=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Arg desconocido: $1" >&2; usage; exit 1 ;;
+  esac
+done
+
+container_filters() {
+  local -a f
+  [[ -n "$STACK"  ]] && f+=(--filter "label=com.docker.compose.project=${STACK}")
+  [[ -n "$SERVICE" ]] && f+=(--filter "label=com.docker.compose.service=${SERVICE}")
+  printf '%s\n' "${f[@]+"${f[@]}"}"
+}
+volume_filters()  { [[ -n "$STACK" ]] && printf -- '--filter label=com.docker.compose.project=%s\n' "$STACK" || true; }
+network_filters() { [[ -n "$STACK" ]] && printf -- '--filter label=com.docker.compose.project=%s\n' "$STACK" || true; }
+
+list_container_ids() { docker ps -a $(container_filters) -q; }
+
+cmd_projects() {
+  local ids; ids="$(docker ps -a -q)"
+  [[ -z "$ids" ]] && { echo "(sin contenedores)"; return; }
+  if command -v jq >/dev/null 2>&1; then
+    docker inspect $ids | jq -r '.[].Config.Labels["com.docker.compose.project"] | select(.!=null)' | sort -u
+  else
+    for id in $ids; do docker inspect -f '{{ index .Config.Labels "com.docker.compose.project"}}' "$id"; done | awk 'NF' | sort -u
+  fi
+}
+
+cmd_status() {
+  # Si STACK vacío → todos los proyectos
+  if (( WANT_JSON )); then
+    need jq
+    local ids; ids="$(list_container_ids)"
+    [[ -z "$ids" ]] && { echo "[]"; return; }
+    docker inspect $ids | jq '[ .[] | {
+      name: .Name[1:], image: .Config.Image,
+      service: (.Config.Labels["com.docker.compose.service"] // ""),
+      project: (.Config.Labels["com.docker.compose.project"] // ""),
+      status: .State.Status,
+      health: (.State.Health.Status // "n/a"),
+      ports: (.NetworkSettings.Ports // {})
+    } ]'
+  else
+    if [[ -n "$STACK" ]]; then
+      printf "%-24s %-40s %-16s %-8s %s\n" "NAME" "IMAGE" "SERVICE" "HEALTH" "STATUS/PORTS"
+      docker ps -a $(container_filters) \
+        --format '{{.Names}}\t{{.Image}}\t{{.Label "com.docker.compose.service"}}\t{{.Status}}\t{{.Ports}}' \
+      | while IFS=$'\t' read -r name image svc status ports; do
+          health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}n/a{{end}}' "$name" 2>/dev/null || echo n/a)"
+          printf "%-24s %-40s %-16s %-8s %s | %s\n" "$name" "$image" "${svc:-}" "$health" "$status" "$ports"
+        done
+    else
+      printf "%-24s %-24s %-40s %-16s %-8s %s\n" "PROJECT" "NAME" "IMAGE" "SERVICE" "HEALTH" "STATUS/PORTS"
+      docker ps -a $(container_filters) \
+        --format '{{.Label "com.docker.compose.project"}}\t{{.Names}}\t{{.Image}}\t{{.Label "com.docker.compose.service"}}\t{{.Status}}\t{{.Ports}}' \
+      | while IFS=$'\t' read -r proj name image svc status ports; do
+          health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}n/a{{end}}' "$name" 2>/dev/null || echo n/a)"
+          printf "%-24s %-24s %-40s %-16s %-8s %s | %s\n" "${proj:-n/a}" "$name" "$image" "${svc:-}" "$health" "$status" "$ports"
+        done
+    fi
+  fi
+}
+
+cmd_health() {
+  [[ -n "$STACK" ]] || { echo "ERROR: especifica stack con -p para 'health'." >&2; exit 2; }
+  printf "%-24s %-8s %s\n" "NAME" "HEALTH" "DETAIL"
+  local ids; ids="$(list_container_ids)"
+  [[ -z "$ids" ]] && { echo "(sin contenedores)"; return; }
+  for c in $ids; do
+    docker inspect "$c" \
+      --format '{{.Name}} {{if .State.Health}}{{.State.Health.Status}}{{else}}n/a{{end}} {{range .State.Health.Log}}{{.ExitCode}}@{{.Start}}:{{.Output}}{{"\n"}}{{end}}' \
+    | sed 's#^/##' \
+    | awk 'NR==1{printf "%-24s %-8s\n",$1,$2; next} NR>1{printf "  └─ %s\n",$0}'
+  done
+}
+
+cmd_logs() {
+  [[ -n "$STACK" ]] || { echo "ERROR: especifica stack con -p para 'logs'." >&2; exit 2; }
+  local -a base=(docker logs)
+  (( FOLLOW )) && base+=(-f)
+  base+=(--tail "$TAIL")
+  [[ -n "$SINCE" ]] && base+=(--since "$SINCE")
+  local ids; ids="$(list_container_ids)"
+  [[ -z "$ids" ]] && { echo "(sin contenedores)"; return; }
+  for id in $ids; do
+    name="$(docker inspect -f '{{.Name}}' "$id" | sed 's#^/##')"
+    echo "===== [${name}] ====="
+    "${base[@]}" "$name" || true
+    [[ $FOLLOW -eq 1 ]] && break
+  done
+}
+
+cmd_events()   { [[ -n "$STACK" ]] || { echo "ERROR: -p requerido en 'events'." >&2; exit 2; }; docker events --filter "label=com.docker.compose.project=${STACK}"; }
+cmd_networks() { [[ -n "$STACK" ]] || { echo "ERROR: -p requerido en 'networks'." >&2; exit 2; }; docker network ls $(network_filters); }
+cmd_labels()   { [[ -n "$STACK" ]] || { echo "ERROR: -p requerido en 'labels'." >&2; exit 2; }; need jq; local ids; ids="$(list_container_ids)"; [[ -z "$ids" ]] && { echo "(sin contenedores)"; return; }; docker inspect $ids | jq -r '.[] | {name: .Name[1:], service: .Config.Labels["com.docker.compose.service"], labels: .Config.Labels} | "### \(.name) [svc=\(.service // "")]\n" + ( .labels | to_entries | map("\(.key)=\(.value)") | join("\n") ) + "\n"'; }
+cmd_top()      { [[ -n "$STACK" ]] || { echo "ERROR: -p requerido en 'top'." >&2; exit 2; }; local ids; ids="$(list_container_ids)"; [[ -z "$ids" ]] && { echo "(sin contenedores)"; return; }; for id in $ids; do name="$(docker inspect -f '{{.Name}}' "$id" | sed 's#^/##')"; echo "===== [${name}] ====="; docker top "$name" || true; done; }
+
+human_kib() {
+  # Recibe KiB y lo pinta en K/M/G/T/P (base 1024)
+  awk 'function human(k){u="KMGTPE";i=1;x=k;
+       while (x>=1024 && i<length(u)) {x/=1024;i++}
+       printf("%.1f%s\n", x, substr(u,i,1)) } {human($1)}'
+}
+
+cmd_volumes() {
+  # Si sin -p: lista todos; con --size: calcula tamaño aprox con busybox du -sk
+  docker volume ls $(volume_filters)
+  if (( WANT_SIZE )); then
+    echo
+    echo "# Tamaños (aprox) — busybox: du -sk (KiB)"
+    for v in $(docker volume ls $(volume_filters) -q); do
+      size_k="$(docker run --rm -v "${v}:/v:ro" busybox sh -c "du -sk /v 2>/dev/null | awk '{print \$1}'" || echo 0)"
+      printf "%-40s %12s\n" "$v" "$(printf "%s\n" "${size_k:-0}" | human_kib)"
+    done
+  fi
+}
+
+case "${CMD}" in
+  projects)  cmd_projects ;;
+  status|ps) cmd_status ;;
+  health)    cmd_health ;;
+  logs)      cmd_logs ;;
+  events)    cmd_events ;;
+  networks)  cmd_networks ;;
+  volumes)   cmd_volumes ;;
+  labels)    cmd_labels ;;
+  top)       cmd_top ;;
+  ""|-h|--help) usage ;;
+  *) echo "Comando desconocido: ${CMD}" >&2; usage; exit 1 ;;
+esac

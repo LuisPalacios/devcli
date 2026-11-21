@@ -1,0 +1,52 @@
+{
+  "tools": [
+    {
+      "name": "e",
+      "platforms": ["linux", "macos", "wsl2"],
+      "skip_profiles": ["server"]
+    },
+    {
+      "name": "confcat",
+      "platforms": ["linux", "macos", "wsl2"]
+    },
+    {
+      "name": "s",
+      "platforms": ["linux", "macos", "wsl2"]
+    },
+    {
+      "name": "ia",
+      "platforms": ["linux", "macos", "wsl2"],
+      "skip_profiles": ["server"]
+    },
+    {
+      "name": "nerd-setup.sh",
+      "platforms": ["linux", "macos", "wsl2"],
+      "skip_profiles": ["server"]
+    },
+    {
+      "name": "nerd-verify.sh",
+      "platforms": ["linux", "macos", "wsl2"],
+      "skip_profiles": ["server"]
+    },
+    {
+      "name": "nerd-setup.ps1",
+      "platforms": ["windows"]
+    },
+    {
+      "name": "nerd-verify.ps1",
+      "platforms": ["windows"]
+    },
+    {
+      "name": "pathdoctor.ps1",
+      "platforms": ["windows"]
+    },
+    {
+      "name": "devcli-ping.ps1",
+      "platforms": ["windows"]
+    },
+    {
+      "name": "DespiertaPantalla.ps1",
+      "platforms": ["windows"]
+    }
+  ]
+}
